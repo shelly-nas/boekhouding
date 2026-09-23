@@ -1,0 +1,23 @@
+# Nooit brondocumenten of gegevensdragers in de repo
+*.pdf
+*.xlsx
+*.xls
+*.csv
+*.docx
+*.jpg
+*.jpeg
+*.png
+*.zip
+
+# Geheimen
+.env
+*.token
+*_secret*
+.mcp.json
+
+# Systeem
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
