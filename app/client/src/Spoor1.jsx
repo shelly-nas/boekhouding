@@ -67,6 +67,12 @@ function Positie({ p }) {
     <>
       <h2>
         {p.positie.aantal} certificaten {p.positie.vennootschap} <small>· {p.positie.houder}</small>
+        {p.noemers.length === 1 && (
+          <small className="rekenbasis">
+            {' '}· rekenbasis {num(p.positie.aantal_rekenbasis)} van {p.noemers[0].aantal} aandelen ={' '}
+            {pct((p.positie.aantal_rekenbasis / p.noemers[0].aantal) * 100)}
+          </small>
+        )}
       </h2>
       <div className="kpis">
         <Kpi titel="Inleg" waarde={eur(p.positie.inleg)} sub={`verkregen ${datum(p.positie.verkregen_op)}`} />
@@ -78,7 +84,7 @@ function Positie({ p }) {
         <Kpi
           titel="Waarde certificaten"
           waarde={waarden.length ? <Bereik min={Math.min(...waarden)} max={Math.max(...waarden)} kleur={false} /> : '—'}
-          sub="afhankelijk van noemer en waardering"
+          sub={p.noemers.length === 1 ? "afhankelijk van de waardering (×3 of ×4)" : "afhankelijk van noemer en waardering"}
         />
         <Kpi
           titel="Netto positie"
@@ -95,8 +101,9 @@ function Positie({ p }) {
       <section className="kaart">
         <h3>Waarde en netto positie</h3>
         <p className="uitleg">
-          Ondernemingswaarde ÷ noemer × {p.positie.aantal} certificaten, min de schuld op de peildatum. Welke noemer
-          geldt is open (V-O01).
+          Ondernemingswaarde ÷ {p.noemers.length === 1 ? p.noemers[0].aantal : 'noemer'} ×{' '}
+          {num(p.positie.aantal_rekenbasis)} aandelen, min de schuld op de peildatum. Rekenbasis volgens de verkopers en
+          het rectificatievoornemen (aanname A11); de akte zegt nog 9 certificaten op 100 (V-F40).
         </p>
         <div className="scroll">
           <table>
@@ -110,8 +117,9 @@ function Positie({ p }) {
               {p.matrix.map((m) => (
                 <tr key={m.waardering.id}>
                   <td>
-                    {eur(m.waardering.ondernemingswaarde)} <small>{m.waardering.label}</small>
-                    <br /><small>{datum(m.waardering.peildatum)} · {m.waardering.bron}</small>
+                    {m.waardering.ondernemingswaarde == null ? 'Instapprijs' : eur(m.waardering.ondernemingswaarde)}{' '}
+                    <small>{m.waardering.label}</small>
+                    <br /><small>{m.waardering.toelichting}</small>
                   </td>
                   {m.cellen.map((c) => (
                     <td key={c.noemer} className="getal">
@@ -126,6 +134,7 @@ function Positie({ p }) {
         </div>
       </section>
 
+      <Waarderingsverloop rijen={p.waarderingsverloop} />
       {p.lening && <Schuldverloop p={p} />}
       {p.dividend_toets && <DividendToets t={p.dividend_toets} />}
 
@@ -168,6 +177,55 @@ function Positie({ p }) {
         </p>
       </section>
     </>
+  );
+}
+
+function Waarderingsverloop({ rijen }) {
+  if (!rijen?.length) return null;
+  const factoren = rijen[0].per_factor.map((x) => x.factor);
+  const soortTekst = { vastgesteld: 'vastgesteld', berekend: 'berekend', doorgetrokken: 'doorgetrokken', inleg: 'instapprijs' };
+  return (
+    <section className="kaart">
+      <h3>Waardering per jaar</h3>
+      <p className="uitleg">
+        Methode van de verkopers (B-PRES dia 7, B-WRD-2025): resultaat vóór belastingen van de drie voorgaande boekjaren,
+        gewogen 1-2-3 (meest recent het zwaarst), × factor. De waardering per eind van een jaar is de prijs in het jaar
+        erna (dia 5). Een vastgestelde waardering gaat voor; ontbreekt een jaarresultaat, dan loopt de waarde door.
+        Jaarresultaten en prognoses voeg je toe onder Stamdata.
+      </p>
+      <div className="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Geldt in</th>
+              <th>Resultaten (gewicht 1 · 2 · 3)</th>
+              {factoren.map((f) => <th key={f} className="getal">×{num(f)}: ondernemingswaarde → positie</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {rijen.map((r) => (
+              <tr key={r.jaar}>
+                <td>{r.jaar}</td>
+                <td>
+                  {r.resultaten.map((x) => (
+                    <span key={x.jaar} className="resultaat">
+                      {x.jaar}: {x.resultaat == null ? '—' : eur(x.resultaat)}
+                      {x.status && x.status !== 'werkelijk' && <small> ({x.status})</small>}
+                    </span>
+                  ))}
+                </td>
+                {r.per_factor.map((x) => (
+                  <td key={x.factor} className="getal">
+                    {x.ondernemingswaarde == null ? '—' : eur(x.ondernemingswaarde)} → <strong>{eur(x.waarde)}</strong>
+                    <br /><small>{soortTekst[x.soort]}{x.soort === 'vastgesteld' || x.soort === 'doorgetrokken' ? `: ${x.bron}` : ''}</small>
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }
 
@@ -291,7 +349,8 @@ function Aandachtspunten() {
     <section className="kaart">
       <h3>Open punten die de cijfers raken</h3>
       <ul>
-        <li><strong>V-O01</strong> Noemer 100, 200 of 300: bepaalt waarde, leaverprijs én box 2 of 3.</li>
+        <li><strong>V-F40</strong> Rectificatie nog niet notarieel vastgelegd: de rekenbasis (13,5 van 300) is een aanname; de akte zegt 9 op 100 (box 2).</li>
+        <li><strong>V-F44</strong> Factor ×3 of ×4 voor de Marktwaarde.</li>
         <li><strong>V-F08</strong> Bijlage 3 (Marktwaarde per 31-12-2024) ontbreekt: basis onder de inleg van € 1.900/st.</li>
         <li><strong>V-F09</strong> Zakelijkheid 5% rente op onbezekerde lening; lucratief belang.</li>
         <li><strong>V-F14</strong> Verwerking lening in aangifte IB 2024 en 2025.</li>
@@ -382,7 +441,11 @@ function Vertrek() {
                 <tbody>
                   {data.matrix.map((m) => (
                     <tr key={m.waardering.id}>
-                      <td>{eur(m.waardering.ondernemingswaarde)} <small>{m.waardering.label}</small></td>
+                      <td>
+                        {m.waardering.ondernemingswaarde == null ? 'Instapprijs' : eur(m.waardering.ondernemingswaarde)}{' '}
+                        <small>{m.waardering.label}</small>
+                        <br /><small>{m.waardering.toelichting}</small>
+                      </td>
                       {m.cellen.map((c) => (
                         <td key={c.noemer} className="getal">
                           {eur(c.prijs)}/st{c.begrensd && <small> (= inleg)</small>}
@@ -397,7 +460,7 @@ function Vertrek() {
             </div>
           )}
           <ul className="uitleg">
-            <li>Rekent met de meest recente waardering vóór de vertrekdatum; bij vertrek stelt de STAK de Marktwaarde vast (art. 6.6.2).</li>
+            <li>Rekent met de waardering die in het vertrekjaar als prijs geldt (waardering per eind vorig jaar); bij vertrek stelt de STAK de Marktwaarde vast (art. 6.6.2). Of dezelfde factor geldt als bij de koop, is open (V-F44).</li>
             <li>De STAK is niet verplicht de certificaten af te nemen (art. 6.4(i)) — de schuld wordt wel opeisbaar.</li>
             <li>Extra korting toegepast op de Marktwaarde vóór het leaverpercentage: een lezing van art. 6.5, niet vastgesteld.</li>
           </ul>
@@ -436,7 +499,6 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
   const [eenmalig, setEenmalig] = useState(0);
   const [dividend, setDividend] = useState(null); // totaal vennootschap; null = server kiest
   const [perJaar, setPerJaar] = useState({}); // jaar -> totaal vennootschap
-  const [noemer, setNoemer] = useState(300);
   const [waardeBasis, setWaardeBasis] = useState(''); // '' = eerste factor uit de stamdata
   const [groei, setGroei] = useState(0);
   const [belasting, setBelasting] = useState(15);
@@ -453,7 +515,6 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
       const plan = {
         extra_per_maand: extra,
         eenmalig,
-        noemer,
         belasting_pct: belasting,
         beleid,
         dividenden: Object.entries(perJaar).map(([j, v]) => `${j}:${v}`).join(','),
@@ -472,7 +533,7 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
       );
     }, 150);
     return () => clearTimeout(timer.current);
-  }, [extra, eenmalig, dividend, perJaar, noemer, waardeBasis, groei, belasting, beleid, rendement, vertrek]);
+  }, [extra, eenmalig, dividend, perJaar, waardeBasis, groei, belasting, beleid, rendement, vertrek]);
 
   if (fout) return <p className="fout">{fout}</p>;
   if (!data) return <section className="kaart"><p className="uitleg">Laden…</p></section>;
@@ -506,21 +567,18 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
           onChange={(n) => setVertrek(n >= maanden ? data.einde : n === 0 ? data.vanaf : plusMaanden(data.vanaf, n))}
           toon={() => datum(data.vertrekdatum)} uitleg="Geldt ook voor de berekening hieronder" />
         <Schuif label="Waardegroei na laatste waardering" waarde={groei} min={-10} max={15} stap={0.5} onChange={setGroei} toon={pct}
-          uitleg="Per jaar; een nieuwe waardering in de stamdata gaat altijd voor" />
+          uitleg="Alleen voor jaren zonder waardering of jaarresultaten; die gaan altijd voor" />
         <Schuif label="Belasting op dividend" waarde={belasting} min={0} max={31} stap={0.5} onChange={setBelasting} toon={pct}
           uitleg="15% dividendbelasting wordt ingehouden; in box 2 wordt het meer (V-F12)" />
       </div>
       <div className="keuzes">
-        <label>
-          Noemer{' '}
-          <select value={noemer} onChange={(e) => setNoemer(Number(e.target.value))}>
-            {data.noemers.map((n) => <option key={n.aantal} value={n.aantal}>÷ {n.aantal} · {n.label}</option>)}
-          </select>
-        </label>
+        <span>
+          Rekenbasis <strong>{num(data.positie.aantal_rekenbasis)} van {data.plan.noemer} aandelen = {pct((data.plan.aandeel ?? 0) * 100)}</strong>
+        </span>
         <label>
           Waarde certificaten{' '}
           <select value={String(data.plan.waarde_basis)} onChange={(e) => setWaardeBasis(e.target.value)}>
-            {data.factoren.map((f) => <option key={f} value={String(f)}>waarderingen factor ×{num(f)} (stamdata)</option>)}
+            {data.factoren.map((f) => <option key={f} value={String(f)}>waardering ×{num(f)} (jaarresultaten, stamdata)</option>)}
             <option value="inleg">inleg (zoals het oude ROI-model)</option>
           </select>
         </label>
@@ -560,7 +618,7 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
       <Jaaroverzicht
         jaren={data.jaren}
         inleg={data.positie.inleg}
-        waardeLabel={data.plan.waarde_basis === 'inleg' ? 'inleg' : `waarderingen ×${num(data.plan.waarde_basis)} ÷ ${data.plan.noemer} × ${data.positie.aantal}`}
+        waardeLabel={data.plan.waarde_basis === 'inleg' ? 'inleg' : `waarderingen ×${num(data.plan.waarde_basis)} ÷ ${data.plan.noemer} × ${num(data.positie.aantal_rekenbasis)}`}
         perJaar={perJaar}
         standaard={dividend ?? 0}
         huidigJaar={Number(data.vanaf.slice(0, 4))}
@@ -669,7 +727,7 @@ function Jaaroverzicht({ jaren, inleg, waardeLabel, perJaar, standaard, huidigJa
   );
 }
 
-const STAMDATA = ['certificaatpositie', 'lening', 'dividend', 'aflossing', 'waardering', 'noemer', 'leaver_regel', 'entiteit', 'gebeurtenis', 'instelling'];
+const STAMDATA = ['certificaatpositie', 'lening', 'dividend', 'aflossing', 'jaarresultaat', 'waardering', 'noemer', 'leaver_regel', 'entiteit', 'gebeurtenis', 'instelling'];
 
 function Stamdata() {
   const [meta, setMeta] = useState(null);

@@ -71,8 +71,10 @@ Het journaal is de administratie van de holding (art. 2:10 BW, art. 52 AWR):
 - **Aflossingen** voer je zelf in. Het dividendpercentage (art. 3.2) wordt niet
   automatisch afgeboekt maar per kalenderjaar getoetst: verplicht tegenover
   werkelijk afgelost, ook cumulatief. Zonder dividend is er geen verplichting.
-- Waarde = ondernemingswaarde ÷ noemer × aantal certificaten, gerekend voor
-  elke noemer (V-O01).
+- **Rekenbasis:** waarde = ondernemingswaarde ÷ noemer × aantal aandelen. De noemer
+  met "Rekenbasis" aan in Stamdata → Noemers (nu 300) en het "Aantal aandelen
+  (rekenbasis)" van de positie (nu 13,5, aanname A11) worden overal gebruikt.
+  Staat er geen noemer als rekenbasis, dan toont de app alle noemers naast elkaar.
 - **Aflossen of aanhouden** (tab Vertrek): de app vergelijkt jouw aflosplan (extra
   per maand, eenmalig) met alleen de verplichte aflossing uit dividend. "Eigen
   geld" is de som van alle kasstromen vanaf vandaag (dividend in, aflossingen
@@ -89,12 +91,17 @@ Het journaal is de administratie van de holding (art. 2:10 BW, art. 52 AWR):
   resultaat ÷ inleg. Jaren tot vandaag komen uit de werkelijke dividenden en
   aflossingen. Het dividend van toekomstige jaren vul je per jaar in. Kies je
   "volledig netto dividend aflossen", dan werkt het net als het ROI-model.
-- **Waarde certificaten per jaar**: de laatste waardering t/m 31 december van dat
-  jaar uit Stamdata → Waarderingen, binnen de gekozen **factor** (×3, ×4), ÷ noemer
-  × aantal certificaten. Na de laatste waardering eventueel met een groei per vol
-  jaar. Vóór de eerste waardering, of bij de keuze "inleg": de inleg. Een nieuwe
-  waardering in de stamdata werkt direct door. De Excel B-ROI-APP rekent
-  hetzelfde, via het blad Waarderingen.
+- **Waarde certificaten per jaar** volgt de methode van de verkopers (B-PRES dia 5
+  en 7): de waardering per eind van jaar J−1 is de prijs in jaar J. Volgorde:
+  1. een vastgestelde waardering die in jaar J als prijs geldt (Stamdata → Waarderingen);
+  2. anders factor × (3·R(J−1) + 2·R(J−2) + 1·R(J−3)) / 6 uit Stamdata → Jaarresultaten
+     (wegingen in Instellingen);
+  3. anders de waarde van het jaar ervoor, met de ingestelde groei;
+  4. anders, en altijd in het jaar van verkrijging: de instapprijs (inleg).
+
+  Daarna ÷ noemer × aantal aandelen (rekenbasis). Een nieuw jaarresultaat of een
+  nieuwe prognose schuift de weging direct mee. De Excel B-ROI-APP rekent
+  hetzelfde, via de bladen Waarderingen en Jaarresultaten.
 - Vertrek: de extra korting van art. 6.5 gaat van de Marktwaarde af vóórdat het
   leaverpercentage wordt toegepast. Dat is een lezing van het artikel, geen
   vaststaand gegeven.

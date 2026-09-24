@@ -200,3 +200,7 @@ table.jaren th, table.jaren td { padding: 0.4rem 0.4rem; }
 table.jaren th { white-space: normal; }
 table.jaren input.cel { width: 7rem; text-align: right; padding: 0.2rem 0.4rem; }
 table.jaren td { vertical-align: middle; }
+
+.rekenbasis { font-size: 0.8rem; }
+
+.resultaat { display: inline-block; margin-right: 0.9rem; white-space: nowrap; }

@@ -20,6 +20,7 @@ const SPOOR_VIA = {
   aflossing: 'lening_id IN (SELECT id FROM lening WHERE spoor = $1)',
   waardering: 'vennootschap_id IN (SELECT id FROM entiteit WHERE spoor = $1)',
   noemer: 'vennootschap_id IN (SELECT id FROM entiteit WHERE spoor = $1)',
+  jaarresultaat: 'vennootschap_id IN (SELECT id FROM entiteit WHERE spoor = $1)',
   leaver_regel: 'positie_id IN (SELECT id FROM certificaatpositie WHERE spoor = $1)',
 };
 
@@ -28,7 +29,7 @@ const LABEL = {
   grootboekrekening: "nummer || ' ' || naam",
   boekjaar: "to_char(start, 'DD-MM-YYYY') || ' t/m ' || to_char(eind, 'DD-MM-YYYY')",
 };
-const VOLGORDE = { grootboekrekening: 'nummer' };
+const VOLGORDE = { grootboekrekening: 'nummer', jaarresultaat: 'boekjaar', waardering: 'peildatum, id' };
 
 // Een afgesloten boekjaar blijft zoals het is.
 async function bewaakBoekjaar(tabel, id) {

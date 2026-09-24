@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { schuldOp, schuldverloop, leaverPrijs, leaverRegel, volleJaren, breakEven, dividendToets, simulatie, jaaroverzicht, waardeReeks } from '../src/rekenen.js';
+import { schuldOp, schuldverloop, leaverPrijs, leaverRegel, volleJaren, breakEven, dividendToets, simulatie, jaaroverzicht, waarderingPerJaar } from '../src/rekenen.js';
 
 const contract = {
   id: 1, positie_id: 1, hoofdsom: 17100, rente_pct: 5, rente_bijschrijven: true, rente_periode: 'contractjaar',
@@ -122,17 +122,33 @@ test('jaaroverzicht: resultaat = (waarde − schuld) + cumulatief kasoverschot, 
   assert.equal(r2(j.roi_pct), r2((j.rijen.at(-1).resultaat / 17100) * 100));
 });
 
-test('waardeReeks: laatste waardering t/m 31-12, daarna groei; ervoor de inleg', () => {
-  const w = waardeReeks({
-    waarderingen: [
-      { peildatum: '2025-11-30', label: '×3', ondernemingswaarde: 220000 },
-      { peildatum: '2027-06-30', label: '×3', ondernemingswaarde: 300000 },
+test('waardering per jaar: instapprijs, vastgesteld, berekend uit resultaten 3-2-1, doorgetrokken', () => {
+  const w = waarderingPerJaar({
+    jaarresultaten: [
+      { boekjaar: 2023, resultaat: 14000 }, { boekjaar: 2024, resultaat: 229000 }, { boekjaar: 2025, resultaat: -12000 },
+      { boekjaar: 2027, resultaat: 100000 },
     ],
-    noemer: 200, aantal: 9, inleg: 17100, groeiPct: 10,
+    vastgesteld: [{ geldig_in_jaar: 2026, factor: 3, ondernemingswaarde: 220000, label: '×3', bron: 'B-WRD-2025' }],
+    factor: 3, noemer: 300, aantal: 13.5, inleg: 17100, groeiPct: 10, vanJaar: 2025,
   });
-  assert.deepEqual(w(2024), { waarde: 17100, bron: 'inleg' });
-  assert.equal(r2(w(2025).waarde), 9900);
-  assert.equal(r2(w(2026).waarde), 10890); // 1 jaar groei
-  assert.equal(r2(w(2027).waarde), 13500); // nieuwe waardering, geen groei
-  assert.equal(r2(w(2029).waarde), r2(13500 * 1.21));
+  assert.equal(w(2025).waarde, 17100); // instap
+  assert.equal(w(2025).soort, 'inleg');
+  assert.equal(r2(w(2026).waarde), 9900); // vastgesteld gaat voor
+  assert.equal(w(2027).soort, 'doorgetrokken'); // resultaat 2026 ontbreekt
+  assert.equal(r2(w(2027).ondernemingswaarde), 242000);
+  // 2028: 2027, 2026 (ontbreekt) → doorgetrokken; vul 2026 in → berekend
+  const w2 = waarderingPerJaar({
+    jaarresultaten: [{ boekjaar: 2023, resultaat: 14000 }, { boekjaar: 2024, resultaat: 229000 }, { boekjaar: 2025, resultaat: -12000 }],
+    factor: 3, noemer: 300, aantal: 13.5, inleg: 17100, vanJaar: 2025,
+  });
+  assert.equal(w2(2026).soort, 'berekend');
+  assert.equal(r2(w2(2026).gewogen), r2(436000 / 6));
+  assert.equal(r2(w2(2026).ondernemingswaarde), r2(3 * 436000 / 6)); // 218.000 (B-WRD-2025: 218.001)
+  const neg = waarderingPerJaar({
+    jaarresultaten: [{ boekjaar: 2023, resultaat: -50000 }, { boekjaar: 2024, resultaat: -50000 }, { boekjaar: 2025, resultaat: -50000 }],
+    factor: 3, noemer: 300, aantal: 13.5, inleg: 17100, vanJaar: 2025,
+  });
+  assert.equal(neg(2026).waarde, 0); // geen negatieve marktwaarde
+  const inleg = waarderingPerJaar({ factor: null, noemer: 300, aantal: 13.5, inleg: 17100, vanJaar: 2025 });
+  assert.equal(inleg(2029).waarde, 17100);
 });

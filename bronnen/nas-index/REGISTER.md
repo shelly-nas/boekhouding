@@ -39,11 +39,11 @@ Map: `Professioneel/VERRA/Certificaten/`
 > Het is één document, geen twee bronnen.
 | B-AKTE-CERT | `Certificaten/241230 Afschrift akte van levering certificaten Verra AV Den Haag aan Smits - Dreves.pdf` | notariële leveringsakte certificaten | 2025-01-02 | 2026-09-23 |
 | B-NOTA-DRV | `Certificaten/Nota - A.Dreves.pdf` | notarisnota € 17.100 | 2024-12-23 | 2026-09-23 |
-| B-WRD-2025 | `Certificaten/Waardering/Waardering Verra aan- en verkoop Den Haag B.V. per 30-11-2025 aangepast.pdf` | waardering per 30-11-2025 | 2025-11-30 | 2026-09-23 |
+| B-WRD-2025 | `Certificaten/Waardering/Waardering Verra aan- en verkoop Den Haag B.V. per 30-11-2025 aangepast.pdf` | waardering per 30-11-2025 | 2025-11-30 | 2026-09-23; herlezen 2026-09-24 (F51, V-F45) |
 | B-WRD-2024 | `Certificaten/Waardering/Waardering Aan en Verkoop BV per begin 12-2024.xlsx` | waarderingsspreadsheet | 2024-12 | 2026-09-23 |
 | B-ROI | `Certificaten/Certificaten ROI.xlsx` | eigen rendementsmodel A. Dreves | onbekend | 2026-09-23 |
 | B-ROI-APP | `Certificaten/Certificaten ROI - afgestemd op app.xlsx` | ROI-model privé + holding met de rekenregels van de webapp (formules); **afgeleid, geen bron van feiten** | 2026-09-24 | 2026-09-24 |
-| B-PRES | `Certificaten/Presentatie Ashley Dreves.pptx` | presentatie "Toekomstbeeld samenwerking" (15 slides) | onbekend, vóór 2024-12-30 | 2026-09-23 |
+| B-PRES | `Certificaten/Presentatie Ashley Dreves.pptx` | presentatie "Toekomstbeeld samenwerking" (15 slides) | onbekend, vóór 2024-12-30 | 2026-09-23; herlezen 2026-09-24 (dia 5–8: F48–F50) |
 | B-LEAD | `Lead registratie/Leadregistratie - Kopie.xlsx`, `Opzet voor dashboard.xlsx`, `Commercieel dashboard - Verra Makelaars.docx` | commercieel dashboard, testdata | 2026-01 | 2026-09-23 |
 
 ## Opmerkingen per bron

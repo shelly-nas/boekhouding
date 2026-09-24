@@ -265,21 +265,57 @@ export function simulatie(lening, historie, opties) {
 // schuld, rente, dividend, aflossing, waarde en resultaat. Het netto resultaat
 // is (waarde certificaten − schuld) + cumulatief kasoverschot (netto dividend −
 // aflossingen); de ROI is dat resultaat gedeeld door de inleg.
-// Waarde van de positie per jaar uit een reeks waarderingen: de laatste
-// waardering met peildatum t/m 31-12 van dat jaar, ÷ noemer × aantal, met een
-// optionele groei per vol jaar daarna. Vóór de eerste waardering: de inleg.
-export function waardeReeks({ waarderingen, noemer, aantal, inleg, groeiPct = 0 }) {
-  const reeks = [...waarderingen].sort((a, b) => a.peildatum.localeCompare(b.peildatum));
-  return (j) => {
-    const w = reeks.filter((x) => x.peildatum <= `${j}-12-31`).at(-1);
-    if (!w || !noemer) return { waarde: inleg, bron: 'inleg' };
-    const jaren = Math.max(0, j - Number(w.peildatum.slice(0, 4)));
-    const groei = (1 + groeiPct / 100) ** jaren;
-    return {
-      waarde: (w.ondernemingswaarde / noemer) * aantal * groei,
-      bron: `${w.label} per ${w.peildatum}${jaren && groeiPct ? ` + ${jaren} jr groei` : ''}`,
-    };
+// Waardering per jaar volgens de methode van de verkopers (B-PRES dia 5, 7, 8).
+// In en vóór het jaar van verkrijging geldt de betaalde instapprijs.
+// de prijs in jaar J is de waardering per eind J-1. Volgorde:
+//  1. een vastgestelde waardering die in jaar J als prijs geldt (STAK, afgerond);
+//  2. anders factor × gewogen gemiddelde (3-2-1) van de resultaten J-1, J-2, J-3;
+//  3. anders de waarde van het jaar ervoor, met de ingestelde groei;
+//  4. anders (vóór de eerste waardering) de inleg: de instapprijs.
+// Geeft per jaar de ondernemingswaarde en de waarde van de positie.
+export function waarderingPerJaar({
+  jaarresultaten = [], vastgesteld = [], factor, weging = [3, 2, 1], noemer, aantal, inleg, groeiPct = 0, vanJaar,
+}) {
+  const res = new Map(jaarresultaten.map((r) => [Number(r.boekjaar), Number(r.resultaat)]));
+  const cache = new Map();
+  const somW = weging.reduce((a, b) => a + b, 0);
+  const bereken = (j) => {
+    if (cache.has(j)) return cache.get(j);
+    let uit;
+    if (factor == null || !noemer || j <= vanJaar) {
+      uit = { soort: 'inleg', ondernemingswaarde: null, waarde: inleg, bron: 'instapprijs (inleg)' };
+    } else {
+      const vast = vastgesteld.find(
+        (w) => Number(w.geldig_in_jaar) === j && (w.factor == null || Number(w.factor) === factor),
+      );
+      const jaren = [j - 1, j - 2, j - 3];
+      const vorige = j > vanJaar ? bereken(j - 1) : null;
+      let ow = null;
+      let soort;
+      let bron;
+      let gewogen = null;
+      if (vast) {
+        ow = vast.ondernemingswaarde;
+        soort = 'vastgesteld';
+        bron = `${vast.label} (vastgesteld, ${vast.bron ?? 'stamdata'})`;
+      } else if (jaren.every((x) => res.has(x))) {
+        gewogen = jaren.reduce((sum, x, i) => sum + weging[i] * res.get(x), 0) / somW;
+        ow = Math.max(0, factor * gewogen);
+        soort = 'berekend';
+        bron = `×${factor} gewogen resultaat ${j - 3}–${j - 1}`;
+      } else if (vorige && vorige.soort !== 'inleg') {
+        ow = vorige.ondernemingswaarde * (1 + groeiPct / 100);
+        soort = 'doorgetrokken';
+        bron = groeiPct ? `${j - 1} + ${groeiPct}% groei` : `gelijk aan ${j - 1}`;
+      }
+      uit = ow == null
+        ? { soort: 'inleg', ondernemingswaarde: null, waarde: inleg, bron: 'instapprijs (inleg)' }
+        : { soort, ondernemingswaarde: ow, waarde: (ow / noemer) * aantal, bron, gewogen };
+    }
+    cache.set(j, uit);
+    return uit;
   };
+  return bereken;
 }
 
 export function jaaroverzicht(lening, { aflossingen, dividenden, waarde, inleg, aandeel, vanJaar, totJaar }) {

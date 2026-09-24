@@ -12,7 +12,7 @@ import {
   schuldverloop,
   simulatie,
   jaaroverzicht,
-  waardeReeks,
+  waarderingPerJaar,
   volleJaren,
 } from './rekenen.js';
 
@@ -21,7 +21,7 @@ const vandaag = () => new Date().toISOString().slice(0, 10);
 
 async function laad() {
   const q = (sql, p = []) => pool.query(sql, p).then((r) => r.rows);
-  const [posities, leningen, dividenden, aflossingen, waarderingen, noemers, regels, instellingen, gebeurtenissen, entiteiten] =
+  const [posities, leningen, dividenden, aflossingen, waarderingen, noemers, regels, instellingen, gebeurtenissen, entiteiten, jaarresultaten] =
     await Promise.all([
       q('SELECT * FROM certificaatpositie WHERE spoor = $1 ORDER BY id', [SPOOR]),
       q('SELECT * FROM lening WHERE spoor = $1 ORDER BY id', [SPOOR]),
@@ -33,17 +33,56 @@ async function laad() {
       q('SELECT * FROM instelling'),
       q('SELECT * FROM gebeurtenis WHERE spoor = $1 ORDER BY datum', [SPOOR]),
       q('SELECT id, naam FROM entiteit'),
+      q('SELECT * FROM jaarresultaat ORDER BY boekjaar'),
     ]);
   const naam = Object.fromEntries(entiteiten.map((e) => [e.id, e.naam]));
   const instelling = Object.fromEntries(instellingen.map((i) => [i.sleutel, i.waarde]));
-  return { posities, leningen, dividenden, aflossingen, waarderingen, noemers, regels, instelling, gebeurtenissen, naam };
+  return { posities, leningen, dividenden, aflossingen, waarderingen, noemers, regels, instelling, gebeurtenissen, naam, jaarresultaten };
 }
 
-// Meest recente peildatum telt; alle labels op die datum vormen de bandbreedte.
-function actueleWaarderingen(waarderingen, vennootschapId, peildatum) {
-  const eigen = waarderingen.filter((w) => w.vennootschap_id === vennootschapId && w.peildatum <= peildatum);
-  const laatste = eigen.at(-1)?.peildatum;
-  return eigen.filter((w) => w.peildatum === laatste);
+// Rekenbasis: de noemer die als standaard is gemarkeerd (anders alle), en het
+// aantal aandelen waarmee de positie meetelt (anders het aantal certificaten).
+function noemersVoor(d, p) {
+  const eigen = d.noemers.filter((n) => n.vennootschap_id === p.vennootschap_id);
+  const standaard = eigen.filter((n) => n.standaard);
+  return standaard.length ? standaard : eigen;
+}
+const rekenAantal = (p) => Number(p.aantal_rekenbasis ?? p.aantal);
+
+// Factoren (×3, ×4) die in de stamdata voorkomen.
+function factorenVoor(d, p) {
+  const f = d.waarderingen.filter((w) => w.vennootschap_id === p.vennootschap_id && w.factor != null).map((w) => Number(w.factor));
+  return [...new Set(f.length ? f : [3, 4])].sort((a, b) => a - b);
+}
+
+// Waardering per jaar voor één factor (null = inleg), volgens B-PRES dia 7.
+function waarderingVoor(d, p, factor, { groeiPct = 0, noemer } = {}) {
+  const n = noemer ?? noemersVoor(d, p).at(-1)?.aantal;
+  const weging = [1, 2, 3].map((i) => Number(d.instelling[`waardering_weging_${i}`] ?? [3, 2, 1][i - 1]));
+  return waarderingPerJaar({
+    jaarresultaten: d.jaarresultaten.filter((r) => r.vennootschap_id === p.vennootschap_id),
+    vastgesteld: d.waarderingen.filter((w) => w.vennootschap_id === p.vennootschap_id && w.geldig_in_jaar != null),
+    factor, weging, noemer: n, aantal: rekenAantal(p), inleg: p.inleg, groeiPct,
+    vanJaar: Number(p.verkregen_op.slice(0, 4)),
+  });
+}
+
+// Per factor de waardering die in het jaar van de datum geldt, in de vorm die
+// de schermen tonen (een 'waardering' per regel).
+function geldendeWaarderingen(d, p, datum) {
+  const jaar = Number(datum.slice(0, 4));
+  return factorenVoor(d, p).map((f) => {
+    const w = waarderingVoor(d, p, f)(jaar);
+    return {
+      id: `f${f}`,
+      factor: f,
+      label: w.soort === 'inleg' ? 'instapprijs' : `×${f}`,
+      ondernemingswaarde: w.ondernemingswaarde,
+      waarde: w.waarde,
+      soort: w.soort,
+      toelichting: `geldt in ${jaar}: ${w.bron}`,
+    };
+  });
 }
 
 function leningVoor(d, positie) {
@@ -57,15 +96,16 @@ export async function overzicht(peildatum = vandaag()) {
   const posities = d.posities.map((p) => {
     const { lening, aflossingen } = leningVoor(d, p);
     const schuld = lening ? schuldOp(lening, aflossingen, peildatum) : { saldo: 0, opgelopen_rente: 0, totaal: 0 };
-    const waarderingen = actueleWaarderingen(d.waarderingen, p.vennootschap_id, peildatum);
-    const noemers = d.noemers.filter((n) => n.vennootschap_id === p.vennootschap_id);
+    const waarderingen = geldendeWaarderingen(d, p, peildatum);
+    const noemers = noemersVoor(d, p);
+    const aantal = rekenAantal(p);
     // Rente over het lopende contractjaar (saldo zonder de nog niet bijgeschreven rente).
     const jaarrente = lening ? (schuld.saldo * lening.rente_pct) / 100 : 0;
     const matrix = waarderingen.map((w) => ({
       waardering: w,
       cellen: noemers.map((n) => {
-        const waarde = (w.ondernemingswaarde / n.aantal) * p.aantal;
-        return { noemer: n.aantal, per_certificaat: w.ondernemingswaarde / n.aantal, waarde, netto: waarde - schuld.totaal };
+        const waarde = w.ondernemingswaarde == null ? p.inleg : (w.ondernemingswaarde / n.aantal) * aantal;
+        return { noemer: n.aantal, per_certificaat: waarde / aantal, waarde, netto: waarde - schuld.totaal };
       }),
     }));
     const netto = matrix.flatMap((m) => m.cellen.map((c) => c.netto));
@@ -75,7 +115,7 @@ export async function overzicht(peildatum = vandaag()) {
       netto: ontvangen.reduce((s, x) => s + x.netto, 0),
     };
     return {
-      positie: { ...p, vennootschap: d.naam[p.vennootschap_id] },
+      positie: { ...p, vennootschap: d.naam[p.vennootschap_id], aantal_rekenbasis: aantal },
       lening: lening && {
         ...lening,
         geldgever: d.naam[lening.geldgever_id],
@@ -93,9 +133,24 @@ export async function overzicht(peildatum = vandaag()) {
       netto_bandbreedte: netto.length ? { min: Math.min(...netto), max: Math.max(...netto) } : null,
       jaarrente,
       break_even: lening
-        ? noemers.map((n) => breakEven(jaarrente, p.aantal, n.aantal, lening.aflossing_uit_dividend_pct))
+        ? noemers.map((n) => breakEven(jaarrente, aantal, n.aantal, lening.aflossing_uit_dividend_pct))
         : [],
-      box: noemers.map((n) => ({ noemer: n.aantal, label: n.label, ...boxIndicatie(p.aantal, n.aantal) })),
+      box: noemers.map((n) => ({ noemer: n.aantal, label: n.label, ...boxIndicatie(aantal, n.aantal) })),
+      waarderingsverloop: (() => {
+        const van = Number(p.verkregen_op.slice(0, 4));
+        const tot = lening ? Number(plusJaren(lening.startdatum, lening.looptijd_jaren).slice(0, 4)) : van + 4;
+        const res = new Map(d.jaarresultaten.filter((r) => r.vennootschap_id === p.vennootschap_id).map((r) => [Number(r.boekjaar), r]));
+        const reeksen = factorenVoor(d, p).map((f) => ({ f, w: waarderingVoor(d, p, f) }));
+        const rijen = [];
+        for (let j = van; j <= tot; j++) {
+          rijen.push({
+            jaar: j,
+            resultaten: [j - 3, j - 2, j - 1].map((x) => (res.has(x) ? { jaar: x, resultaat: res.get(x).resultaat, status: res.get(x).status } : { jaar: x, resultaat: null })),
+            per_factor: reeksen.map(({ f, w }) => ({ factor: f, ...w(j) })),
+          });
+        }
+        return rijen;
+      })(),
     };
   });
   return { peildatum, posities, gebeurtenissen: d.gebeurtenissen };
@@ -121,26 +176,27 @@ export async function leaver({ positie_id, vertrekdatum = vandaag(), categorie =
     : metPlan
       ? { totaal: simulatie(lening, aflossingen, planUitQuery(plan, d, p).opties).schuld(vertrekdatum), volgens_plan: true }
       : schuldOp(lening, aflossingen, vertrekdatum);
-  const waarderingen = actueleWaarderingen(d.waarderingen, p.vennootschap_id, vertrekdatum);
-  const noemers = d.noemers.filter((n) => n.vennootschap_id === p.vennootschap_id);
+  const waarderingen = geldendeWaarderingen(d, p, vertrekdatum);
+  const noemers = noemersVoor(d, p);
+  const aantal = rekenAantal(p);
   const matrix = regel
     ? waarderingen.map((w) => ({
         waardering: w,
         cellen: noemers.map((n) => {
           const r = leaverPrijs({
-            ondernemingswaarde: w.ondernemingswaarde,
+            ondernemingswaarde: w.ondernemingswaarde ?? (p.inleg / aantal) * n.aantal,
             noemer: n.aantal,
             regel,
             extraKortingPct: korting,
-            inlegPerCertificaat: p.inleg / p.aantal,
+            inlegPerCertificaat: p.inleg / aantal,
           });
-          const opbrengst = r.prijs * p.aantal;
+          const opbrengst = r.prijs * aantal;
           return { noemer: n.aantal, ...r, opbrengst, netto: opbrengst - schuld.totaal };
         }),
       }))
     : [];
   return {
-    positie: p,
+    positie: { ...p, aantal_rekenbasis: aantal },
     vertrekdatum,
     jaar,
     categorie,
@@ -157,9 +213,9 @@ export async function leaver({ positie_id, vertrekdatum = vandaag(), categorie =
 // plan rekenen.
 function planUitQuery(query, d, p) {
   const getal = (k, std = 0) => (query[k] === undefined || query[k] === '' ? std : Math.max(0, Number(query[k]) || 0));
-  const noemers = d.noemers.filter((n) => n.vennootschap_id === p.vennootschap_id);
+  const noemers = noemersVoor(d, p);
   const noemer = noemers.find((n) => n.aantal === Number(query.noemer)) ?? noemers.at(-1);
-  const aandeel = noemer ? p.aantal / noemer.aantal : null;
+  const aandeel = noemer ? rekenAantal(p) / noemer.aantal : null;
   // Standaard dividend van de vennootschap: afgeleid van het laatst ontvangen
   // dividend, zodat het bruto bedrag voor de houder gelijk blijft.
   const laatste = d.dividenden.filter((x) => x.positie_id === p.id).at(-1);
@@ -216,20 +272,15 @@ export async function simuleer(query) {
 
   // Jaaroverzicht: werkelijke dividenden tot vandaag, daarna het plan. De
   // waarde volgt per jaar de gekozen reeks waarderingen (factor), of de inleg.
-  const eigen = d.waarderingen.filter((w) => w.vennootschap_id === p.vennootschap_id);
-  const factoren = [...new Set(eigen.map((w) => w.factor).filter((f) => f != null))].sort((a, b) => a - b);
+  const factoren = factorenVoor(d, p);
   const keuzeWaarde = String(query.waarde ?? '');
   const factor = keuzeWaarde === 'inleg' ? null : keuzeWaarde ? Number(keuzeWaarde) : factoren[0] ?? null;
   const groeiPct = Number(query.groei_pct) || 0;
-  const waarde = factor == null
-    ? () => ({ waarde: p.inleg, bron: 'inleg' })
-    : waardeReeks({
-        waarderingen: eigen.filter((w) => Number(w.factor) === factor),
-        noemer: plan.noemer,
-        aantal: p.aantal,
-        inleg: p.inleg,
-        groeiPct,
-      });
+  const reeks = waarderingVoor(d, p, factor, { groeiPct, noemer: plan.noemer });
+  const waarde = (j) => {
+    const w = reeks(j);
+    return { waarde: w.waarde, bron: w.bron };
+  };
   const historischeDividenden = d.dividenden
     .filter((x) => x.positie_id === p.id && x.datum < vanaf)
     .map((x) => ({ datum: x.datum, bruto: x.bruto, netto: x.netto, historie: true }));
@@ -249,8 +300,8 @@ export async function simuleer(query) {
     einde,
     vertrekdatum: vertrek,
     lening: { omschrijving: lening.omschrijving, rente_pct: lening.rente_pct, aflossing_pct: lening.aflossing_uit_dividend_pct, grondslag: lening.aflossing_grondslag },
-    positie: { aantal: p.aantal, inleg: p.inleg },
-    noemers: d.noemers.filter((n) => n.vennootschap_id === p.vennootschap_id).map((n) => ({ aantal: n.aantal, label: n.label })),
+    positie: { aantal: p.aantal, aantal_rekenbasis: rekenAantal(p), inleg: p.inleg },
+    noemers: noemersVoor(d, p).map((n) => ({ aantal: n.aantal, label: n.label })),
     factoren,
     plan: { noemer: plan.noemer, aandeel: plan.aandeel, standaard_totaal: plan.standaard_totaal, per_jaar: plan.per_jaar, waarde_basis: factor ?? 'inleg', groei_pct: groeiPct },
     schuld_nu: keuze.reeks[0].schuld,
