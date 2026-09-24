@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { schuldOp, schuldverloop, leaverPrijs, leaverRegel, volleJaren, breakEven, dividendToets, simulatie, jaaroverzicht, waarderingPerJaar } from '../src/rekenen.js';
+import { schuldOp, schuldverloop, leaverPrijs, leaverRegel, volleJaren, dividendToets, simulatie, jaaroverzicht, waarderingPerJaar } from '../src/rekenen.js';
 
 const contract = {
   id: 1, positie_id: 1, hoofdsom: 17100, rente_pct: 5, rente_bijschrijven: true, rente_periode: 'contractjaar',
@@ -67,12 +67,9 @@ test('leaver: bad leaver begrensd op inleg, early per jaar', () => {
   assert.equal(badLaag.prijs, 1900);
 });
 
-test('volle jaren en break-even', () => {
+test('volle jaren', () => {
   assert.equal(volleJaren('2025-01-02', '2028-01-01'), 2);
   assert.equal(volleJaren('2025-01-02', '2028-01-02'), 3);
-  const b = breakEven(855, 9, 100, 25);
-  assert.equal(r2(b.dividend_rente_dekken), 9500);
-  assert.equal(r2(b.dividend_schuld_stilstand), 38000);
 });
 
 test('volledig aflossen voldoet ook de opgelopen rente', () => {

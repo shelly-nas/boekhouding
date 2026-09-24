@@ -2,8 +2,6 @@ import { pool } from './db.js';
 import { Invoerfout } from './resources.js';
 import {
   aflossingenVoor,
-  boxIndicatie,
-  breakEven,
   dividendToets,
   leaverPrijs,
   leaverRegel,
@@ -99,8 +97,6 @@ export async function overzicht(peildatum = vandaag()) {
     const waarderingen = geldendeWaarderingen(d, p, peildatum);
     const noemers = noemersVoor(d, p);
     const aantal = rekenAantal(p);
-    // Rente over het lopende contractjaar (saldo zonder de nog niet bijgeschreven rente).
-    const jaarrente = lening ? (schuld.saldo * lening.rente_pct) / 100 : 0;
     const matrix = waarderingen.map((w) => ({
       waardering: w,
       cellen: noemers.map((n) => {
@@ -131,11 +127,6 @@ export async function overzicht(peildatum = vandaag()) {
       noemers,
       matrix,
       netto_bandbreedte: netto.length ? { min: Math.min(...netto), max: Math.max(...netto) } : null,
-      jaarrente,
-      break_even: lening
-        ? noemers.map((n) => breakEven(jaarrente, aantal, n.aantal, lening.aflossing_uit_dividend_pct))
-        : [],
-      box: noemers.map((n) => ({ noemer: n.aantal, label: n.label, ...boxIndicatie(aantal, n.aantal) })),
       waarderingsverloop: (() => {
         const van = Number(p.verkregen_op.slice(0, 4));
         const tot = lening ? Number(plusJaren(lening.startdatum, lening.looptijd_jaren).slice(0, 4)) : van + 4;

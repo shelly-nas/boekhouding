@@ -137,45 +137,6 @@ function Positie({ p }) {
       <Waarderingsverloop rijen={p.waarderingsverloop} />
       {p.lening && <Schuldverloop p={p} />}
       {p.dividend_toets && <DividendToets t={p.dividend_toets} />}
-
-      <section className="kaart">
-        <h3>Wanneer levert het op?</h3>
-        <p className="uitleg">
-          De certificaten zijn niet vrij verkoopbaar (art. 5.1). Opbrengst komt alleen uit dividend of bij vertrek
-          (tab Vertrek). Hieronder: hoeveel dividend de vennootschap in totaal moet uitkeren, bij een jaarrente van{' '}
-          {eur(p.jaarrente)}.
-        </p>
-        <table>
-          <thead>
-            <tr>
-              <th>Noemer</th>
-              <th className="getal">Belang</th>
-              <th>Box (indicatief)</th>
-              <th className="getal">Totaal dividend om rente te dekken</th>
-              <th className="getal">Totaal dividend waarbij schuld niet groeit</th>
-            </tr>
-          </thead>
-          <tbody>
-            {p.box.map((b, i) => {
-              const be = p.break_even[i];
-              return (
-                <tr key={b.noemer}>
-                  <td>{b.noemer} <small>{b.label}</small></td>
-                  <td className="getal">{pct(b.pct)}</td>
-                  <td>box {b.box} <small>{b.grond}</small></td>
-                  <td className="getal">{eur(be?.dividend_rente_dekken)}</td>
-                  <td className="getal">{eur(be?.dividend_schuld_stilstand)}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        <p className="uitleg">
-          "Niet groeit": de verplichte aflossing ({pct(p.lening?.aflossing_uit_dividend_pct)} van het ontvangen
-          dividend) is gelijk aan de rente. Een lucratief belang (box 1, art. 3.92b Wet IB 2001) is niet uitgesloten —
-          V-F09.
-        </p>
-      </section>
     </>
   );
 }

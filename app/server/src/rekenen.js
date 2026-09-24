@@ -364,29 +364,6 @@ function plusDagen(s, n) {
   return naarString(d);
 }
 
-// Box-indicatie op basis van het belang. Indicatief: de lucratiefbelangtoets
-// (art. 3.92b Wet IB 2001) staat hier los van en is een open vraag.
-export function boxIndicatie(aantal, noemer) {
-  const pct = (aantal / noemer) * 100;
-  return pct >= 5
-    ? { pct, box: 2, grond: 'aanmerkelijk belang ≥ 5% (art. 4.6 Wet IB 2001)' }
-    : { pct, box: 3, grond: 'geen aanmerkelijk belang (< 5%, art. 4.6 Wet IB 2001)' };
-}
-
-// Hoeveel dividend moet de vennootschap in totaal uitkeren om de rente te
-// dragen? 'dekken' = rente volledig uit het eigen deel van het dividend;
-// 'stilstand' = de verplichte aflossing uit dividend is gelijk aan de rente,
-// zodat de schuld niet verder groeit.
-export function breakEven(jaarrente, aantal, noemer, aflossingPct) {
-  const aandeel = aantal / noemer;
-  return {
-    noemer,
-    aandeel,
-    dividend_rente_dekken: jaarrente / aandeel,
-    dividend_schuld_stilstand: aflossingPct > 0 ? jaarrente / (aandeel * (aflossingPct / 100)) : null,
-  };
-}
-
 export function leaverRegel(regels, categorie, jaar) {
   return regels.find(
     (r) =>
