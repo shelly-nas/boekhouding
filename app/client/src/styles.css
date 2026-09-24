@@ -74,7 +74,7 @@ input, select, textarea {
   font: inherit; color: inherit; background: var(--bg);
   border: 1px solid var(--rand); border-radius: 6px; padding: 0.35rem 0.5rem; width: 100%;
 }
-input[type='checkbox'] { width: auto; }
+input[type='checkbox'], input[type='radio'] { width: auto; margin: 0; }
 
 .balk { display: flex; gap: 1rem; align-items: center; }
 .balk label { display: flex; gap: 0.5rem; align-items: center; }
@@ -189,3 +189,14 @@ button.klein { padding: 0.1rem 0.5rem; font-size: 0.8rem; }
 .tooltip-rij strong { font-variant-numeric: tabular-nums; }
 .tooltip-rij span:last-child { color: var(--zacht); }
 .tabelweergave summary { cursor: pointer; font-size: 0.8rem; color: var(--zacht); }
+
+.keuzes { display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; align-items: center; margin: -0.25rem 0 1.25rem; font-size: 0.85rem; color: var(--zacht); }
+.keuzes select { width: auto; }
+.keuzes fieldset.radio { display: flex; flex-direction: column; gap: 0.2rem; padding: 0; }
+.keuzes fieldset.radio label { display: flex; gap: 0.4rem; align-items: center; color: var(--tekst); }
+.jaaroverzicht { margin: 0.5rem 0 1rem; }
+table.jaren { font-size: 0.8rem; }
+table.jaren th, table.jaren td { padding: 0.4rem 0.4rem; }
+table.jaren th { white-space: normal; }
+table.jaren input.cel { width: 7rem; text-align: right; padding: 0.2rem 0.4rem; }
+table.jaren td { vertical-align: middle; }

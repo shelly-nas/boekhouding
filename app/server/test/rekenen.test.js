@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { schuldOp, schuldverloop, leaverPrijs, leaverRegel, volleJaren, breakEven, dividendToets, simulatie } from '../src/rekenen.js';
+import { schuldOp, schuldverloop, leaverPrijs, leaverRegel, volleJaren, breakEven, dividendToets, simulatie, jaaroverzicht } from '../src/rekenen.js';
 
 const contract = {
   id: 1, positie_id: 1, hoofdsom: 17100, rente_pct: 5, rente_bijschrijven: true, rente_periode: 'contractjaar',
@@ -96,4 +96,28 @@ test('simulatie: extra aflossen maakt eerder schuldvrij; rendement gelijk aan re
   const k0 = simulatie(kalender, [], { vanaf, extraPerMaand: 1000, rendementPct: 0 });
   const b0 = simulatie(kalender, [], { vanaf, rendementPct: 0 });
   assert.ok(k0.reeks.at(-1).netto - b0.reeks.at(-1).netto > 500);
+});
+
+test('jaaroverzicht: resultaat = (waarde − schuld) + cumulatief kasoverschot, ROI op inleg', () => {
+  const vanaf = '2026-09-23';
+  const historie = [{ datum: '2025-12-30', bedrag: 700 }];
+  const sim = simulatie(kalender, historie, {
+    vanaf, beleid: 'netto', belastingPct: 25, dividendVoorJaar: (j) => (j >= 2027 ? 2000 : 0),
+  });
+  const hist = [{ datum: '2025-05-08', bruto: 3150, netto: 2678, historie: true }];
+  const j = jaaroverzicht(kalender, {
+    aflossingen: sim.aflossingen, dividenden: [...hist, ...sim.dividenden], waarde: 17100, inleg: 17100, aandeel: 0.045,
+    vanJaar: 2025, totJaar: 2029,
+  });
+  const r25 = j.rijen[0];
+  assert.equal(r25.dividend_netto, 2678);
+  assert.equal(r25.afgelost, 700);
+  assert.equal(r2(r25.cum_kas), 1978);
+  assert.equal(r2(r25.dividend_totaal), 70000);
+  assert.ok(r25.dividend_werkelijk);
+  const r27 = j.rijen[2];
+  assert.equal(r27.dividend_netto, 1500);
+  assert.equal(r2(r27.afgelost), 1500); // volledig netto dividend afgelost
+  for (const r of j.rijen) assert.equal(r2(r.resultaat), r2(r.waarde - r.eind_schuld + r.cum_kas));
+  assert.equal(r2(j.roi_pct), r2((j.rijen.at(-1).resultaat / 17100) * 100));
 });

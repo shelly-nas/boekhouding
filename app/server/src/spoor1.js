@@ -11,6 +11,7 @@ import {
   schuldOp,
   schuldverloop,
   simulatie,
+  jaaroverzicht,
   volleJaren,
 } from './rekenen.js';
 
@@ -113,19 +114,11 @@ export async function leaver({ positie_id, vertrekdatum = vandaag(), categorie =
   const korting = extra_korting === 'true' ? (d.instelling.leaver_extra_korting_pct ?? 0) : 0;
   const { lening, aflossingen } = leningVoor(d, p);
   // Met een aflosplan (uit de schuiven) volgt de toekomstige schuld dat plan.
-  const metPlan = lening && vertrekdatum > vandaag() && ['extra_per_maand', 'eenmalig', 'dividend_per_jaar'].some((k) => k in plan);
+  const metPlan = lening && vertrekdatum > vandaag() && ['extra_per_maand', 'eenmalig', 'dividend_totaal', 'beleid'].some((k) => k in plan);
   const schuld = !lening
     ? { totaal: 0 }
     : metPlan
-      ? {
-          totaal: simulatie(lening, aflossingen, {
-            vanaf: vandaag(),
-            extraPerMaand: Number(plan.extra_per_maand) || 0,
-            eenmalig: Number(plan.eenmalig) || 0,
-            dividendPerJaar: Number(plan.dividend_per_jaar) || 0,
-          }).schuld(vertrekdatum),
-          volgens_plan: true,
-        }
+      ? { totaal: simulatie(lening, aflossingen, planUitQuery(plan, d, p).opties).schuld(vertrekdatum), volgens_plan: true }
       : schuldOp(lening, aflossingen, vertrekdatum);
   const waarderingen = actueleWaarderingen(d.waarderingen, p.vennootschap_id, vertrekdatum);
   const noemers = d.noemers.filter((n) => n.vennootschap_id === p.vennootschap_id);
@@ -158,25 +151,58 @@ export async function leaver({ positie_id, vertrekdatum = vandaag(), categorie =
   };
 }
 
+// Het aflosplan uit de query (schuiven en jaartabel in de tab Vertrek). Wordt
+// gedeeld door de simulatie en de vertrekberekening, zodat beide op hetzelfde
+// plan rekenen.
+function planUitQuery(query, d, p) {
+  const getal = (k, std = 0) => (query[k] === undefined || query[k] === '' ? std : Math.max(0, Number(query[k]) || 0));
+  const noemers = d.noemers.filter((n) => n.vennootschap_id === p.vennootschap_id);
+  const noemer = noemers.find((n) => n.aantal === Number(query.noemer)) ?? noemers.at(-1);
+  const aandeel = noemer ? p.aantal / noemer.aantal : null;
+  // Standaard dividend van de vennootschap: afgeleid van het laatst ontvangen
+  // dividend, zodat het bruto bedrag voor de houder gelijk blijft.
+  const laatste = d.dividenden.filter((x) => x.positie_id === p.id).at(-1);
+  const standaardTotaal = laatste && aandeel ? laatste.bruto / aandeel : 0;
+  const totaal = getal('dividend_totaal', standaardTotaal);
+  const perJaar = {};
+  for (const deel of String(query.dividenden ?? '').split(',')) {
+    const [j, v] = deel.split(':');
+    if (/^\d{4}$/.test(j) && v !== undefined && v !== '') perJaar[j] = Math.max(0, Number(v) || 0);
+  }
+  const huidigJaar = Number(vandaag().slice(0, 4));
+  const ontvangenIn = new Set(d.dividenden.filter((x) => x.positie_id === p.id).map((x) => Number(x.datum.slice(0, 4))));
+  // Lopend jaar: alleen een dividend als dat expliciet is opgegeven; jaren met
+  // een ontvangen dividend krijgen er geen gepland dividend bij.
+  const totaalVoor = (j) =>
+    j in perJaar ? perJaar[j] : j <= huidigJaar || ontvangenIn.has(j) ? 0 : totaal;
+  return {
+    noemer: noemer?.aantal ?? null,
+    aandeel,
+    standaard_totaal: totaal,
+    per_jaar: perJaar,
+    totaalVoor,
+    opties: {
+      vanaf: vandaag(),
+      extraPerMaand: getal('extra_per_maand'),
+      eenmalig: getal('eenmalig'),
+      rendementPct: getal('rendement_pct'),
+      belastingPct: getal('belasting_pct', 15),
+      beleid: query.beleid === 'netto' ? 'netto' : 'verplicht',
+      dividendVoorJaar: (j) => (aandeel ? totaalVoor(j) * aandeel : 0),
+    },
+  };
+}
+
 // Aflossen of aanhouden: jouw keuze tegenover alleen de verplichte aflossing.
 export async function simuleer(query) {
   const d = await laad();
   const p = d.posities[0];
   const { lening, aflossingen } = p ? leningVoor(d, p) : {};
   if (!lening) throw new Invoerfout('Geen lening in spoor 1');
-  const getal = (k, std = 0) => (query[k] === undefined || query[k] === '' ? std : Math.max(0, Number(query[k]) || 0));
-  const vanaf = vandaag();
-  const basisOpties = {
-    vanaf,
-    dividendPerJaar: getal('dividend_per_jaar'),
-    rendementPct: getal('rendement_pct'),
-  };
-  const keuze = simulatie(lening, aflossingen, {
-    ...basisOpties,
-    extraPerMaand: getal('extra_per_maand'),
-    eenmalig: getal('eenmalig'),
-  });
-  const basis = simulatie(lening, aflossingen, basisOpties);
+  const plan = planUitQuery(query, d, p);
+  const vanaf = plan.opties.vanaf;
+  const keuze = simulatie(lening, aflossingen, plan.opties);
+  const basis = simulatie(lening, aflossingen, { ...plan.opties, extraPerMaand: 0, eenmalig: 0, beleid: 'verplicht' });
   const einde = keuze.einde;
   let vertrek = /^\d{4}-\d{2}-\d{2}$/.test(query.vertrekdatum ?? '') ? query.vertrekdatum : einde;
   if (vertrek < vanaf) vertrek = vanaf;
@@ -186,14 +212,37 @@ export async function simuleer(query) {
     const k = sim.kas(vertrek);
     return { schuld: s, eigen_geld: k, netto: k - s };
   };
-  const zonderFuncties = ({ schuld, kas, ...rest }) => rest;
+
+  // Jaaroverzicht: werkelijke dividenden tot vandaag, daarna het plan.
+  const waarderingen = actueleWaarderingen(d.waarderingen, p.vennootschap_id, vanaf);
+  const basisWaarde = waarderingen.find((w) => String(w.id) === String(query.waarde)) ?? null;
+  const waarde = basisWaarde && plan.noemer ? (basisWaarde.ondernemingswaarde / plan.noemer) * p.aantal : p.inleg;
+  const historischeDividenden = d.dividenden
+    .filter((x) => x.positie_id === p.id && x.datum < vanaf)
+    .map((x) => ({ datum: x.datum, bruto: x.bruto, netto: x.netto, historie: true }));
+  const jaren = jaaroverzicht(lening, {
+    aflossingen: keuze.aflossingen,
+    dividenden: [...historischeDividenden, ...keuze.dividenden],
+    waarde,
+    inleg: p.inleg,
+    aandeel: plan.aandeel,
+    vanJaar: Number(p.verkregen_op.slice(0, 4)),
+    totJaar: Number(einde.slice(0, 4)),
+  });
+
+  const zonderFuncties = ({ schuld, kas, aflossingen: _a, dividenden: _d, ...rest }) => rest;
   return {
     vanaf,
     einde,
     vertrekdatum: vertrek,
     lening: { omschrijving: lening.omschrijving, rente_pct: lening.rente_pct, aflossing_pct: lening.aflossing_uit_dividend_pct, grondslag: lening.aflossing_grondslag },
+    positie: { aantal: p.aantal, inleg: p.inleg },
+    noemers: d.noemers.filter((n) => n.vennootschap_id === p.vennootschap_id).map((n) => ({ aantal: n.aantal, label: n.label })),
+    waarderingen: waarderingen.map((w) => ({ id: w.id, label: w.label, ondernemingswaarde: w.ondernemingswaarde, peildatum: w.peildatum })),
+    plan: { noemer: plan.noemer, aandeel: plan.aandeel, standaard_totaal: plan.standaard_totaal, per_jaar: plan.per_jaar, waarde_basis: basisWaarde ? basisWaarde.id : 'inleg', waarde },
     schuld_nu: keuze.reeks[0].schuld,
     keuze: { ...zonderFuncties(keuze), bij_vertrek: opVertrek(keuze) },
     basis: { ...zonderFuncties(basis), bij_vertrek: opVertrek(basis) },
+    jaren,
   };
 }

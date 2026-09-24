@@ -32,6 +32,7 @@ Map: `Professioneel/VERRA/Certificaten/`
 | B-GL-2024 | `Certificaten/Contract/2312024 geldleningsovk Dreves VOL GET.pdf` | geldlening € 17.100 aan A. Dreves privé (scan, 3 blz.; ondertekend 30-12-2024) | 2024-12-23 | 2026-09-23 (herlezen art. 2–4: F34–F38) |
 | B-GL-2025 | `Certificaten/Contract/23122025_geldleningsovk_dreves_holding_bv_signed.pdf` | geldlening € 12.094,50 aan Dreves Holding i.o. | 2025-12-23 | 2026-09-23 |
 | B-DIV-2025-05 | `Certificaten/Dividendnota Verra Aan- en Verkoop Den Haag Ashley Dreves 8 mei 2025.pdf` | dividendnota "Dividend 2025-01", interimdividend aan A. Dreves | 2025-05-08 | 2026-09-23 (F39) |
+| B-MAIL-2025-12 | `Certificaten/Fw: aandelen kapitaal Verra Aan- en verkoop BV.pdf` | e-mailwisseling 17-12-2025 (3 berichten) van Martijn van der Laan aan Freek Smits en A. Dreves, cc Niek Verra, over het aantal aandelen, rectificatie en bijkoop; op 24-09-2026 door A. Dreves doorgestuurd | 2025-12-17 | 2026-09-24 (F45–F47) |
 
 > **Let op:** `B-GL-2025` staat twee keer op de NAS — in `Certificaten/` en in
 > `Certificaten/Contract/` — met identieke inhoud (sha256 `8c96605a53e05196`).
@@ -41,6 +42,7 @@ Map: `Professioneel/VERRA/Certificaten/`
 | B-WRD-2025 | `Certificaten/Waardering/Waardering Verra aan- en verkoop Den Haag B.V. per 30-11-2025 aangepast.pdf` | waardering per 30-11-2025 | 2025-11-30 | 2026-09-23 |
 | B-WRD-2024 | `Certificaten/Waardering/Waardering Aan en Verkoop BV per begin 12-2024.xlsx` | waarderingsspreadsheet | 2024-12 | 2026-09-23 |
 | B-ROI | `Certificaten/Certificaten ROI.xlsx` | eigen rendementsmodel A. Dreves | onbekend | 2026-09-23 |
+| B-ROI-APP | `Certificaten/Certificaten ROI - afgestemd op app.xlsx` | ROI-model privé + holding met de rekenregels van de webapp (formules); **afgeleid, geen bron van feiten** | 2026-09-24 | 2026-09-24 |
 | B-PRES | `Certificaten/Presentatie Ashley Dreves.pptx` | presentatie "Toekomstbeeld samenwerking" (15 slides) | onbekend, vóór 2024-12-30 | 2026-09-23 |
 | B-LEAD | `Lead registratie/Leadregistratie - Kopie.xlsx`, `Opzet voor dashboard.xlsx`, `Commercieel dashboard - Verra Makelaars.docx` | commercieel dashboard, testdata | 2026-01 | 2026-09-23 |
 
@@ -73,6 +75,10 @@ De geldgever is in beide gevallen Verra Aan- en Verkoop B.V.
 cel D13 (percentage) leeg is. Cel D25 deelt door 200. De rechterkolommen bevatten
 een omzetsplitsing Den Haag/Rotterdam en een kostendoorbelasting van € 63.100
 (te ontvangen van Aan- en Verkoop B.V., "factuur nog te maken").
+
+**B-ROI-APP** — opgesteld 2026-09-24 in deze repository en op de NAS gezet. Privéblok gecontroleerd tegen de webapp: alle jaren en de ROI komen tot op de cent overeen. Het holdingblok volgt dezelfde regels (rente betaald volgens B-GL-2025 art. 2.2) maar zit nog niet in de app. Vervangt B-ROI niet; B-ROI blijft ongewijzigd staan.
+
+**B-MAIL-2025-12** — bevat e-mailadressen en een telefoonnummer; die zijn niet overgenomen. Het is correspondentie van de verkopers, geen notariële vaststelling: de beschreven rectificatie is een voornemen ("lijkt de beste optie"), geen uitgevoerde handeling.
 
 **B-ROI** — eigen rekenmodel, geen document van VERRA. Gebruikt `RANDBETWEEN`
 voor de dividendreeks, dus de uitkomsten zijn illustratief en niet als

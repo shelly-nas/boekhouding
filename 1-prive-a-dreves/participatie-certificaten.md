@@ -31,6 +31,13 @@
 | Vergaderrecht | **geen** | B-AKTE-CERT art. 3 sub j |
 | Gehouden door | A. Dreves **privé**, niet via de holding | B-AKTE-CERT ("Koper 2") |
 
+**Rectificatie en bijkoop (mail 17-12-2025, F45–F47):** de verkopers rekenen op
+300 aandelen en willen de aantallen van de participanten via de notaris
+rectificeren. Volgens die lezing is het privébelang 4,5% (13,5 aandelen) en koopt
+de holding 5,5% (16,5 aandelen à € 733 = € 12.094,50) bij — zie aanname A10.
+Of de rectificatie is uitgevoerd, is niet bekend (V-F40). Tot er een notariële
+akte is, blijft de leveringsakte van 02-01-2025 (9 certificaten) de vastlegging.
+
 **Tweede tranche (december 2025):** Dreves Holding B.V. heeft circa € 12.000 aan
 certificaten verkregen (opgave N-VERRA, 5,5%). De leveringsakte is niet op de NAS
 aangetroffen; aantal certificaten, prijs per stuk en datum staan daarmee niet
@@ -69,6 +76,9 @@ Kapitaal van de Vennootschap (per 02-01-2025):
 | F38 | Lening 2024 is ondertekend op 30-12-2024 (Den Haag/Rotterdam); de tekst spreekt van verstrekking "per heden" en een looptijd van vijf jaar "na heden" | B-GL-2024 p. 1 en 3 | 2026-09-23 | — |
 | F39 | Op 08-05-2025 is een **interimdividend** ("Dividend 2025-01") ter beschikking gesteld aan A. Dreves: bruto € 3.150, dividendbelasting € 472, netto € 2.678 | B-DIV-2025-05 | 2026-09-23 | — |
 | F40 | Op de lening van 2024 is afgelost: € 700 op 30-12-2025 en € 2.000 op 26-02-2026 | opgave Jelle (betaalbewijs niet op NAS) | 2026-09-23 | — |
+| F45 | Op 17-12-2025 meldt Martijn van der Laan aan Freek Smits en A. Dreves dat de waardering is gebaseerd op **300 aandelen**; om 10% extra te verwerven moeten 30 aandelen worden gekocht. Bij factor 3 ("eerste 10% nog van toepassing bij Ashley") € 733 per aandeel, "aanvullen naar de eerste 10% komt dan op ongeveer 12.000"; bij factor 4 (na de eerste 10%) € 967 per aandeel, extra 10% circa € 29.000 | B-MAIL-2025-12 (bericht 10:29) | 2026-09-24 | — |
+| F46 | Op 17-12-2025 schrijft Martijn van der Laan dat "in overleg met de notaris" rectificatie "de beste optie lijkt"; Freek krijgt de ontbrekende 10 certificaten op naam, waarmee zijn belang op de afgesproken 10% komt; het dividend is al op basis van 10% verdeeld. Er zijn 100 gecertificeerde aandelen, "niet 150 wat de helft zou zijn"; zo nodig worden nog 50 aandelen gecertificeerd | B-MAIL-2025-12 (bericht 13:54) | 2026-09-24 | — |
+| F47 | Eerder op 17-12-2025: de notaris beraadt zich op "het afwijkende aantal aandelen"; mogelijk blijft het aantal op 300 en worden de aantallen van de participanten "met een correctie in de juiste verhouding" gebracht; overdracht mogelijk pas begin januari | B-MAIL-2025-12 (bericht 10:17) | 2026-09-24 | — |
 
 ## D. Leaver-regeling (B-PART-OVK art. 6)
 Aanbiedingsplicht met de volgende prijsstelling:
@@ -100,6 +110,7 @@ bindend advies van een register valuator (NIRV) binnen 20 werkdagen.
 | A7 | ~~De lening van 2024 (€ 17.100) is nog niet afgelost~~ **Vervallen 2026-09-23: onjuist, zie F40** | Geen aflossingsplicht (art. 3.1); geen aflossingsbewijs aangetroffen | Schuldpositie is onjuist in de aangifte IB | Bankafschriften, jaaropgave Verra |
 | A8 | ~~Over 2025 is geen dividend uitgekeerd~~ **Vervallen 2026-09-23: onjuist, er is een interimdividend over 2025 uitgekeerd, zie F39** | Geschat resultaat 2025 is negatief (−€ 11.789) volgens B-WRD-2025 | Aflossingsverplichting van 25% is gemist | Notulen AVA, dividendbesluit |
 | A9 | De verplichte aflossing van 25% (F35) gaat over het **bruto** dividend | "toekomende uit te keren dividendbedrag" is het bedrag dat wordt uitgekeerd, vóór inhouding van dividendbelasting | Bij netto als grondslag was de verplichting 2025 € 669,50 in plaats van € 787,50; de aflossing van € 700 was dan voldoende | Uitleg geldgever; zie V-F38 |
+| A10 | De verkopers rekenen op een basis van 300 aandelen, waarbij het privébelang van A. Dreves **4,5% = 13,5 aandelen** is (de 9 certificaten worden via rectificatie 13,5) en de holding **5,5% = 16,5 aandelen** bijkoopt tegen € 733: 16,5 × € 733 = € 12.094,50, precies de lening B-GL-2025. Samen 10% | Sluit exact aan op F45 ("aanvullen naar de eerste 10%"), op de lening van € 12.094,50 (F14) en op de opgave 4,5% + 5,5% (N-VERRA); Freek krijgt op dezelfde grond extra certificaten (F46) | Blijft het bij 9 certificaten op 100 gecertificeerde aandelen, dan is het privébelang 9% (aanmerkelijk belang) en klopt de verhouding privé/holding niet met de betaalde bedragen | Rectificatie- of leveringsakte notaris, register certificaathouders STAK — V-F40 |
 
 ## F. Openstaande vragen
 Zie [../openstaande-vragen/REGISTER.md](../openstaande-vragen/REGISTER.md),

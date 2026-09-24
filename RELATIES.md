@@ -34,6 +34,18 @@ de **verkoper** van de certificaten en de **bestuurder** van de STAK die over de
 Marktwaarde beslist. Niek Verra Holding B.V. en Martijn van der Laan Holding B.V.
 zijn bestuurder van zowel de Vennootschap als de STAK, en traden op als Verkopers.
 
+## Rectificatie en bijkoop (B-MAIL-2025-12)
+De mail van 17-12-2025 raakt **beide** posities:
+- **Spoor 1 (privé):** rectificatie van de bestaande certificaten uit de akte van
+  02-01-2025 (Freek Smits "Koper 1", A. Dreves "Koper 2"). Freek gaat naar 10%;
+  voor A. Dreves wijst de rekensom op 4,5% = 13,5 aandelen van 300 (A10).
+- **Spoor 2 (holding):** "aanvullen naar de eerste 10%" à € 733 per aandeel,
+  circa € 12.000 — gefinancierd met de lening aan Dreves Holding i.o. van
+  € 12.094,50 (= 16,5 × € 733). De mail is aan Ashley persoonlijk gericht, vóór
+  de oprichting van de holding (23-12-2025); dat de koop bij de holding ligt,
+  volgt uit B-GL-2025 en de opgave, niet uit de mail (V-F21).
+- Bevestiging nodig van de notaris en de STAK: V-F40 t/m V-F42, V-F20.
+
 ## Deelnemingen
 | Houdster | Deelneming | % | Sinds | Deelnemingsvrijstelling | Bron |
 |---|---|---|---|---|---|

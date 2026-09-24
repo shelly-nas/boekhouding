@@ -177,12 +177,14 @@ export function dividendToets(lening, dividenden, aflossingen, totJaar) {
 // nagekomen; extra aflossen stopt zodra de schuld nul is.
 export function simulatie(lening, historie, opties) {
   const {
-    vanaf, extraPerMaand = 0, eenmalig = 0, dividendPerJaar = 0, dividendDag = '05-08',
-    rendementPct = 0, dividendbelastingPct = 15,
+    vanaf, extraPerMaand = 0, eenmalig = 0, dividendPerJaar = 0, dividendVoorJaar, dividendDag = '05-08',
+    rendementPct = 0, belastingPct = 0, beleid = 'verplicht', dividendbelastingPct = 15,
   } = opties;
   const einde = plusJaren(lening.startdatum, lening.looptijd_jaren);
   const pct = (lening.aflossing_uit_dividend_pct ?? 0) / 100;
   const grondslag = lening.aflossing_grondslag === 'netto' ? 1 - dividendbelastingPct / 100 : 1;
+  // Bruto dividend van de houder per jaar; null = geen gepland dividend.
+  const brutoVoor = dividendVoorJaar ?? (() => dividendPerJaar);
 
   // Geplande gebeurtenissen, op datum.
   const plan = [];
@@ -194,16 +196,24 @@ export function simulatie(lening, historie, opties) {
     if (d >= einde) break;
     if (extraPerMaand > 0) plan.push({ datum: d, soort: 'extra', bedrag: extraPerMaand });
   }
-  for (let j = vj; `${j}-${dividendDag}` < einde; j++) {
-    const d = `${j}-${dividendDag}`;
-    if (d > vanaf && dividendPerJaar > 0) {
-      plan.push({ datum: d, soort: 'dividend', bedrag: dividendPerJaar });
-      plan.push({ datum: d, soort: 'verplicht', bedrag: dividendPerJaar * grondslag * pct });
-    }
+  const dividenden = [];
+  for (let j = vj; `${j}-01-01` < einde; j++) {
+    const bruto = brutoVoor(j);
+    if (!bruto) continue;
+    // Staat de gebruikelijke uitkeringsdatum al achter ons, dan valt een
+    // opgegeven dividend voor dit jaar op de dag na 'vanaf'.
+    let d = `${j}-${dividendDag}`;
+    if (d <= vanaf) d = plusDagen(vanaf, 1);
+    if (d >= einde || naarDatum(d).getUTCFullYear() !== j) continue;
+    const netto = bruto * (1 - belastingPct / 100);
+    dividenden.push({ datum: d, bruto, netto });
+    plan.push({ datum: d, soort: 'dividend', bedrag: netto });
+    const verplicht = bruto * grondslag * pct;
+    plan.push({ datum: d, soort: 'verplicht', bedrag: beleid === 'netto' ? Math.max(verplicht, netto) : verplicht });
   }
   plan.sort((a, b) => a.datum.localeCompare(b.datum));
 
-  const aflossingen = historie.filter((a) => a.datum < vanaf).map((a) => ({ ...a }));
+  const aflossingen = historie.filter((a) => a.datum < vanaf).map((a) => ({ datum: a.datum, bedrag: a.bedrag, soort: 'historie' }));
   const kasstromen = [];
   let eigenGeld = 0;
   for (const g of plan) {
@@ -214,10 +224,10 @@ export function simulatie(lening, historie, opties) {
     const open = schuldOp(lening, aflossingen, g.datum).totaal;
     const bedrag = Math.min(g.bedrag, open);
     if (bedrag < 0.005) continue;
-    aflossingen.push({ datum: g.datum, bedrag });
+    aflossingen.push({ datum: g.datum, bedrag, soort: g.soort });
     aflossingen.sort((a, b) => a.datum.localeCompare(b.datum));
     kasstromen.push({ datum: g.datum, bedrag: -bedrag });
-    if (g.soort !== 'verplicht') eigenGeld += bedrag;
+    if (g.soort === 'extra' || g.soort === 'eenmalig') eigenGeld += bedrag;
   }
 
   const r = rendementPct / 100;
@@ -245,7 +255,57 @@ export function simulatie(lening, historie, opties) {
   const schuldvrij = reeks.find((p) => p.schuld < 0.005)?.datum ?? null;
   const betaald = aflossingen.filter((a) => a.datum >= vanaf).reduce((s, a) => s + a.bedrag, 0);
   const renteTotaal = reeks.at(-1).schuld - reeks[0].schuld + betaald;
-  return { reeks, schuldvrij_op: schuldvrij, eigen_geld_ingezet: eigenGeld, rente: renteTotaal, einde, schuld, kas };
+  return {
+    reeks, schuldvrij_op: schuldvrij, eigen_geld_ingezet: eigenGeld, rente: renteTotaal, einde,
+    schuld, kas, aflossingen, dividenden,
+  };
+}
+
+// Jaaroverzicht in de vorm van het eigen ROI-model (B-ROI): per kalenderjaar
+// schuld, rente, dividend, aflossing, waarde en resultaat. Het netto resultaat
+// is (waarde certificaten − schuld) + cumulatief kasoverschot (netto dividend −
+// aflossingen); de ROI is dat resultaat gedeeld door de inleg.
+export function jaaroverzicht(lening, { aflossingen, dividenden, waarde, inleg, aandeel, vanJaar, totJaar }) {
+  const verloop = schuldverloop(lening, aflossingen, { totDatum: `${totJaar + 1}-01-01` });
+  const jaar = (s) => naarDatum(s).getUTCFullYear();
+  const rijen = [];
+  let cumKas = 0;
+  for (let j = vanJaar; j <= totJaar; j++) {
+    const begin = schuldOp(lening, aflossingen, `${j}-01-01`).totaal;
+    const eind = schuldOp(lening, aflossingen, `${j + 1}-01-01`).totaal;
+    const rente = verloop.filter((r) => jaar(r.start) === j).reduce((s, r) => s + r.rente, 0);
+    const div = dividenden.filter((d) => jaar(d.datum) === j);
+    const bruto = div.reduce((s, d) => s + d.bruto, 0);
+    const netto = div.reduce((s, d) => s + d.netto, 0);
+    const afgelost = aflossingen.filter((a) => jaar(a.datum) === j).reduce((s, a) => s + a.bedrag, 0);
+    cumKas += netto - afgelost;
+    const vermogen = waarde - eind;
+    rijen.push({
+      jaar: j,
+      begin_schuld: begin,
+      rente,
+      dividend_totaal: aandeel ? bruto / aandeel : null,
+      dividend_bruto: bruto,
+      dividend_netto: netto,
+      afgelost,
+      eind_schuld: eind,
+      waarde,
+      vermogen,
+      cum_kas: cumKas,
+      resultaat: vermogen + cumKas,
+      // werkelijk ontvangen dividend (niet aan te passen) en/of werkelijke aflossingen
+      dividend_werkelijk: div.some((d) => d.historie),
+      historie: div.some((d) => d.historie) || aflossingen.some((a) => jaar(a.datum) === j && a.soort === 'historie'),
+    });
+  }
+  const laatste = rijen.at(-1);
+  return { rijen, rest_schuld: laatste?.eind_schuld ?? 0, roi_pct: inleg && laatste ? (laatste.resultaat / inleg) * 100 : null };
+}
+
+function plusDagen(s, n) {
+  const d = naarDatum(s);
+  d.setUTCDate(d.getUTCDate() + n);
+  return naarString(d);
 }
 
 // Box-indicatie op basis van het belang. Indicatief: de lucratiefbelangtoets

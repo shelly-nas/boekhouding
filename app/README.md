@@ -81,6 +81,14 @@ Het journaal is de administratie van de holding (art. 2:10 BW, art. 52 AWR):
   schuld). Alles vóór inkomstenbelasting. Een aflossing boven de hoofdsom
   betaalt ook de opgelopen rente, zodat volledig aflossen echt op nul uitkomt.
   De vertrekdatum en het aflosplan gelden ook voor de vertrekberekening.
+- **Jaaroverzicht** (tab Vertrek): dezelfde opbouw als het eigen ROI-model
+  (B-ROI). Per jaar: lening, rente, dividend van de vennootschap (× aandeel via
+  de gekozen noemer), netto dividend, aflossing, waarde certificaten (inleg of
+  een waardering), vermogen (waarde − lening), cumulatief kasoverschot (netto
+  dividend − aflossingen) en netto resultaat (de som van die twee). ROI = netto
+  resultaat ÷ inleg. Jaren tot vandaag komen uit de werkelijke dividenden en
+  aflossingen. Het dividend van toekomstige jaren vul je per jaar in. Kies je
+  "volledig netto dividend aflossen", dan werkt het net als het ROI-model.
 - Vertrek: de extra korting van art. 6.5 gaat van de Marktwaarde af vóórdat het
   leaverpercentage wordt toegepast. Dat is een lezing van het artikel, geen
   vaststaand gegeven.

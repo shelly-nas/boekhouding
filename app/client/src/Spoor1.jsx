@@ -434,40 +434,44 @@ function Schuif({ label, waarde, min, max, stap, onChange, toon, uitleg }) {
 function Aflossen({ vertrek, onVertrek, onPlan }) {
   const [extra, setExtra] = useState(0);
   const [eenmalig, setEenmalig] = useState(0);
-  const [dividend, setDividend] = useState(null);
+  const [dividend, setDividend] = useState(null); // totaal vennootschap; null = server kiest
+  const [perJaar, setPerJaar] = useState({}); // jaar -> totaal vennootschap
+  const [noemer, setNoemer] = useState(300);
+  const [waardeBasis, setWaardeBasis] = useState('inleg');
+  const [belasting, setBelasting] = useState(15);
+  const [beleid, setBeleid] = useState('verplicht');
   const [rendement, setRendement] = useState(2);
   const setVertrek = onVertrek;
   const [data, setData] = useState(null);
   const [fout, setFout] = useState(null);
   const timer = useRef(null);
 
-  // Startwaarde dividend: het laatst ontvangen bruto dividend.
   useEffect(() => {
-    api.get('/data/dividend?spoor=1').then(
-      (d) => setDividend(d.at(-1)?.bruto ?? 0),
-      () => setDividend(0),
-    );
-  }, []);
-
-  useEffect(() => {
-    if (dividend === null) return;
     clearTimeout(timer.current);
     timer.current = setTimeout(() => {
-      const q = new URLSearchParams({
-        extra_per_maand: extra, eenmalig, dividend_per_jaar: dividend, rendement_pct: rendement, vertrekdatum: vertrek,
-      });
+      const plan = {
+        extra_per_maand: extra,
+        eenmalig,
+        noemer,
+        belasting_pct: belasting,
+        beleid,
+        dividenden: Object.entries(perJaar).map(([j, v]) => `${j}:${v}`).join(','),
+        ...(dividend === null ? {} : { dividend_totaal: dividend }),
+      };
+      const q = new URLSearchParams({ ...plan, rendement_pct: rendement, waarde: waardeBasis, vertrekdatum: vertrek });
       api.get(`/spoor1/simulatie?${q}`).then(
         (d) => {
           setData(d);
           setFout(null);
           if (!vertrek) setVertrek(d.einde);
-          onPlan({ extra_per_maand: extra, eenmalig, dividend_per_jaar: dividend });
+          if (dividend === null) setDividend(Math.round(d.plan.standaard_totaal));
+          onPlan({ ...plan, dividend_totaal: d.plan.standaard_totaal });
         },
         (e) => setFout(e.message),
       );
-    }, 120);
+    }, 150);
     return () => clearTimeout(timer.current);
-  }, [extra, eenmalig, dividend, rendement, vertrek]);
+  }, [extra, eenmalig, dividend, perJaar, noemer, waardeBasis, belasting, beleid, rendement, vertrek]);
 
   if (fout) return <p className="fout">{fout}</p>;
   if (!data) return <section className="kaart"><p className="uitleg">Laden…</p></section>;
@@ -493,13 +497,34 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
       <div className="schuiven">
         <Schuif label="Extra aflossen per maand" waarde={extra} min={0} max={1000} stap={25} onChange={setExtra} toon={eur} />
         <Schuif label="Eenmalig nu aflossen" waarde={Math.min(eenmalig, schuldMax)} min={0} max={schuldMax} stap={100} onChange={setEenmalig} toon={eur} />
-        <Schuif label="Verwacht dividend per jaar (bruto)" waarde={dividend} min={0} max={10000} stap={50} onChange={setDividend} toon={eur}
-          uitleg="Aanname; uitkering elk jaar rond 8 mei zoals in 2025" />
+        <Schuif label="Dividend vennootschap per jaar (totaal)" waarde={dividend ?? 0} min={0} max={250000} stap={1000} onChange={setDividend} toon={eur}
+          uitleg={`Jouw deel: ${pct((data.plan.aandeel ?? 0) * 100)} = ${eur((dividend ?? 0) * (data.plan.aandeel ?? 0))} bruto. Per jaar aan te passen in de tabel.`} />
         <Schuif label="Rendement op geld dat je niet aflost" waarde={rendement} min={0} max={10} stap={0.25} onChange={setRendement} toon={pct}
           uitleg={`Netto, bijv. spaarrente. Onder ${pct(rente)} levert aflossen meer op.`} />
         <Schuif label="Vertrekdatum" waarde={vertrekIndex} min={0} max={maanden} stap={1}
           onChange={(n) => setVertrek(n >= maanden ? data.einde : n === 0 ? data.vanaf : plusMaanden(data.vanaf, n))}
           toon={() => datum(data.vertrekdatum)} uitleg="Geldt ook voor de berekening hieronder" />
+        <Schuif label="Belasting op dividend" waarde={belasting} min={0} max={31} stap={0.5} onChange={setBelasting} toon={pct}
+          uitleg="15% dividendbelasting wordt ingehouden; in box 2 wordt het meer (V-F12)" />
+      </div>
+      <div className="keuzes">
+        <label>
+          Noemer{' '}
+          <select value={noemer} onChange={(e) => setNoemer(Number(e.target.value))}>
+            {data.noemers.map((n) => <option key={n.aantal} value={n.aantal}>÷ {n.aantal} · {n.label}</option>)}
+          </select>
+        </label>
+        <label>
+          Waarde certificaten{' '}
+          <select value={waardeBasis} onChange={(e) => setWaardeBasis(e.target.value)}>
+            <option value="inleg">inleg (zoals het ROI-model)</option>
+            {data.waarderingen.map((w) => <option key={w.id} value={w.id}>{w.label} · {eur(w.ondernemingswaarde)}</option>)}
+          </select>
+        </label>
+        <fieldset className="radio">
+          <label><input type="radio" checked={beleid === 'verplicht'} onChange={() => setBeleid('verplicht')} /> alleen verplichte {pct(data.lening.aflossing_pct)} van het dividend</label>
+          <label><input type="radio" checked={beleid === 'netto'} onChange={() => setBeleid('netto')} /> volledig netto dividend aflossen (zoals het ROI-model)</label>
+        </fieldset>
       </div>
 
       <div className="kpis">
@@ -529,6 +554,20 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
           nulLijn
         />
       </div>
+      <Jaaroverzicht
+        jaren={data.jaren}
+        inleg={data.positie.inleg}
+        waardeLabel={waardeBasis === 'inleg' ? 'inleg' : `waardering ÷ ${data.plan.noemer}`}
+        perJaar={perJaar}
+        standaard={dividend ?? 0}
+        huidigJaar={Number(data.vanaf.slice(0, 4))}
+        onDividend={(j, v) => setPerJaar((p) => {
+          const n = { ...p };
+          if (v === '') delete n[j];
+          else n[j] = Number(v);
+          return n;
+        })}
+      />
       <ul className="uitleg">
         <li>
           Liquiditeit tegenover vermogen: elke euro die je aflost, verdient {pct(rente)} (de rente die je niet meer
@@ -546,6 +585,84 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
         </li>
       </ul>
     </section>
+  );
+}
+
+function Jaaroverzicht({ jaren, inleg, waardeLabel, perJaar, standaard, huidigJaar, onDividend }) {
+  const laatste = jaren.rijen.at(-1);
+  return (
+    <div className="jaaroverzicht">
+      <h4>Jaaroverzicht</h4>
+      <p className="uitleg">
+        Zelfde opbouw als het eigen ROI-model: vermogen = waarde certificaten ({waardeLabel}) − schuld; netto resultaat
+        = vermogen + cumulatief kasoverschot (netto dividend − aflossingen). Jaren tot vandaag zijn werkelijk; daarna het
+        plan. Het dividend van toekomstige jaren kun je hier per jaar invullen.
+      </p>
+      <div className="kpis">
+        <div className="kpi"><div className="kpi-titel">Resterende lening {laatste?.jaar}</div><div className="kpi-waarde">{eur(jaren.rest_schuld)}</div>
+          <div className="kpi-sub">op 1 januari {laatste ? laatste.jaar + 1 : ''}</div></div>
+        <div className="kpi"><div className="kpi-titel">Netto resultaat</div><div className="kpi-waarde"><Netto n={laatste?.resultaat ?? 0} /></div>
+          <div className="kpi-sub">vermogen + kasoverschot</div></div>
+        <div className="kpi"><div className="kpi-titel">Totaal ROI</div><div className="kpi-waarde">{jaren.roi_pct == null ? '—' : pct(Math.round(jaren.roi_pct * 10) / 10)}</div>
+          <div className="kpi-sub">netto resultaat ÷ inleg {eur(inleg)}</div></div>
+      </div>
+      <div className="scroll">
+        <table className="jaren">
+          <thead>
+            <tr>
+              <th>Jaar</th>
+              <th className="getal">Lening 1-1</th>
+              <th className="getal">Rente</th>
+              <th className="getal">Dividend vennootschap</th>
+              <th className="getal">Netto dividend</th>
+              <th className="getal">Aflossing</th>
+              <th className="getal">Lening 31-12</th>
+              <th className="getal">Waarde certificaten</th>
+              <th className="getal">Vermogen</th>
+              <th className="getal">Cum. kasoverschot</th>
+              <th className="getal">Netto resultaat</th>
+            </tr>
+          </thead>
+          <tbody>
+            {jaren.rijen.map((r) => {
+              const bewerkbaar = r.jaar >= huidigJaar && !r.dividend_werkelijk;
+              return (
+                <tr key={r.jaar}>
+                  <td>{r.jaar}{r.historie && <small> {r.jaar < huidigJaar ? 'werkelijk' : 'deels werkelijk'}</small>}</td>
+                  <td className="getal">{eur(r.begin_schuld)}</td>
+                  <td className="getal">{eur(r.rente)}</td>
+                  <td className="getal">
+                    {bewerkbaar ? (
+                      <input
+                        type="number"
+                        step="1000"
+                        min="0"
+                        className="cel"
+                        placeholder={r.jaar === huidigJaar ? '0' : String(standaard)}
+                        value={perJaar[r.jaar] ?? ''}
+                        onChange={(e) => onDividend(r.jaar, e.target.value)}
+                        aria-label={`Dividend vennootschap ${r.jaar}`}
+                      />
+                    ) : eur(r.dividend_totaal)}
+                  </td>
+                  <td className="getal">{eur(r.dividend_netto)}</td>
+                  <td className="getal">{eur(r.afgelost)}</td>
+                  <td className="getal">{eur(r.eind_schuld)}</td>
+                  <td className="getal">{eur(r.waarde)}</td>
+                  <td className="getal"><Netto n={r.vermogen} /></td>
+                  <td className="getal"><Netto n={r.cum_kas} /></td>
+                  <td className="getal"><strong><Netto n={r.resultaat} /></strong></td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <p className="uitleg">
+        Leeg dividendveld = de schuif (lopend jaar: geen dividend, tenzij ingevuld). De inleg is volledig geleend; de ROI
+        is dus een rendement op een geleend bedrag, niet op eigen geld.
+      </p>
+    </div>
   );
 }
 
