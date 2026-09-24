@@ -70,6 +70,10 @@ ingangsdatum 23-12-2025, geen verzoek tot afscherming. Bron: B-UBO-DRV.
 | F7a | Dreves Holding B.V. heeft in december 2025 een **tweede tranche certificaten** in Verra Aan- en Verkoop B.V. verkregen voor circa € 12.000 | N-VERRA (opgave Jelle 2026-09-23) | 2026-09-23 | — |
 | F8 | Dreves Holding B.V. i.o. is op 23-12-2025 een geldlening van € 12.094,50 aangegaan met Verra Aan- en Verkoop B.V., 5% rente, looptijd 5 jaar | B-GL-2025 | 2026-09-23 | — |
 | F9 | Aan de certificaten is **geen** vergaderrecht verbonden | B-AKTE-CERT art. 3 sub j | 2026-09-23 | — |
+| F41 | Lening 2025: de rente wordt jaarlijks aan het einde van het jaar berekend en overgemaakt aan de geldgever | B-GL-2025 art. 2.2 | 2026-09-23 | — |
+| F42 | Lening 2025: geen aflossingsplicht, behoudens steeds 25% van het jaarlijks toekomende dividend; tussentijds boetevrij aflossen is toegestaan | B-GL-2025 art. 3.1–3.3 | 2026-09-23 | — |
+| F43 | Dreves Holding B.V. heeft een zakelijke bankrekening bij ING | opgave Jelle | 2026-09-23 | — |
+| F44 | De administratie van Dreves Holding B.V. wordt gevoerd in de webapp van deze repo (`app/`, spoor 2), vanaf het eerste boekjaar | opgave Jelle | 2026-09-23 | — |
 
 ## E. Aannames
 | # | Aanname | Waarom aangenomen | Gevolg als onjuist | Te verifiëren via |

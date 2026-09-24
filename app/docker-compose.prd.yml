@@ -1,0 +1,99 @@
+# Productiestack.
+#
+# IMAGE_TAG is de uitgebrachte versie (1.2.3), niet 'latest': een rollback is
+# dan één regel wijzigen, en een herstart trekt niet stilletjes een nieuwere
+# build binnen.
+#
+# Data blijft bestaan over versies heen: de database en de bijlagen staan in
+# bind mounts op de host (${DATA_DIR}/postgres en ${DATA_DIR}/bijlagen). Een
+# nieuwe versie vervangt alleen de images; ook `docker compose down -v` laat
+# een bind mount met rust. Beide paden moeten op de host bestaan: postgres
+# eigendom van uid/gid 70 (postgres in alpine), bijlagen van uid/gid 1000.
+#
+# Het schema en de stamdata worden door database/init.sql aangemaakt bij de
+# eerste start van een leeg volume. Staat er eenmaal data in, dan gaat een
+# schemawijziging niet meer daar maar in server/migrations/; de server past die
+# bij het starten toe.
+services:
+  db:
+    # Eigen image: het schema zit erin gebakken, omdat de deploy alleen dit
+    # compose-bestand naar de host kopieert.
+    image: ${REGISTRY}/boekhouding-db:${IMAGE_TAG:?IMAGE_TAG is verplicht - zet een versie, niet latest}
+    container_name: boekhouding-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-boekhouder}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is verplicht in productie}
+      POSTGRES_DB: ${DB_NAME:-boekhouding}
+      TZ: ${TZ:-Europe/Amsterdam}
+    volumes:
+      - ${DATA_DIR:-./data}/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-boekhouder} -d ${DB_NAME:-boekhouding}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  server:
+    image: ${REGISTRY}/boekhouding-server:${IMAGE_TAG:?IMAGE_TAG is verplicht - zet een versie, niet latest}
+    container_name: boekhouding-server
+    restart: always
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-boekhouder}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME:-boekhouding}
+      SERVER_PORT: 3000
+      TZ: ${TZ:-Europe/Amsterdam}
+      NODE_ENV: production
+    volumes:
+      # Bijlagen bij boekingen (bewaarplicht 7 jaar, art. 52 AWR). Bind mount,
+      # net als de database: overleeft elke nieuwe versie. Eigenaar op de host:
+      # uid/gid 1000 (de node-user in het image).
+      - ${DATA_DIR:-./data}/bijlagen:/data/bijlagen
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+    networks:
+      - shelly-network
+      - default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.boekhouding-api.rule=Host(`${APP_HOST:?APP_HOST is verplicht}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.boekhouding-api.entrypoints=web"
+      - "traefik.http.services.boekhouding-api.loadbalancer.server.port=3000"
+
+  client:
+    image: ${REGISTRY}/boekhouding-client:${IMAGE_TAG:?IMAGE_TAG is verplicht - zet een versie, niet latest}
+    container_name: boekhouding-client
+    restart: always
+    environment:
+      TZ: ${TZ:-Europe/Amsterdam}
+    depends_on:
+      - server
+    networks:
+      - shelly-network
+      - default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.boekhouding.rule=Host(`${APP_HOST}`)"
+      - "traefik.http.routers.boekhouding.entrypoints=web"
+      - "traefik.http.services.boekhouding.loadbalancer.server.port=80"
+
+networks:
+  shelly-network:
+    external: true

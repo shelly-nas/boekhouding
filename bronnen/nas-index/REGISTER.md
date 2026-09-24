@@ -29,8 +29,9 @@ Map: `Professioneel/VERRA/Certificaten/`
 | id | Bestand | Soort | Datum | Gelezen op |
 |---|---|---|---|---|
 | B-PART-OVK | `Certificaten/Contract/Werknemersparticipatie VERRA Makelaars Dreves VOL GET.pdf` | participatieovereenkomst (scan, 11 blz.) | 2024-12-30 | 2026-09-23 |
-| B-GL-2024 | `Certificaten/Contract/2312024 geldleningsovk Dreves VOL GET.pdf` | geldlening € 17.100 aan A. Dreves privé (scan, 3 blz.) | 2024-12-23 | 2026-09-23 |
+| B-GL-2024 | `Certificaten/Contract/2312024 geldleningsovk Dreves VOL GET.pdf` | geldlening € 17.100 aan A. Dreves privé (scan, 3 blz.; ondertekend 30-12-2024) | 2024-12-23 | 2026-09-23 (herlezen art. 2–4: F34–F38) |
 | B-GL-2025 | `Certificaten/Contract/23122025_geldleningsovk_dreves_holding_bv_signed.pdf` | geldlening € 12.094,50 aan Dreves Holding i.o. | 2025-12-23 | 2026-09-23 |
+| B-DIV-2025-05 | `Certificaten/Dividendnota Verra Aan- en Verkoop Den Haag Ashley Dreves 8 mei 2025.pdf` | dividendnota "Dividend 2025-01", interimdividend aan A. Dreves | 2025-05-08 | 2026-09-23 (F39) |
 
 > **Let op:** `B-GL-2025` staat twee keer op de NAS — in `Certificaten/` en in
 > `Certificaten/Contract/` — met identieke inhoud (sha256 `8c96605a53e05196`).

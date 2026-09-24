@@ -61,6 +61,14 @@ Kapitaal van de Vennootschap (per 02-01-2025):
 | F18 | Vervreemding of bezwaring van de certificaten door de Participant is niet toegestaan | B-PART-OVK art. 5.1 | 2026-09-23 | — |
 | F19 | Alle loonbelasting en sociale premies i.v.m. verkrijging en houden van de certificaten komen voor rekening van de Participant, met vrijwaring van de Vennootschap | B-PART-OVK art. 7.1 | 2026-09-23 | — |
 | F20 | Geschillen uit de participatieovereenkomst: rechtbank Amsterdam; uit de geldleningen: rechter in het rechtsgebied van de geldgever (Den Haag) | B-PART-OVK art. 9.2, B-GL-2025 art. 6.1 | 2026-09-23 | — |
+| F33 | De rente op de lening van 2024 wordt per contractjaar bijgeschreven en maakt deel uit van de hoofdsom, zodat in volgende jaren rente over rente loopt (samengesteld, 5% p.j.) | opgave Jelle; aansluitend op B-GL-2024 | 2026-09-23 | 2026-09-23 — vervangen door F34 (bijschrijving op 31-12, niet op de jaardag) |
+| F34 | De rente op de lening van 2024 wordt telkens op het einde van het kalenderjaar bijgeschreven; over de bijgeschreven rente loopt daarna rente (samengesteld, 5% p.j.) | B-GL-2024 art. 2.1–2.2; samengesteld: opgave Jelle | 2026-09-23 | — |
+| F35 | Lening 2024: Geldneemster betaalt gedurende de looptijd "steeds 25% van het aan haar jaarlijks op grond van de Participatie toekomende uit te keren dividendbedrag" als aflossing; verder geen aflossingsplicht | B-GL-2024 art. 3.1–3.2 | 2026-09-23 | — |
+| F36 | Lening 2024: tussentijds aflossen mag altijd, geheel of gedeeltelijk, zonder boete | B-GL-2024 art. 3.3 | 2026-09-23 | — |
+| F37 | Lening 2024 wordt ook terstond opeisbaar als A. Dreves na deugdelijke ingebrekestelling een verplichting uit de overeenkomst niet (alsnog) nakomt, en bij toepassing van de WSNP | B-GL-2024 art. 4.1(b)–(c) | 2026-09-23 | — |
+| F38 | Lening 2024 is ondertekend op 30-12-2024 (Den Haag/Rotterdam); de tekst spreekt van verstrekking "per heden" en een looptijd van vijf jaar "na heden" | B-GL-2024 p. 1 en 3 | 2026-09-23 | — |
+| F39 | Op 08-05-2025 is een **interimdividend** ("Dividend 2025-01") ter beschikking gesteld aan A. Dreves: bruto € 3.150, dividendbelasting € 472, netto € 2.678 | B-DIV-2025-05 | 2026-09-23 | — |
+| F40 | Op de lening van 2024 is afgelost: € 700 op 30-12-2025 en € 2.000 op 26-02-2026 | opgave Jelle (betaalbewijs niet op NAS) | 2026-09-23 | — |
 
 ## D. Leaver-regeling (B-PART-OVK art. 6)
 Aanbiedingsplicht met de volgende prijsstelling:
@@ -89,8 +97,9 @@ bindend advies van een register valuator (NIRV) binnen 20 werkdagen.
 |---|---|---|---|---|
 | A5 | De Marktwaarde per 31-12-2024 is destijds vastgesteld op € 1.900 per certificaat | Inleg € 17.100 / 9 = € 1.900; art. 3.2 verwijst naar een per e-mail bevestigde berekening | Als de werkelijk bevestigde waarde afwijkt, is de inleg niet marktconform en ontstaat loonheffingsrisico | E-mail van 30-12-2024 met Bijlage 3 — zie V-F08 |
 | A6 | De certificaten zijn verkregen tegen marktwaarde, zodat er geen belast loonvoordeel is ontstaan | Art. 7.4 gaat uit van marktconforme waardering | Naheffing loonbelasting bij A. Dreves; art. 7.1 legt dat risico volledig bij haar | Onderbouwing waardering, standpunt Belastingdienst |
-| A7 | De lening van 2024 (€ 17.100) is nog niet afgelost | Geen aflossingsplicht (art. 3.1); geen aflossingsbewijs aangetroffen | Schuldpositie is onjuist in de aangifte IB | Bankafschriften, jaaropgave Verra |
-| A8 | Over 2025 is geen dividend uitgekeerd | Geschat resultaat 2025 is negatief (−€ 11.789) volgens B-WRD-2025 | Aflossingsverplichting van 25% is gemist | Notulen AVA, dividendbesluit |
+| A7 | ~~De lening van 2024 (€ 17.100) is nog niet afgelost~~ **Vervallen 2026-09-23: onjuist, zie F40** | Geen aflossingsplicht (art. 3.1); geen aflossingsbewijs aangetroffen | Schuldpositie is onjuist in de aangifte IB | Bankafschriften, jaaropgave Verra |
+| A8 | ~~Over 2025 is geen dividend uitgekeerd~~ **Vervallen 2026-09-23: onjuist, er is een interimdividend over 2025 uitgekeerd, zie F39** | Geschat resultaat 2025 is negatief (−€ 11.789) volgens B-WRD-2025 | Aflossingsverplichting van 25% is gemist | Notulen AVA, dividendbesluit |
+| A9 | De verplichte aflossing van 25% (F35) gaat over het **bruto** dividend | "toekomende uit te keren dividendbedrag" is het bedrag dat wordt uitgekeerd, vóór inhouding van dividendbelasting | Bij netto als grondslag was de verplichting 2025 € 669,50 in plaats van € 787,50; de aflossing van € 700 was dan voldoende | Uitleg geldgever; zie V-F38 |
 
 ## F. Openstaande vragen
 Zie [../openstaande-vragen/REGISTER.md](../openstaande-vragen/REGISTER.md),
