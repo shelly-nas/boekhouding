@@ -12,6 +12,7 @@ import {
   schuldverloop,
   simulatie,
   jaaroverzicht,
+  waardeReeks,
   volleJaren,
 } from './rekenen.js';
 
@@ -213,10 +214,22 @@ export async function simuleer(query) {
     return { schuld: s, eigen_geld: k, netto: k - s };
   };
 
-  // Jaaroverzicht: werkelijke dividenden tot vandaag, daarna het plan.
-  const waarderingen = actueleWaarderingen(d.waarderingen, p.vennootschap_id, vanaf);
-  const basisWaarde = waarderingen.find((w) => String(w.id) === String(query.waarde)) ?? null;
-  const waarde = basisWaarde && plan.noemer ? (basisWaarde.ondernemingswaarde / plan.noemer) * p.aantal : p.inleg;
+  // Jaaroverzicht: werkelijke dividenden tot vandaag, daarna het plan. De
+  // waarde volgt per jaar de gekozen reeks waarderingen (factor), of de inleg.
+  const eigen = d.waarderingen.filter((w) => w.vennootschap_id === p.vennootschap_id);
+  const factoren = [...new Set(eigen.map((w) => w.factor).filter((f) => f != null))].sort((a, b) => a - b);
+  const keuzeWaarde = String(query.waarde ?? '');
+  const factor = keuzeWaarde === 'inleg' ? null : keuzeWaarde ? Number(keuzeWaarde) : factoren[0] ?? null;
+  const groeiPct = Number(query.groei_pct) || 0;
+  const waarde = factor == null
+    ? () => ({ waarde: p.inleg, bron: 'inleg' })
+    : waardeReeks({
+        waarderingen: eigen.filter((w) => Number(w.factor) === factor),
+        noemer: plan.noemer,
+        aantal: p.aantal,
+        inleg: p.inleg,
+        groeiPct,
+      });
   const historischeDividenden = d.dividenden
     .filter((x) => x.positie_id === p.id && x.datum < vanaf)
     .map((x) => ({ datum: x.datum, bruto: x.bruto, netto: x.netto, historie: true }));
@@ -238,8 +251,8 @@ export async function simuleer(query) {
     lening: { omschrijving: lening.omschrijving, rente_pct: lening.rente_pct, aflossing_pct: lening.aflossing_uit_dividend_pct, grondslag: lening.aflossing_grondslag },
     positie: { aantal: p.aantal, inleg: p.inleg },
     noemers: d.noemers.filter((n) => n.vennootschap_id === p.vennootschap_id).map((n) => ({ aantal: n.aantal, label: n.label })),
-    waarderingen: waarderingen.map((w) => ({ id: w.id, label: w.label, ondernemingswaarde: w.ondernemingswaarde, peildatum: w.peildatum })),
-    plan: { noemer: plan.noemer, aandeel: plan.aandeel, standaard_totaal: plan.standaard_totaal, per_jaar: plan.per_jaar, waarde_basis: basisWaarde ? basisWaarde.id : 'inleg', waarde },
+    factoren,
+    plan: { noemer: plan.noemer, aandeel: plan.aandeel, standaard_totaal: plan.standaard_totaal, per_jaar: plan.per_jaar, waarde_basis: factor ?? 'inleg', groei_pct: groeiPct },
     schuld_nu: keuze.reeks[0].schuld,
     keuze: { ...zonderFuncties(keuze), bij_vertrek: opVertrek(keuze) },
     basis: { ...zonderFuncties(basis), bij_vertrek: opVertrek(basis) },

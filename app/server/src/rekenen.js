@@ -265,7 +265,25 @@ export function simulatie(lening, historie, opties) {
 // schuld, rente, dividend, aflossing, waarde en resultaat. Het netto resultaat
 // is (waarde certificaten − schuld) + cumulatief kasoverschot (netto dividend −
 // aflossingen); de ROI is dat resultaat gedeeld door de inleg.
+// Waarde van de positie per jaar uit een reeks waarderingen: de laatste
+// waardering met peildatum t/m 31-12 van dat jaar, ÷ noemer × aantal, met een
+// optionele groei per vol jaar daarna. Vóór de eerste waardering: de inleg.
+export function waardeReeks({ waarderingen, noemer, aantal, inleg, groeiPct = 0 }) {
+  const reeks = [...waarderingen].sort((a, b) => a.peildatum.localeCompare(b.peildatum));
+  return (j) => {
+    const w = reeks.filter((x) => x.peildatum <= `${j}-12-31`).at(-1);
+    if (!w || !noemer) return { waarde: inleg, bron: 'inleg' };
+    const jaren = Math.max(0, j - Number(w.peildatum.slice(0, 4)));
+    const groei = (1 + groeiPct / 100) ** jaren;
+    return {
+      waarde: (w.ondernemingswaarde / noemer) * aantal * groei,
+      bron: `${w.label} per ${w.peildatum}${jaren && groeiPct ? ` + ${jaren} jr groei` : ''}`,
+    };
+  };
+}
+
 export function jaaroverzicht(lening, { aflossingen, dividenden, waarde, inleg, aandeel, vanJaar, totJaar }) {
+  const waardeVoor = typeof waarde === 'function' ? waarde : () => ({ waarde, bron: null });
   const verloop = schuldverloop(lening, aflossingen, { totDatum: `${totJaar + 1}-01-01` });
   const jaar = (s) => naarDatum(s).getUTCFullYear();
   const rijen = [];
@@ -279,7 +297,8 @@ export function jaaroverzicht(lening, { aflossingen, dividenden, waarde, inleg, 
     const netto = div.reduce((s, d) => s + d.netto, 0);
     const afgelost = aflossingen.filter((a) => jaar(a.datum) === j).reduce((s, a) => s + a.bedrag, 0);
     cumKas += netto - afgelost;
-    const vermogen = waarde - eind;
+    const { waarde: w, bron: waardeBron } = waardeVoor(j);
+    const vermogen = w - eind;
     rijen.push({
       jaar: j,
       begin_schuld: begin,
@@ -289,7 +308,8 @@ export function jaaroverzicht(lening, { aflossingen, dividenden, waarde, inleg, 
       dividend_netto: netto,
       afgelost,
       eind_schuld: eind,
-      waarde,
+      waarde: w,
+      waarde_bron: waardeBron,
       vermogen,
       cum_kas: cumKas,
       resultaat: vermogen + cumKas,

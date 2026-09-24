@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { api } from './api.js';
 import CrudTabel from './CrudTabel.jsx';
 import Grafiek from './Grafiek.jsx';
-import { datum, eur, eurc, pct, vandaag } from './format.js';
+import { datum, eur, eurc, num, pct, vandaag } from './format.js';
 
 const ONDERDELEN = ['Overzicht', 'Vertrek', 'Stamdata'];
 
@@ -437,7 +437,8 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
   const [dividend, setDividend] = useState(null); // totaal vennootschap; null = server kiest
   const [perJaar, setPerJaar] = useState({}); // jaar -> totaal vennootschap
   const [noemer, setNoemer] = useState(300);
-  const [waardeBasis, setWaardeBasis] = useState('inleg');
+  const [waardeBasis, setWaardeBasis] = useState(''); // '' = eerste factor uit de stamdata
+  const [groei, setGroei] = useState(0);
   const [belasting, setBelasting] = useState(15);
   const [beleid, setBeleid] = useState('verplicht');
   const [rendement, setRendement] = useState(2);
@@ -458,7 +459,7 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
         dividenden: Object.entries(perJaar).map(([j, v]) => `${j}:${v}`).join(','),
         ...(dividend === null ? {} : { dividend_totaal: dividend }),
       };
-      const q = new URLSearchParams({ ...plan, rendement_pct: rendement, waarde: waardeBasis, vertrekdatum: vertrek });
+      const q = new URLSearchParams({ ...plan, rendement_pct: rendement, waarde: waardeBasis, groei_pct: groei, vertrekdatum: vertrek });
       api.get(`/spoor1/simulatie?${q}`).then(
         (d) => {
           setData(d);
@@ -471,7 +472,7 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
       );
     }, 150);
     return () => clearTimeout(timer.current);
-  }, [extra, eenmalig, dividend, perJaar, noemer, waardeBasis, belasting, beleid, rendement, vertrek]);
+  }, [extra, eenmalig, dividend, perJaar, noemer, waardeBasis, groei, belasting, beleid, rendement, vertrek]);
 
   if (fout) return <p className="fout">{fout}</p>;
   if (!data) return <section className="kaart"><p className="uitleg">Laden…</p></section>;
@@ -504,6 +505,8 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
         <Schuif label="Vertrekdatum" waarde={vertrekIndex} min={0} max={maanden} stap={1}
           onChange={(n) => setVertrek(n >= maanden ? data.einde : n === 0 ? data.vanaf : plusMaanden(data.vanaf, n))}
           toon={() => datum(data.vertrekdatum)} uitleg="Geldt ook voor de berekening hieronder" />
+        <Schuif label="Waardegroei na laatste waardering" waarde={groei} min={-10} max={15} stap={0.5} onChange={setGroei} toon={pct}
+          uitleg="Per jaar; een nieuwe waardering in de stamdata gaat altijd voor" />
         <Schuif label="Belasting op dividend" waarde={belasting} min={0} max={31} stap={0.5} onChange={setBelasting} toon={pct}
           uitleg="15% dividendbelasting wordt ingehouden; in box 2 wordt het meer (V-F12)" />
       </div>
@@ -516,9 +519,9 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
         </label>
         <label>
           Waarde certificaten{' '}
-          <select value={waardeBasis} onChange={(e) => setWaardeBasis(e.target.value)}>
-            <option value="inleg">inleg (zoals het ROI-model)</option>
-            {data.waarderingen.map((w) => <option key={w.id} value={w.id}>{w.label} · {eur(w.ondernemingswaarde)}</option>)}
+          <select value={String(data.plan.waarde_basis)} onChange={(e) => setWaardeBasis(e.target.value)}>
+            {data.factoren.map((f) => <option key={f} value={String(f)}>waarderingen factor ×{num(f)} (stamdata)</option>)}
+            <option value="inleg">inleg (zoals het oude ROI-model)</option>
           </select>
         </label>
         <fieldset className="radio">
@@ -557,7 +560,7 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
       <Jaaroverzicht
         jaren={data.jaren}
         inleg={data.positie.inleg}
-        waardeLabel={waardeBasis === 'inleg' ? 'inleg' : `waardering ÷ ${data.plan.noemer}`}
+        waardeLabel={data.plan.waarde_basis === 'inleg' ? 'inleg' : `waarderingen ×${num(data.plan.waarde_basis)} ÷ ${data.plan.noemer} × ${data.positie.aantal}`}
         perJaar={perJaar}
         standaard={dividend ?? 0}
         huidigJaar={Number(data.vanaf.slice(0, 4))}
@@ -648,7 +651,7 @@ function Jaaroverzicht({ jaren, inleg, waardeLabel, perJaar, standaard, huidigJa
                   <td className="getal">{eur(r.dividend_netto)}</td>
                   <td className="getal">{eur(r.afgelost)}</td>
                   <td className="getal">{eur(r.eind_schuld)}</td>
-                  <td className="getal">{eur(r.waarde)}</td>
+                  <td className="getal">{eur(r.waarde)}{r.waarde_bron && <><br /><small>{r.waarde_bron}</small></>}</td>
                   <td className="getal"><Netto n={r.vermogen} /></td>
                   <td className="getal"><Netto n={r.cum_kas} /></td>
                   <td className="getal"><strong><Netto n={r.resultaat} /></strong></td>

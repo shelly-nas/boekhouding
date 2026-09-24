@@ -76,7 +76,7 @@ cel D13 (percentage) leeg is. Cel D25 deelt door 200. De rechterkolommen bevatte
 een omzetsplitsing Den Haag/Rotterdam en een kostendoorbelasting van € 63.100
 (te ontvangen van Aan- en Verkoop B.V., "factuur nog te maken").
 
-**B-ROI-APP** — opgesteld 2026-09-24 in deze repository en op de NAS gezet. Privéblok gecontroleerd tegen de webapp: alle jaren en de ROI komen tot op de cent overeen. Het holdingblok volgt dezelfde regels (rente betaald volgens B-GL-2025 art. 2.2) maar zit nog niet in de app. Vervangt B-ROI niet; B-ROI blijft ongewijzigd staan.
+**B-ROI-APP** — opgesteld 2026-09-24 in deze repository en op de NAS gezet. Privéblok gecontroleerd tegen de webapp: alle jaren en de ROI komen tot op de cent overeen. Het holdingblok volgt dezelfde regels (rente betaald volgens B-GL-2025 art. 2.2) maar zit nog niet in de app. Vervangt B-ROI niet; B-ROI blijft ongewijzigd staan. Bijgewerkt 2026-09-24: de waarde van de certificaten volgt per jaar de laatste waardering van de gekozen factor (blad Waarderingen), met optionele groei; vier varianten (×3, ×3 + 5% groei, ×4, inleg) gecontroleerd tegen de app, zonder afwijking.
 
 **B-MAIL-2025-12** — bevat e-mailadressen en een telefoonnummer; die zijn niet overgenomen. Het is correspondentie van de verkopers, geen notariële vaststelling: de beschreven rectificatie is een voornemen ("lijkt de beste optie"), geen uitgevoerde handeling.
 

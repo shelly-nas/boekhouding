@@ -89,6 +89,12 @@ Het journaal is de administratie van de holding (art. 2:10 BW, art. 52 AWR):
   resultaat ÷ inleg. Jaren tot vandaag komen uit de werkelijke dividenden en
   aflossingen. Het dividend van toekomstige jaren vul je per jaar in. Kies je
   "volledig netto dividend aflossen", dan werkt het net als het ROI-model.
+- **Waarde certificaten per jaar**: de laatste waardering t/m 31 december van dat
+  jaar uit Stamdata → Waarderingen, binnen de gekozen **factor** (×3, ×4), ÷ noemer
+  × aantal certificaten. Na de laatste waardering eventueel met een groei per vol
+  jaar. Vóór de eerste waardering, of bij de keuze "inleg": de inleg. Een nieuwe
+  waardering in de stamdata werkt direct door. De Excel B-ROI-APP rekent
+  hetzelfde, via het blad Waarderingen.
 - Vertrek: de extra korting van art. 6.5 gaat van de Marktwaarde af vóórdat het
   leaverpercentage wordt toegepast. Dat is een lezing van het artikel, geen
   vaststaand gegeven.

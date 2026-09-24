@@ -89,11 +89,12 @@ export const RESOURCES = {
   },
   waardering: {
     titel: 'Waarderingen',
-    uitleg: 'Ondernemingswaarde van de vennootschap op een peildatum.',
+    uitleg: 'Ondernemingswaarde van de vennootschap op een peildatum. De factor (×3, ×4) koppelt waarderingen van verschillende jaren tot één reeks; het jaaroverzicht rekent per jaar met de laatste waardering van die reeks.',
     velden: [
       { naam: 'vennootschap_id', label: 'Vennootschap', type: 'ref', ref: 'entiteit', verplicht: true },
       { naam: 'peildatum', label: 'Peildatum', type: 'date', verplicht: true },
       { naam: 'label', label: 'Label', type: 'text', verplicht: true },
+      { naam: 'factor', label: 'Factor', type: 'number' },
       { naam: 'ondernemingswaarde', label: 'Ondernemingswaarde (€)', type: 'number', verplicht: true },
       bron,
       notitie,

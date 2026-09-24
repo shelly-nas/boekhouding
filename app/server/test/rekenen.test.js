@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { schuldOp, schuldverloop, leaverPrijs, leaverRegel, volleJaren, breakEven, dividendToets, simulatie, jaaroverzicht } from '../src/rekenen.js';
+import { schuldOp, schuldverloop, leaverPrijs, leaverRegel, volleJaren, breakEven, dividendToets, simulatie, jaaroverzicht, waardeReeks } from '../src/rekenen.js';
 
 const contract = {
   id: 1, positie_id: 1, hoofdsom: 17100, rente_pct: 5, rente_bijschrijven: true, rente_periode: 'contractjaar',
@@ -120,4 +120,19 @@ test('jaaroverzicht: resultaat = (waarde − schuld) + cumulatief kasoverschot, 
   assert.equal(r2(r27.afgelost), 1500); // volledig netto dividend afgelost
   for (const r of j.rijen) assert.equal(r2(r.resultaat), r2(r.waarde - r.eind_schuld + r.cum_kas));
   assert.equal(r2(j.roi_pct), r2((j.rijen.at(-1).resultaat / 17100) * 100));
+});
+
+test('waardeReeks: laatste waardering t/m 31-12, daarna groei; ervoor de inleg', () => {
+  const w = waardeReeks({
+    waarderingen: [
+      { peildatum: '2025-11-30', label: '×3', ondernemingswaarde: 220000 },
+      { peildatum: '2027-06-30', label: '×3', ondernemingswaarde: 300000 },
+    ],
+    noemer: 200, aantal: 9, inleg: 17100, groeiPct: 10,
+  });
+  assert.deepEqual(w(2024), { waarde: 17100, bron: 'inleg' });
+  assert.equal(r2(w(2025).waarde), 9900);
+  assert.equal(r2(w(2026).waarde), 10890); // 1 jaar groei
+  assert.equal(r2(w(2027).waarde), 13500); // nieuwe waardering, geen groei
+  assert.equal(r2(w(2029).waarde), r2(13500 * 1.21));
 });
