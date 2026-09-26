@@ -26,6 +26,21 @@ Map: `Professioneel/VERRA/Overnamen/`
 ## VERRA — Certificaten
 Map: `Professioneel/VERRA/Certificaten/`
 
+**Nieuw op 2026-09-26** (11 documenten):
+
+| id | Bestand | Soort | Datum | Status |
+|---|---|---|---|---|
+| B-STAK-OPR | `231218 Afschrift akte van oprichting Stichting Administratiekantoor Verra Makelaars.pdf` | oprichtingsakte + statuten STAK | 2023-12-18 | afschrift |
+| B-STAK-ADM | `231218 Afschrift akte houdende administratie voorwaarden.pdf` | administratievoorwaarden STAK | 2023-12-18 | afschrift |
+| B-AKTE-2025 | `251224 AFSCHRIFT akte van levering certificaten VAV BV.pdf` | leveringsakte tranche 2: Freek Holding, **Dreves Holding**, Uddevalla Holding | **gepasseerd 2025-12-31** | afschrift |
+| B-RECT | `251224 Akte van rectificatie levering certificaten Verra Aan- en Verkoop Den Haag B.V.pdf` | rectificatie van B-AKTE-CERT | — | **concept** (datum en comparant staan als `@`) |
+| B-NOTA-DH | `Nota - DrevesHoldingB.V.pdf` | notarisnota Dreves Holding | — | — |
+| B-VOLM-2024 | `241224 volmacht aankoop cert. Verra AV Den Haag - Freek en Ashley.pdf` | volmacht | 2024-12-24 | — |
+| — | `241219 … - Concept.pdf`, `251223 … - Concept.pdf` (2×), `251224 akte van levering certificaten VAV BV.pdf` | concepten en niet-afschrift-versies | — | concept |
+| — | `Nota - A.Dreves(1).pdf` | duplicaat van `Nota - A.Dreves.pdf` (zelfde hash) | — | duplicaat |
+
+> ⚠️ **Let op de bestandsnamen.** `251224 Akte van rectificatie …` (zónder "Concept" in de naam) is tóch een concept: de aanhef luidt "Op @, verscheen voor mij" — datum en comparant zijn niet ingevuld. Alleen B-AKTE-2025 is een gepasseerde akte (31-12-2025, notaris mr. P.P.M. Berssenbrugge als waarnemer van mr. R. Verbeek).
+
 | id | Bestand | Soort | Datum | Gelezen op |
 |---|---|---|---|---|
 | B-PART-OVK | `Certificaten/Contract/Werknemersparticipatie VERRA Makelaars Dreves VOL GET.pdf` | participatieovereenkomst (scan, 11 blz.) | 2024-12-30 | 2026-09-23 |

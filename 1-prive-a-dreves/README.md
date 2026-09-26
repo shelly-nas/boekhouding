@@ -15,9 +15,11 @@ Wat Ashley Dreves **privé** houdt, buiten Dreves Holding B.V. om.
 | 100% aandelen Dreves Holding B.V. | € 100 nominaal | 2025-12-23 |
 
 ## Wat dit spoor bepaalt
-- **Box 2 of box 3** voor de certificaten — hangt af van de noemer (V-O01).
-  Bij 9 van 100 gecertificeerde aandelen is het 9% en dus een aanmerkelijk
-  belang; bij 9 van 200 is het 4,5% en valt het in box 3.
+- **Box 2 of box 3** voor de certificaten. De noemer is 300 (V-O01 afgesloten
+  2026-09-26): privé 13,5 van 300 = 4,5%. Samen met de 5,5% van de holding
+  (akte 31-12-2025) is het 10%, en telt het middellijke belang mee, dan is
+  het een aanmerkelijk belang en box 2 (art. 4.6 onderdeel a Wet IB 2001) —
+  V-F47 t/m V-F49.
 - De schuld van € 17.100 hoort in dezelfde box als de certificaten.
 - Het 100%-belang in Dreves Holding is sowieso een aanmerkelijk belang (box 2).
 - **Lucratief belang** (art. 3.92b Wet IB 2001): de certificaten zijn verkregen

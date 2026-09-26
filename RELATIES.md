@@ -53,7 +53,7 @@ De mail van 17-12-2025 raakt **beide** posities:
 ## Deelnemingen
 | Houdster | Deelneming | % | Sinds | Deelnemingsvrijstelling | Bron |
 |---|---|---|---|---|---|
-| Dreves Holding B.V. | Verra Aan- en Verkoop B.V. (via STAK-certificaten) | opgave 5,5% — noemer onzeker, zie V-O01 | 2025-12 | te beoordelen, zie V-F19 | N-VERRA |
+| Dreves Holding B.V. | Verra Aan- en Verkoop B.V. (via STAK-certificaten) | 5,5% (16,5 van 300; noemer 300, V-O01 afgesloten) | 2025-12 | te beoordelen, zie V-F19 | N-VERRA |
 | STAK VERRA Makelaars | Verra Aan- en Verkoop Den Haag B.V. | 100 van 300 aandelen gecertificeerd | ≤ 2025-01-02 | n.v.t. (stichting) | [B-AKTE-CERT](bronnen/nas-index/REGISTER.md#b-akte-cert) |
 
 > Dreves Holding heeft in december 2025 certificaten verkregen (opgave Jelle).

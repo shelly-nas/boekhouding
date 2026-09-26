@@ -1,16 +1,16 @@
-# Graph Report - boekhouding  (2026-09-24)
+# Graph Report - boekhouding  (2026-09-26)
 
 ## Corpus Check
-- 48 files · ~45,925 words
+- 48 files · ~47,937 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 384 nodes · 563 edges · 30 communities (28 shown, 2 thin omitted)
+- 385 nodes · 564 edges · 30 communities (28 shown, 2 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 3 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `b43ef3d1`
+- Built from commit: `ca7e4405`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -89,7 +89,7 @@ Nodes (26): afl, b, b0, bad, badLaag, basis, contract, div (+18 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.07
-Nodes (26): B-AKTE-CERT, B-AKTE-OPR, B-DIV-2025-05, B-DOC-OPR, B-FACT-KVK, B-GL-2024, B-GL-2025, B-KVK-DRV (+18 more)
+Nodes (27): B-AKTE-CERT, B-AKTE-OPR, B-DIV-2025-05, B-DOC-OPR, B-FACT-KVK, B-GL-2024, B-GL-2025, B-KVK-DRV (+19 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.1
@@ -180,7 +180,7 @@ Cohesion: 0.5
 Nodes (3): Samenvatting positie, Spoor 1 — Privébezittingen A. Dreves, Wat dit spoor bepaalt
 
 ## Knowledge Gaps
-- **183 isolated node(s):** `Bestandsnamen die in het bronregister voorkomen.`, `contract`, `kalender`, `v`, `op3112` (+178 more)
+- **184 isolated node(s):** `Bestandsnamen die in het bronregister voorkomen.`, `contract`, `kalender`, `v`, `op3112` (+179 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **2 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -194,7 +194,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `Journaal()` connect `Community 2` to `Community 0`?**
   _High betweenness centrality (0.018) - this node is a cross-community bridge._
 - **What connects `Bestandsnamen die in het bronregister voorkomen.`, `contract`, `kalender` to the rest of the system?**
-  _183 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _184 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.07 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**

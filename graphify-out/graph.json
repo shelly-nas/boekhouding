@@ -817,7 +817,7 @@
       "label": "planUitQuery()",
       "file_type": "code",
       "source_file": "app/server/src/spoor1.js",
-      "source_location": "L206",
+      "source_location": "L208",
       "id": "src_spoor1_planuitquery",
       "community": 1,
       "norm_label": "planuitquery()"
@@ -826,7 +826,7 @@
       "label": "simuleer()",
       "file_type": "code",
       "source_file": "app/server/src/spoor1.js",
-      "source_location": "L251",
+      "source_location": "L253",
       "id": "src_spoor1_simuleer",
       "community": 1,
       "norm_label": "simuleer()"
@@ -1501,7 +1501,7 @@
       "label": "plusMaanden()",
       "file_type": "code",
       "source_file": "app/client/src/Spoor1.jsx",
-      "source_location": "L437",
+      "source_location": "L448",
       "id": "src_spoor1_plusmaanden",
       "community": 0,
       "norm_label": "plusmaanden()"
@@ -1510,7 +1510,7 @@
       "label": "maandenTussen()",
       "file_type": "code",
       "source_file": "app/client/src/Spoor1.jsx",
-      "source_location": "L442",
+      "source_location": "L453",
       "id": "src_spoor1_maandentussen",
       "community": 0,
       "norm_label": "maandentussen()"
@@ -1519,7 +1519,7 @@
       "label": "jarenTussen()",
       "file_type": "code",
       "source_file": "app/client/src/Spoor1.jsx",
-      "source_location": "L447",
+      "source_location": "L458",
       "id": "src_spoor1_jarentussen",
       "community": 0,
       "norm_label": "jarentussen()"
@@ -1528,7 +1528,7 @@
       "label": "Schuif()",
       "file_type": "code",
       "source_file": "app/client/src/Spoor1.jsx",
-      "source_location": "L453",
+      "source_location": "L464",
       "id": "src_spoor1_schuif",
       "community": 0,
       "norm_label": "schuif()"
@@ -1537,7 +1537,7 @@
       "label": "Aflossen()",
       "file_type": "code",
       "source_file": "app/client/src/Spoor1.jsx",
-      "source_location": "L463",
+      "source_location": "L474",
       "id": "src_spoor1_aflossen",
       "community": 0,
       "norm_label": "aflossen()"
@@ -1546,7 +1546,7 @@
       "label": "Jaaroverzicht()",
       "file_type": "code",
       "source_file": "app/client/src/Spoor1.jsx",
-      "source_location": "L627",
+      "source_location": "L643",
       "id": "src_spoor1_jaaroverzicht",
       "community": 0,
       "norm_label": "jaaroverzicht()"
@@ -1555,7 +1555,7 @@
       "label": "STAMDATA",
       "file_type": "code",
       "source_file": "app/client/src/Spoor1.jsx",
-      "source_location": "L705",
+      "source_location": "L721",
       "id": "src_spoor1_stamdata",
       "community": 0,
       "norm_label": "stamdata"
@@ -1870,7 +1870,7 @@
       "label": "Toegang",
       "file_type": "document",
       "source_file": "NOTION.md",
-      "source_location": "L9",
+      "source_location": "L17",
       "id": "boekhouding_notion_toegang",
       "community": 17,
       "norm_label": "toegang"
@@ -1879,7 +1879,7 @@
       "label": "Paginastructuur",
       "file_type": "document",
       "source_file": "NOTION.md",
-      "source_location": "L16",
+      "source_location": "L24",
       "id": "boekhouding_notion_paginastructuur",
       "community": 17,
       "norm_label": "paginastructuur"
@@ -1888,7 +1888,7 @@
       "label": "code:block1 (VERRA  (hoofdpagina))",
       "file_type": "document",
       "source_file": "NOTION.md",
-      "source_location": "L25",
+      "source_location": "L33",
       "id": "boekhouding_notion_codeblock_1",
       "community": 17,
       "norm_label": "code:block1 (verra  (hoofdpagina))"
@@ -1897,7 +1897,7 @@
       "label": "Schrijfregels",
       "file_type": "document",
       "source_file": "NOTION.md",
-      "source_location": "L58",
+      "source_location": "L66",
       "id": "boekhouding_notion_schrijfregels",
       "community": 17,
       "norm_label": "schrijfregels"
@@ -1906,7 +1906,7 @@
       "label": "Synchronisatie",
       "file_type": "document",
       "source_file": "NOTION.md",
-      "source_location": "L69",
+      "source_location": "L77",
       "id": "boekhouding_notion_synchronisatie",
       "community": 17,
       "norm_label": "synchronisatie"
@@ -2425,10 +2425,19 @@
       "norm_label": "verra \u2014 certificaten"
     },
     {
+      "label": "Notion-bronnen",
+      "file_type": "document",
+      "source_file": "bronnen/nas-index/REGISTER.md",
+      "source_location": "L64",
+      "id": "nas_index_register_notion_bronnen",
+      "community": 4,
+      "norm_label": "notion-bronnen"
+    },
+    {
       "label": "Opmerkingen per bron",
       "file_type": "document",
       "source_file": "bronnen/nas-index/REGISTER.md",
-      "source_location": "L49",
+      "source_location": "L90",
       "id": "nas_index_register_opmerkingen_per_bron",
       "community": 4,
       "norm_label": "opmerkingen per bron"
@@ -2437,7 +2446,7 @@
       "label": "Index per document",
       "file_type": "document",
       "source_file": "bronnen/nas-index/REGISTER.md",
-      "source_location": "L146",
+      "source_location": "L187",
       "id": "nas_index_register_index_per_document",
       "community": 4,
       "norm_label": "index per document"
@@ -2446,7 +2455,7 @@
       "label": "B-KVK-DRV",
       "file_type": "document",
       "source_file": "bronnen/nas-index/REGISTER.md",
-      "source_location": "L150",
+      "source_location": "L191",
       "id": "nas_index_register_b_kvk_drv",
       "community": 4,
       "norm_label": "b-kvk-drv"
@@ -2455,7 +2464,7 @@
       "label": "B-UBO-DRV",
       "file_type": "document",
       "source_file": "bronnen/nas-index/REGISTER.md",
-      "source_location": "L160",
+      "source_location": "L201",
       "id": "nas_index_register_b_ubo_drv",
       "community": 4,
       "norm_label": "b-ubo-drv"
@@ -2464,7 +2473,7 @@
       "label": "B-AKTE-OPR",
       "file_type": "document",
       "source_file": "bronnen/nas-index/REGISTER.md",
-      "source_location": "L170",
+      "source_location": "L211",
       "id": "nas_index_register_b_akte_opr",
       "community": 4,
       "norm_label": "b-akte-opr"
@@ -2473,7 +2482,7 @@
       "label": "B-DOC-OPR",
       "file_type": "document",
       "source_file": "bronnen/nas-index/REGISTER.md",
-      "source_location": "L183",
+      "source_location": "L224",
       "id": "nas_index_register_b_doc_opr",
       "community": 4,
       "norm_label": "b-doc-opr"
@@ -2482,7 +2491,7 @@
       "label": "B-FACT-KVK",
       "file_type": "document",
       "source_file": "bronnen/nas-index/REGISTER.md",
-      "source_location": "L193",
+      "source_location": "L234",
       "id": "nas_index_register_b_fact_kvk",
       "community": 4,
       "norm_label": "b-fact-kvk"
@@ -2491,7 +2500,7 @@
       "label": "B-REG-DRV",
       "file_type": "document",
       "source_file": "bronnen/nas-index/REGISTER.md",
-      "source_location": "L203",
+      "source_location": "L244",
       "id": "nas_index_register_b_reg_drv",
       "community": 4,
       "norm_label": "b-reg-drv"
@@ -2500,7 +2509,7 @@
       "label": "B-OPDR",
       "file_type": "document",
       "source_file": "bronnen/nas-index/REGISTER.md",
-      "source_location": "L216",
+      "source_location": "L257",
       "id": "nas_index_register_b_opdr",
       "community": 4,
       "norm_label": "b-opdr"
@@ -2509,7 +2518,7 @@
       "label": "B-PART-OVK",
       "file_type": "document",
       "source_file": "bronnen/nas-index/REGISTER.md",
-      "source_location": "L231",
+      "source_location": "L272",
       "id": "nas_index_register_b_part_ovk",
       "community": 4,
       "norm_label": "b-part-ovk"
@@ -2518,7 +2527,7 @@
       "label": "B-GL-2024",
       "file_type": "document",
       "source_file": "bronnen/nas-index/REGISTER.md",
-      "source_location": "L251",
+      "source_location": "L292",
       "id": "nas_index_register_b_gl_2024",
       "community": 4,
       "norm_label": "b-gl-2024"
@@ -2527,7 +2536,7 @@
       "label": "B-GL-2025",
       "file_type": "document",
       "source_file": "bronnen/nas-index/REGISTER.md",
-      "source_location": "L263",
+      "source_location": "L304",
       "id": "nas_index_register_b_gl_2025",
       "community": 4,
       "norm_label": "b-gl-2025"
@@ -2536,7 +2545,7 @@
       "label": "B-AKTE-CERT",
       "file_type": "document",
       "source_file": "bronnen/nas-index/REGISTER.md",
-      "source_location": "L275",
+      "source_location": "L316",
       "id": "nas_index_register_b_akte_cert",
       "community": 4,
       "norm_label": "b-akte-cert"
@@ -2545,7 +2554,7 @@
       "label": "B-NOTA-DRV",
       "file_type": "document",
       "source_file": "bronnen/nas-index/REGISTER.md",
-      "source_location": "L293",
+      "source_location": "L334",
       "id": "nas_index_register_b_nota_drv",
       "community": 4,
       "norm_label": "b-nota-drv"
@@ -2554,7 +2563,7 @@
       "label": "B-DIV-2025-05",
       "file_type": "document",
       "source_file": "bronnen/nas-index/REGISTER.md",
-      "source_location": "L303",
+      "source_location": "L344",
       "id": "nas_index_register_b_div_2025_05",
       "community": 4,
       "norm_label": "b-div-2025-05"
@@ -2563,7 +2572,7 @@
       "label": "B-MAIL-2025-12",
       "file_type": "document",
       "source_file": "bronnen/nas-index/REGISTER.md",
-      "source_location": "L313",
+      "source_location": "L354",
       "id": "nas_index_register_b_mail_2025_12",
       "community": 4,
       "norm_label": "b-mail-2025-12"
@@ -2572,7 +2581,7 @@
       "label": "B-WRD-2025",
       "file_type": "document",
       "source_file": "bronnen/nas-index/REGISTER.md",
-      "source_location": "L325",
+      "source_location": "L366",
       "id": "nas_index_register_b_wrd_2025",
       "community": 4,
       "norm_label": "b-wrd-2025"
@@ -2581,7 +2590,7 @@
       "label": "B-WRD-2024",
       "file_type": "document",
       "source_file": "bronnen/nas-index/REGISTER.md",
-      "source_location": "L335",
+      "source_location": "L376",
       "id": "nas_index_register_b_wrd_2024",
       "community": 4,
       "norm_label": "b-wrd-2024"
@@ -2590,7 +2599,7 @@
       "label": "B-PRES",
       "file_type": "document",
       "source_file": "bronnen/nas-index/REGISTER.md",
-      "source_location": "L347",
+      "source_location": "L388",
       "id": "nas_index_register_b_pres",
       "community": 4,
       "norm_label": "b-pres"
@@ -2599,7 +2608,7 @@
       "label": "B-ROI",
       "file_type": "document",
       "source_file": "bronnen/nas-index/REGISTER.md",
-      "source_location": "L362",
+      "source_location": "L403",
       "id": "nas_index_register_b_roi",
       "community": 4,
       "norm_label": "b-roi"
@@ -2608,7 +2617,7 @@
       "label": "B-ROI-APP",
       "file_type": "document",
       "source_file": "bronnen/nas-index/REGISTER.md",
-      "source_location": "L373",
+      "source_location": "L414",
       "id": "nas_index_register_b_roi_app",
       "community": 4,
       "norm_label": "b-roi-app"
@@ -2617,7 +2626,7 @@
       "label": "B-LEAD",
       "file_type": "document",
       "source_file": "bronnen/nas-index/REGISTER.md",
-      "source_location": "L383",
+      "source_location": "L424",
       "id": "nas_index_register_b_lead",
       "community": 4,
       "norm_label": "b-lead"
@@ -3076,7 +3085,7 @@
       "label": "C. Feiten / absolute waarheden",
       "file_type": "document",
       "source_file": "1-prive-a-dreves/participatie-certificaten.md",
-      "source_location": "L57",
+      "source_location": "L58",
       "id": "1_prive_a_dreves_participatie_certificaten_c_feiten_absolute_waarheden",
       "community": 13,
       "norm_label": "c. feiten / absolute waarheden"
@@ -3085,7 +3094,7 @@
       "label": "D. Leaver-regeling (B-PART-OVK art. 6)",
       "file_type": "document",
       "source_file": "1-prive-a-dreves/participatie-certificaten.md",
-      "source_location": "L91",
+      "source_location": "L99",
       "id": "1_prive_a_dreves_participatie_certificaten_d_leaver_regeling_b_part_ovk_art_6",
       "community": 13,
       "norm_label": "d. leaver-regeling (b-part-ovk art. 6)"
@@ -3094,7 +3103,7 @@
       "label": "E. Aannames",
       "file_type": "document",
       "source_file": "1-prive-a-dreves/participatie-certificaten.md",
-      "source_location": "L113",
+      "source_location": "L121",
       "id": "1_prive_a_dreves_participatie_certificaten_e_aannames",
       "community": 13,
       "norm_label": "e. aannames"
@@ -3103,7 +3112,7 @@
       "label": "F. Openstaande vragen",
       "file_type": "document",
       "source_file": "1-prive-a-dreves/participatie-certificaten.md",
-      "source_location": "L126",
+      "source_location": "L134",
       "id": "1_prive_a_dreves_participatie_certificaten_f_openstaande_vragen",
       "community": 13,
       "norm_label": "f. openstaande vragen"
@@ -3112,7 +3121,7 @@
       "label": "G. Aandachtspunten",
       "file_type": "document",
       "source_file": "1-prive-a-dreves/participatie-certificaten.md",
-      "source_location": "L130",
+      "source_location": "L138",
       "id": "1_prive_a_dreves_participatie_certificaten_g_aandachtspunten",
       "community": 13,
       "norm_label": "g. aandachtspunten"
@@ -3175,7 +3184,7 @@
       "label": "E. Aannames",
       "file_type": "document",
       "source_file": "2-dreves-holding/entiteit.md",
-      "source_location": "L79",
+      "source_location": "L83",
       "id": "2_dreves_holding_entiteit_e_aannames",
       "community": 14,
       "norm_label": "e. aannames"
@@ -3184,7 +3193,7 @@
       "label": "F. Openstaande vragen",
       "file_type": "document",
       "source_file": "2-dreves-holding/entiteit.md",
-      "source_location": "L87",
+      "source_location": "L91",
       "id": "2_dreves_holding_entiteit_f_openstaande_vragen",
       "community": 14,
       "norm_label": "f. openstaande vragen"
@@ -3193,7 +3202,7 @@
       "label": "G. Aandachtspunten",
       "file_type": "document",
       "source_file": "2-dreves-holding/entiteit.md",
-      "source_location": "L98",
+      "source_location": "L102",
       "id": "2_dreves_holding_entiteit_g_aandachtspunten",
       "community": 14,
       "norm_label": "g. aandachtspunten"
@@ -3409,7 +3418,7 @@
       "label": "Onderhandeling",
       "file_type": "document",
       "source_file": "openstaande-vragen/REGISTER.md",
-      "source_location": "L61",
+      "source_location": "L59",
       "id": "openstaande_vragen_register_onderhandeling",
       "community": 23,
       "norm_label": "onderhandeling"
@@ -3418,7 +3427,7 @@
       "label": "Op te vragen stukken",
       "file_type": "document",
       "source_file": "openstaande-vragen/REGISTER.md",
-      "source_location": "L84",
+      "source_location": "L82",
       "id": "openstaande_vragen_register_op_te_vragen_stukken",
       "community": 23,
       "norm_label": "op te vragen stukken"
@@ -3427,7 +3436,7 @@
       "label": "Afgesloten",
       "file_type": "document",
       "source_file": "openstaande-vragen/REGISTER.md",
-      "source_location": "L101",
+      "source_location": "L99",
       "id": "openstaande_vragen_register_afgesloten",
       "community": 23,
       "norm_label": "afgesloten"
@@ -4164,9 +4173,9 @@
       "source_file": "app/server/src/rekenen.js",
       "source_location": "L176",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_server_src_rekenen_js",
-      "target": "src_rekenen_dividendtarief",
-      "confidence_score": 1.0
+      "target": "src_rekenen_dividendtarief"
     },
     {
       "relation": "contains",
@@ -4706,9 +4715,9 @@
       "source_file": "app/server/src/spoor1.js",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_server_src_spoor1_js",
-      "target": "src_rekenen_dividendtarief",
-      "confidence_score": 1.0
+      "target": "src_rekenen_dividendtarief"
     },
     {
       "relation": "calls",
@@ -7300,9 +7309,9 @@
       "source_file": "app/client/src/Spoor1.jsx",
       "source_location": "L447",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_client_src_spoor1_jsx",
-      "target": "src_spoor1_jarentussen",
-      "confidence_score": 1.0
+      "target": "src_spoor1_jarentussen"
     },
     {
       "relation": "contains",
@@ -7373,9 +7382,9 @@
       "source_file": "app/client/src/Spoor1.jsx",
       "source_location": "L553",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_spoor1_aflossen",
-      "target": "src_spoor1_jarentussen",
-      "confidence_score": 1.0
+      "target": "src_spoor1_jarentussen"
     },
     {
       "relation": "imports_from",
@@ -8301,6 +8310,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "bronnen/nas-index/REGISTER.md",
+      "source_location": "L64",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "nas_index_register_bronregister",
+      "target": "nas_index_register_notion_bronnen"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "bronnen/nas-index/REGISTER.md",
       "source_location": "L49",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -8313,9 +8332,9 @@
       "source_file": "bronnen/nas-index/REGISTER.md",
       "source_location": "L146",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nas_index_register_bronregister",
-      "target": "nas_index_register_index_per_document",
-      "confidence_score": 1.0
+      "target": "nas_index_register_index_per_document"
     },
     {
       "relation": "contains",
@@ -8323,9 +8342,9 @@
       "source_file": "bronnen/nas-index/REGISTER.md",
       "source_location": "L150",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nas_index_register_index_per_document",
-      "target": "nas_index_register_b_kvk_drv",
-      "confidence_score": 1.0
+      "target": "nas_index_register_b_kvk_drv"
     },
     {
       "relation": "contains",
@@ -8333,9 +8352,9 @@
       "source_file": "bronnen/nas-index/REGISTER.md",
       "source_location": "L160",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nas_index_register_index_per_document",
-      "target": "nas_index_register_b_ubo_drv",
-      "confidence_score": 1.0
+      "target": "nas_index_register_b_ubo_drv"
     },
     {
       "relation": "contains",
@@ -8343,9 +8362,9 @@
       "source_file": "bronnen/nas-index/REGISTER.md",
       "source_location": "L170",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nas_index_register_index_per_document",
-      "target": "nas_index_register_b_akte_opr",
-      "confidence_score": 1.0
+      "target": "nas_index_register_b_akte_opr"
     },
     {
       "relation": "contains",
@@ -8353,9 +8372,9 @@
       "source_file": "bronnen/nas-index/REGISTER.md",
       "source_location": "L183",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nas_index_register_index_per_document",
-      "target": "nas_index_register_b_doc_opr",
-      "confidence_score": 1.0
+      "target": "nas_index_register_b_doc_opr"
     },
     {
       "relation": "contains",
@@ -8363,9 +8382,9 @@
       "source_file": "bronnen/nas-index/REGISTER.md",
       "source_location": "L193",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nas_index_register_index_per_document",
-      "target": "nas_index_register_b_fact_kvk",
-      "confidence_score": 1.0
+      "target": "nas_index_register_b_fact_kvk"
     },
     {
       "relation": "contains",
@@ -8373,9 +8392,9 @@
       "source_file": "bronnen/nas-index/REGISTER.md",
       "source_location": "L203",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nas_index_register_index_per_document",
-      "target": "nas_index_register_b_reg_drv",
-      "confidence_score": 1.0
+      "target": "nas_index_register_b_reg_drv"
     },
     {
       "relation": "contains",
@@ -8383,9 +8402,9 @@
       "source_file": "bronnen/nas-index/REGISTER.md",
       "source_location": "L216",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nas_index_register_index_per_document",
-      "target": "nas_index_register_b_opdr",
-      "confidence_score": 1.0
+      "target": "nas_index_register_b_opdr"
     },
     {
       "relation": "contains",
@@ -8393,9 +8412,9 @@
       "source_file": "bronnen/nas-index/REGISTER.md",
       "source_location": "L231",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nas_index_register_index_per_document",
-      "target": "nas_index_register_b_part_ovk",
-      "confidence_score": 1.0
+      "target": "nas_index_register_b_part_ovk"
     },
     {
       "relation": "contains",
@@ -8403,9 +8422,9 @@
       "source_file": "bronnen/nas-index/REGISTER.md",
       "source_location": "L251",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nas_index_register_index_per_document",
-      "target": "nas_index_register_b_gl_2024",
-      "confidence_score": 1.0
+      "target": "nas_index_register_b_gl_2024"
     },
     {
       "relation": "contains",
@@ -8413,9 +8432,9 @@
       "source_file": "bronnen/nas-index/REGISTER.md",
       "source_location": "L263",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nas_index_register_index_per_document",
-      "target": "nas_index_register_b_gl_2025",
-      "confidence_score": 1.0
+      "target": "nas_index_register_b_gl_2025"
     },
     {
       "relation": "contains",
@@ -8423,9 +8442,9 @@
       "source_file": "bronnen/nas-index/REGISTER.md",
       "source_location": "L275",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nas_index_register_index_per_document",
-      "target": "nas_index_register_b_akte_cert",
-      "confidence_score": 1.0
+      "target": "nas_index_register_b_akte_cert"
     },
     {
       "relation": "contains",
@@ -8433,9 +8452,9 @@
       "source_file": "bronnen/nas-index/REGISTER.md",
       "source_location": "L293",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nas_index_register_index_per_document",
-      "target": "nas_index_register_b_nota_drv",
-      "confidence_score": 1.0
+      "target": "nas_index_register_b_nota_drv"
     },
     {
       "relation": "contains",
@@ -8443,9 +8462,9 @@
       "source_file": "bronnen/nas-index/REGISTER.md",
       "source_location": "L303",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nas_index_register_index_per_document",
-      "target": "nas_index_register_b_div_2025_05",
-      "confidence_score": 1.0
+      "target": "nas_index_register_b_div_2025_05"
     },
     {
       "relation": "contains",
@@ -8453,9 +8472,9 @@
       "source_file": "bronnen/nas-index/REGISTER.md",
       "source_location": "L313",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nas_index_register_index_per_document",
-      "target": "nas_index_register_b_mail_2025_12",
-      "confidence_score": 1.0
+      "target": "nas_index_register_b_mail_2025_12"
     },
     {
       "relation": "contains",
@@ -8463,9 +8482,9 @@
       "source_file": "bronnen/nas-index/REGISTER.md",
       "source_location": "L325",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nas_index_register_index_per_document",
-      "target": "nas_index_register_b_wrd_2025",
-      "confidence_score": 1.0
+      "target": "nas_index_register_b_wrd_2025"
     },
     {
       "relation": "contains",
@@ -8473,9 +8492,9 @@
       "source_file": "bronnen/nas-index/REGISTER.md",
       "source_location": "L335",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nas_index_register_index_per_document",
-      "target": "nas_index_register_b_wrd_2024",
-      "confidence_score": 1.0
+      "target": "nas_index_register_b_wrd_2024"
     },
     {
       "relation": "contains",
@@ -8483,9 +8502,9 @@
       "source_file": "bronnen/nas-index/REGISTER.md",
       "source_location": "L347",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nas_index_register_index_per_document",
-      "target": "nas_index_register_b_pres",
-      "confidence_score": 1.0
+      "target": "nas_index_register_b_pres"
     },
     {
       "relation": "contains",
@@ -8493,9 +8512,9 @@
       "source_file": "bronnen/nas-index/REGISTER.md",
       "source_location": "L362",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nas_index_register_index_per_document",
-      "target": "nas_index_register_b_roi",
-      "confidence_score": 1.0
+      "target": "nas_index_register_b_roi"
     },
     {
       "relation": "contains",
@@ -8503,9 +8522,9 @@
       "source_file": "bronnen/nas-index/REGISTER.md",
       "source_location": "L373",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nas_index_register_index_per_document",
-      "target": "nas_index_register_b_roi_app",
-      "confidence_score": 1.0
+      "target": "nas_index_register_b_roi_app"
     },
     {
       "relation": "contains",
@@ -8513,9 +8532,9 @@
       "source_file": "bronnen/nas-index/REGISTER.md",
       "source_location": "L383",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nas_index_register_index_per_document",
-      "target": "nas_index_register_b_lead",
-      "confidence_score": 1.0
+      "target": "nas_index_register_b_lead"
     },
     {
       "relation": "contains",
@@ -9309,5 +9328,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "b43ef3d1410cf554bcb593c2dd1aa1dc673a6e73"
+  "built_at_commit": "ca7e440517c625cca7a82206f6a5d16c18f02218"
 }

@@ -41,9 +41,8 @@ async function laad() {
 
 // Rekenbasis: de noemer die als standaard is gemarkeerd (anders alle), en het
 // aantal aandelen waarmee de positie meetelt (anders het aantal certificaten).
-function noemersVoor(d, p, { alle = false } = {}) {
+function noemersVoor(d, p) {
   const eigen = d.noemers.filter((n) => n.vennootschap_id === p.vennootschap_id);
-  if (alle) return eigen;
   const standaard = eigen.filter((n) => n.standaard);
   return standaard.length ? standaard : eigen;
 }
@@ -149,7 +148,7 @@ export async function overzicht(peildatum = vandaag()) {
   return { peildatum, posities, gebeurtenissen: d.gebeurtenissen };
 }
 
-export async function leaver({ positie_id, vertrekdatum = vandaag(), categorie = 'good', extra_korting, alle_noemers, ...plan }) {
+export async function leaver({ positie_id, vertrekdatum = vandaag(), categorie = 'good', extra_korting, ...plan }) {
   const d = await laad();
   const p = d.posities.find((x) => x.id === Number(positie_id)) ?? d.posities[0];
   if (!p) throw new Invoerfout('Geen positie in spoor 1');
@@ -170,9 +169,8 @@ export async function leaver({ positie_id, vertrekdatum = vandaag(), categorie =
       ? { totaal: simulatie(lening, aflossingen, planUitQuery(plan, d, p).opties).schuld(vertrekdatum), volgens_plan: true }
       : schuldOp(lening, aflossingen, vertrekdatum);
   const waarderingen = geldendeWaarderingen(d, p, vertrekdatum);
-  const toonAlle = alle_noemers === 'true';
-  const noemers = noemersVoor(d, p, { alle: toonAlle });
-  const rekenbasis = noemersVoor(d, p).at(-1)?.aantal ?? null;
+  const noemers = noemersVoor(d, p);
+  const rekenbasis = noemers.at(-1)?.aantal ?? null;
   const aantal = rekenAantal(p);
   const matrix = regel
     ? waarderingen.map((w) => ({
@@ -200,7 +198,6 @@ export async function leaver({ positie_id, vertrekdatum = vandaag(), categorie =
     schuld,
     noemers,
     rekenbasis,
-    alle_noemers: toonAlle,
     matrix,
   };
 }

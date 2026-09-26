@@ -325,14 +325,14 @@ function Aandachtspunten() {
 function Vertrek() {
   // Eén vertrekdatum voor het aflosplan en de vertrekberekening; leeg = einde
   // looptijd (vult het aflosplan in zodra dat geladen is).
-  const [invoer, setInvoer] = useState({ vertrekdatum: '', categorie: 'good', extra_korting: false, alle_noemers: false });
+  const [invoer, setInvoer] = useState({ vertrekdatum: '', categorie: 'good', extra_korting: false });
   const [plan, setPlan] = useState(null);
   const [data, setData] = useState(null);
   const [fout, setFout] = useState(null);
 
   useEffect(() => {
     if (!invoer.vertrekdatum || !plan) return;
-    const q = new URLSearchParams({ ...invoer, ...plan, extra_korting: String(invoer.extra_korting), alle_noemers: String(invoer.alle_noemers) });
+    const q = new URLSearchParams({ ...invoer, ...plan, extra_korting: String(invoer.extra_korting) });
     api.get(`/spoor1/leaver?${q}`).then(
       (d) => { setData(d); setFout(null); },
       (e) => setFout(e.message),
@@ -367,10 +367,6 @@ function Vertrek() {
             <input type="checkbox" checked={invoer.extra_korting} onChange={(e) => zet('extra_korting', e.target.checked)} />
             <span>Extra korting art. 6.5 (onbetaald verlof of gemiddeld &lt; 40 uur/week)</span>
           </label>
-          <label className="vink">
-            <input type="checkbox" checked={invoer.alle_noemers} onChange={(e) => zet('alle_noemers', e.target.checked)} />
-            <span>Toon alle noemers (100 / 200 / 300 — V-O01 is niet beslist)</span>
-          </label>
         </div>
       </section>
 
@@ -404,7 +400,6 @@ function Vertrek() {
                       <th key={n.id} className="getal">
                         ÷ {n.aantal}
                         {n.aantal === data.rekenbasis && <><br /><small>rekenbasis</small></>}
-                        {data.alle_noemers && n.aantal !== data.rekenbasis && <><br /><small>{n.label}</small></>}
                       </th>
                     ))}
                   </tr>
@@ -432,12 +427,10 @@ function Vertrek() {
           )}
           <ul className="uitleg">
             <li>
-              <strong>Twee open punten bepalen deze bedragen.</strong> De <em>factor</em> (×3 of ×4) is een keuze binnen
+              <strong>De factor bepaalt deze bedragen.</strong> De <em>factor</em> (×3 of ×4) is een keuze binnen
               een bandbreedte die de verkopers zelf noemen — B-PRES dia 8: "je mag tussen de factor 3 en 4 waarderen".
-              Beide rijen zijn daarom reëel. De <em>noemer</em> is geen keuze maar een uitleg van "het aantal uitstaande
-              Aandelen" (art. 3.1): de akte noemt 100 gecertificeerde en 300 geplaatste aandelen, de presentatie 200.
-              Daar hoort één antwoord bij dat nog niet vaststaat (V-O01). De getoonde rekenbasis is een aanname (A11),
-              geen vaststelling — vink hierboven aan om de andere noemers te zien.
+              Beide rijen zijn daarom reëel. De <em>noemer</em> is 300 aandelen, zoals de verkopers rekenen (B-MAIL-2025-12,
+              A11); de rectificatie die dat notarieel vastlegt, is er nog niet (V-F40).
             </li>
             <li>Rekent met de waardering die in het vertrekjaar als prijs geldt (waardering per eind vorig jaar); bij vertrek stelt de STAK de Marktwaarde vast (art. 6.6.2). Bij de <em>koop</em> is de factor grotendeels herleid: de holdingtranche is tegen ×3 verworven (F56). Welke factor bij <em>verkoop</em> geldt, is open (V-F44).</li>
             <li>De STAK is niet verplicht de certificaten af te nemen (art. 6.4(i)) — de schuld wordt wel opeisbaar.</li>
@@ -543,8 +536,17 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
       <div className="schuiven">
         <Schuif label="Extra aflossen per maand" waarde={extra} min={0} max={1000} stap={25} onChange={setExtra} toon={eur} />
         <Schuif label="Eenmalig nu aflossen" waarde={Math.min(eenmalig, schuldMax)} min={0} max={schuldMax} stap={100} onChange={setEenmalig} toon={eur} />
-        <Schuif label="Dividend vennootschap per jaar (totaal)" waarde={dividend ?? 0} min={0} max={250000} stap={1000} onChange={setDividend} toon={eur}
-          uitleg={`Jouw deel: ${pct((data.plan.aandeel ?? 0) * 100)} = ${eur((dividend ?? 0) * (data.plan.aandeel ?? 0))} bruto. Per jaar aan te passen in de tabel.`} />
+        <div className="schuif-groep">
+          <Schuif label="Dividend vennootschap per jaar (totaal)" waarde={dividend ?? 0} min={0} max={250000} stap={1000} onChange={setDividend} toon={eur}
+            uitleg={`Jouw deel: ${pct((data.plan.aandeel ?? 0) * 100)} = ${eur((dividend ?? 0) * (data.plan.aandeel ?? 0))} bruto. Per jaar aan te passen in de tabel.`} />
+          <label className="schuif-keuze">
+            <span>Dividend gebruiken voor</span>
+            <select value={beleid} onChange={(e) => setBeleid(e.target.value)}>
+              <option value="verplicht">alleen de verplichte {pct(data.lening.aflossing_pct)} aflossen</option>
+              <option value="netto">alles aflossen (netto, zoals het ROI-model)</option>
+            </select>
+          </label>
+        </div>
         <Schuif label="Rendement op geld dat je niet aflost" waarde={rendement} min={0} max={10} stap={0.25} onChange={setRendement} toon={pct}
           uitleg={`Netto, bijv. spaarrente. Onder ${pct(rente)} levert aflossen meer op.`} />
         <Schuif label="Vertrekdatum" waarde={vertrekIndex} min={0} max={maanden} stap={1}
@@ -574,10 +576,6 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
           </select>{' '}
           <small>V-F47, A13</small>
         </label>
-        <fieldset className="radio">
-          <label><input type="radio" checked={beleid === 'verplicht'} onChange={() => setBeleid('verplicht')} /> alleen verplichte {pct(data.lening.aflossing_pct)} van het dividend</label>
-          <label><input type="radio" checked={beleid === 'netto'} onChange={() => setBeleid('netto')} /> volledig netto dividend aflossen (zoals het ROI-model)</label>
-        </fieldset>
       </div>
 
       <div className="kpis">
