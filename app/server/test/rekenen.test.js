@@ -99,7 +99,7 @@ test('jaaroverzicht: resultaat = (waarde − schuld) + cumulatief kasoverschot, 
   const vanaf = '2026-09-23';
   const historie = [{ datum: '2025-12-30', bedrag: 700 }];
   const sim = simulatie(kalender, historie, {
-    vanaf, beleid: 'netto', belastingPct: 25, dividendVoorJaar: (j) => (j >= 2027 ? 2000 : 0),
+    vanaf, beleid: 'netto', dividendVoorJaar: (j) => (j >= 2027 ? 2000 : 0),
   });
   const hist = [{ datum: '2025-05-08', bruto: 3150, netto: 2678, historie: true }];
   const j = jaaroverzicht(kalender, {
@@ -113,8 +113,8 @@ test('jaaroverzicht: resultaat = (waarde − schuld) + cumulatief kasoverschot, 
   assert.equal(r2(r25.dividend_totaal), 70000);
   assert.ok(r25.dividend_werkelijk);
   const r27 = j.rijen[2];
-  assert.equal(r27.dividend_netto, 1500);
-  assert.equal(r2(r27.afgelost), 1500); // volledig netto dividend afgelost
+  assert.equal(r27.dividend_netto, 1700);
+  assert.equal(r2(r27.afgelost), 1700); // volledig netto dividend afgelost
   for (const r of j.rijen) assert.equal(r2(r.resultaat), r2(r.waarde - r.eind_schuld + r.cum_kas));
   assert.equal(r2(j.roi_pct), r2((j.rijen.at(-1).resultaat / 17100) * 100));
 });
@@ -148,4 +148,12 @@ test('waardering per jaar: instapprijs, vastgesteld, berekend uit resultaten 3-2
   assert.equal(neg(2026).waarde, 0); // geen negatieve marktwaarde
   const inleg = waarderingPerJaar({ factor: null, noemer: 300, aantal: 13.5, inleg: 17100, vanJaar: 2025 });
   assert.equal(inleg(2029).waarde, 17100);
+});
+
+test('simulatie: dividendtarief per jaar (box 3, daarna box 2)', () => {
+  const sim = simulatie(kalender, [], {
+    vanaf: '2026-09-23', dividendVoorJaar: () => 1000,
+    tariefVoorJaar: (j) => (j >= 2028 ? 24.5 : 0),
+  });
+  assert.deepEqual(sim.dividenden.map((x) => [x.datum.slice(0, 4), x.netto]), [['2026', 1000], ['2027', 1000], ['2028', 755], ['2029', 755]]);
 });

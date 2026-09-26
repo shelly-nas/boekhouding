@@ -31,17 +31,21 @@
     "mtime": 1790257356.1283743,
     "hash": "3f39e5f06a058163d51e40cfe0406058"
   },
+  "/Users/jelle/Documents/GitHub/boekhouding/app/server/migrations/008_early_leaver_termijn.sql": {
+    "mtime": 1790261200.4483588,
+    "hash": "e3f19905fc03d888b42a9c08b3898f88"
+  },
   "/Users/jelle/Documents/GitHub/boekhouding/app/server/migrations/007_jaarresultaten.sql": {
     "mtime": 1790259654.8750896,
     "hash": "d26db6f48c4002a8edd7d00b92537ba4"
   },
   "/Users/jelle/Documents/GitHub/boekhouding/app/server/test/rekenen.test.js": {
-    "mtime": 1790260967.2204537,
-    "hash": "92d7350ed356301c9cd6e044d883f643"
+    "mtime": 1790262004.524523,
+    "hash": "23208f3800ab1e5e6c428ec939a94cbb"
   },
   "/Users/jelle/Documents/GitHub/boekhouding/app/server/src/rekenen.js": {
-    "mtime": 1790260967.220333,
-    "hash": "c3f03a955aadaeb64b31d21966b07140"
+    "mtime": 1790261965.369696,
+    "hash": "0a3ee3b04b76afd9f5ec9ab716ff0bdb"
   },
   "/Users/jelle/Documents/GitHub/boekhouding/app/server/src/db.js": {
     "mtime": 1790168342.2025542,
@@ -52,8 +56,8 @@
     "hash": "0556ba84d28c543d977d1cff0845f2dc"
   },
   "/Users/jelle/Documents/GitHub/boekhouding/app/server/src/spoor1.js": {
-    "mtime": 1790260967.22017,
-    "hash": "e0ef0b024c93ec696f1f66a46172aadb"
+    "mtime": 1790261965.3698616,
+    "hash": "2c28508fd37313d1c9f41d5312a2ed82"
   },
   "/Users/jelle/Documents/GitHub/boekhouding/app/server/src/spoor2.js": {
     "mtime": 1790182267.288379,
@@ -80,8 +84,8 @@
     "hash": "0e20dced077a13c40d4d04abff18ae0f"
   },
   "/Users/jelle/Documents/GitHub/boekhouding/app/client/src/Spoor1.jsx": {
-    "mtime": 1790260742.8934,
-    "hash": "9364ae92c68ea2619ff68d1307b6b77f"
+    "mtime": 1790261986.2265573,
+    "hash": "43e1a4d79bd93f3597ce03a22e653d54"
   },
   "/Users/jelle/Documents/GitHub/boekhouding/app/client/src/Spoor2.jsx": {
     "mtime": 1790182144.249934,
@@ -104,8 +108,8 @@
     "hash": "6ff3e9695ce1666335ea91e43cb39254"
   },
   "/Users/jelle/Documents/GitHub/boekhouding/RELATIES.md": {
-    "mtime": 1790252623.403297,
-    "hash": "c3626ba65bff29320586e9a9cb671cc9"
+    "mtime": 1790261939.7561812,
+    "hash": "9921b5cd79256eec138704506e0f202b"
   },
   "/Users/jelle/Documents/GitHub/boekhouding/NOTION.md": {
     "mtime": 1790164633.7236161,
@@ -116,8 +120,8 @@
     "hash": "5846fd634076a056b8337f5b435b6b57"
   },
   "/Users/jelle/Documents/GitHub/boekhouding/SYNC.md": {
-    "mtime": 1790259958.7183774,
-    "hash": "b84ed73814bbc3c119154f41fdfa031d"
+    "mtime": 1790261527.8436258,
+    "hash": "582391a300831757a599f080490c1887"
   },
   "/Users/jelle/Documents/GitHub/boekhouding/CLAUDE.md": {
     "mtime": 1790164905.2873604,
@@ -152,36 +156,36 @@
     "hash": "0a78719cdb4a575ab920a2d766acdb35"
   },
   "/Users/jelle/Documents/GitHub/boekhouding/bronnen/nas-index/REGISTER.md": {
-    "mtime": 1790259881.420173,
-    "hash": "4ce70006d45895db70f4c73a7492d37c"
+    "mtime": 1790261175.7826562,
+    "hash": "a0f01fbad4bec48f6b38a9657795bf67"
   },
   "/Users/jelle/Documents/GitHub/boekhouding/3-overname-verra/README.md": {
     "mtime": 1790162856.0460868,
     "hash": "d2a3644aaa3275e1f2d57087a361e7f0"
   },
   "/Users/jelle/Documents/GitHub/boekhouding/3-overname-verra/structuurkeuze.md": {
-    "mtime": 1790162832.9173603,
+    "mtime": 1790261175.7851696,
     "hash": "2bfb8b6872c204da470e216398b1f5a3"
   },
   "/Users/jelle/Documents/GitHub/boekhouding/3-overname-verra/dossier.md": {
-    "mtime": 1790162048.5926232,
-    "hash": "6e43c971f4fe65c2da7ba258cc28f710"
+    "mtime": 1790261175.7841992,
+    "hash": "fdfcc143e20828afbf45a83180da607e"
   },
   "/Users/jelle/Documents/GitHub/boekhouding/1-prive-a-dreves/analyse-waardering.md": {
-    "mtime": 1790162138.1586123,
-    "hash": "2a05076eb8c77f7026da97648e819bb6"
+    "mtime": 1790261175.7848346,
+    "hash": "ce807f75b2fbb5a3d9fc1715fbf76bc9"
   },
   "/Users/jelle/Documents/GitHub/boekhouding/1-prive-a-dreves/README.md": {
     "mtime": 1790162070.1725183,
     "hash": "353a22187201499ae2ebc32e2a8545af"
   },
   "/Users/jelle/Documents/GitHub/boekhouding/1-prive-a-dreves/participatie-certificaten.md": {
-    "mtime": 1790259881.4196615,
-    "hash": "92f046ef63686a1401853122aec67f98"
+    "mtime": 1790261939.7560966,
+    "hash": "c230ac3345e617e6bb45b0dd942e5fb6"
   },
   "/Users/jelle/Documents/GitHub/boekhouding/2-dreves-holding/entiteit.md": {
-    "mtime": 1790182267.2889907,
-    "hash": "02af2dc327c10e93286e47cb9e5171dd"
+    "mtime": 1790261175.7838442,
+    "hash": "d2e6df0bbd2aeacb31e724f82e9fffbb"
   },
   "/Users/jelle/Documents/GitHub/boekhouding/2-dreves-holding/README.md": {
     "mtime": 1790162070.174329,
@@ -196,7 +200,7 @@
     "hash": "b56ab36ab3aeebcb12abea49bbe558a3"
   },
   "/Users/jelle/Documents/GitHub/boekhouding/openstaande-vragen/REGISTER.md": {
-    "mtime": 1790259919.2037013,
-    "hash": "cc2a269d21806cddc4764d15278dc79f"
+    "mtime": 1790261939.755931,
+    "hash": "e0081a9b15a93eb569e66e9b489bc700"
   }
 }

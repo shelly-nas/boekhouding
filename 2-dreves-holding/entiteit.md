@@ -5,33 +5,33 @@
 ## A. Identiteit
 | Gegeven | Waarde | Bron | Vastgesteld op |
 |---|---|---|---|
-| Statutaire naam | Dreves Holding B.V. | B-KVK-DRV, B-AKTE-OPR | 2026-09-23 |
-| Rechtsvorm | Besloten Vennootschap | B-KVK-DRV | 2026-09-23 |
-| KvK-nummer | 99257467 | B-KVK-DRV | 2026-09-23 |
-| RSIN | 868903772 | B-KVK-DRV | 2026-09-23 |
+| Statutaire naam | Dreves Holding B.V. | [B-KVK-DRV](../bronnen/nas-index/REGISTER.md#b-kvk-drv), [B-AKTE-OPR](../bronnen/nas-index/REGISTER.md#b-akte-opr) | 2026-09-23 |
+| Rechtsvorm | Besloten Vennootschap | [B-KVK-DRV](../bronnen/nas-index/REGISTER.md#b-kvk-drv) | 2026-09-23 |
+| KvK-nummer | 99257467 | [B-KVK-DRV](../bronnen/nas-index/REGISTER.md#b-kvk-drv) | 2026-09-23 |
+| RSIN | 868903772 | [B-KVK-DRV](../bronnen/nas-index/REGISTER.md#b-kvk-drv) | 2026-09-23 |
 | OB-nummer | onbekend — zie V-F01 | — | — |
-| Statutaire zetel | gemeente Lansingerland | B-KVK-DRV, B-AKTE-OPR art. 2 | 2026-09-23 |
-| Bezoekadres | Hogeweg 1, 3212 LG Simonshaven | B-KVK-DRV | 2026-09-23 |
-| Vestigingsnummer | 000064350924 | B-KVK-DRV | 2026-09-23 |
-| Datum akte van oprichting | 2025-12-23 | B-AKTE-OPR | 2026-09-23 |
-| Eerste inschrijving HR | 2025-12-24 | B-KVK-DRV | 2026-09-23 |
-| Boekjaar | gelijk aan kalenderjaar (art. 21 lid 1 statuten) | B-AKTE-OPR | 2026-09-23 |
-| **Eerste boekjaar** | **23-12-2025 t/m 31-12-2026 (verlengd)** | B-AKTE-OPR slotverklaring | 2026-09-23 |
-| Geplaatst kapitaal | € 100,00 (100 aandelen à € 1,00, nrs. 1–100) | B-AKTE-OPR, B-KVK-DRV, B-REG-DRV | 2026-09-23 |
-| Gestort kapitaal | € 100,00, gestort op derdengeldenrekening notaris | B-AKTE-OPR slotverklaring sub b | 2026-09-23 |
-| SBI-code | 64210 — activiteiten van financiële holdings | B-KVK-DRV | 2026-09-23 |
-| Werkzame personen | 1 | B-KVK-DRV | 2026-09-23 |
-| Notaris | mr. R.S. Oude Hengel, 's-Gravenhage (dossier 35387/ame) | B-AKTE-OPR | 2026-09-23 |
+| Statutaire zetel | gemeente Lansingerland | [B-KVK-DRV](../bronnen/nas-index/REGISTER.md#b-kvk-drv), [B-AKTE-OPR](../bronnen/nas-index/REGISTER.md#b-akte-opr) art. 2 | 2026-09-23 |
+| Bezoekadres | Hogeweg 1, 3212 LG Simonshaven | [B-KVK-DRV](../bronnen/nas-index/REGISTER.md#b-kvk-drv) | 2026-09-23 |
+| Vestigingsnummer | 000064350924 | [B-KVK-DRV](../bronnen/nas-index/REGISTER.md#b-kvk-drv) | 2026-09-23 |
+| Datum akte van oprichting | 2025-12-23 | [B-AKTE-OPR](../bronnen/nas-index/REGISTER.md#b-akte-opr) | 2026-09-23 |
+| Eerste inschrijving HR | 2025-12-24 | [B-KVK-DRV](../bronnen/nas-index/REGISTER.md#b-kvk-drv) | 2026-09-23 |
+| Boekjaar | gelijk aan kalenderjaar (art. 21 lid 1 statuten) | [B-AKTE-OPR](../bronnen/nas-index/REGISTER.md#b-akte-opr) | 2026-09-23 |
+| **Eerste boekjaar** | **23-12-2025 t/m 31-12-2026 (verlengd)** | [B-AKTE-OPR](../bronnen/nas-index/REGISTER.md#b-akte-opr) slotverklaring | 2026-09-23 |
+| Geplaatst kapitaal | € 100,00 (100 aandelen à € 1,00, nrs. 1–100) | [B-AKTE-OPR](../bronnen/nas-index/REGISTER.md#b-akte-opr), [B-KVK-DRV](../bronnen/nas-index/REGISTER.md#b-kvk-drv), [B-REG-DRV](../bronnen/nas-index/REGISTER.md#b-reg-drv) | 2026-09-23 |
+| Gestort kapitaal | € 100,00, gestort op derdengeldenrekening notaris | [B-AKTE-OPR](../bronnen/nas-index/REGISTER.md#b-akte-opr) slotverklaring sub b | 2026-09-23 |
+| SBI-code | 64210 — activiteiten van financiële holdings | [B-KVK-DRV](../bronnen/nas-index/REGISTER.md#b-kvk-drv) | 2026-09-23 |
+| Werkzame personen | 1 | [B-KVK-DRV](../bronnen/nas-index/REGISTER.md#b-kvk-drv) | 2026-09-23 |
+| Notaris | mr. R.S. Oude Hengel, 's-Gravenhage (dossier 35387/ame) | [B-AKTE-OPR](../bronnen/nas-index/REGISTER.md#b-akte-opr) | 2026-09-23 |
 
 ## B. Zeggenschap en belang
 | Partij | Soort belang | % kapitaal | % stemrecht | Sinds | Bron |
 |---|---|---|---|---|---|
-| Ashley Dreves | enig aandeelhouder | 100% | 100% | 2025-12-23 | B-KVK-DRV, B-UBO-DRV |
+| Ashley Dreves | enig aandeelhouder | 100% | 100% | 2025-12-23 | [B-KVK-DRV](../bronnen/nas-index/REGISTER.md#b-kvk-drv), [B-UBO-DRV](../bronnen/nas-index/REGISTER.md#b-ubo-drv) |
 
 Bestuur:
 | Naam | Functie | Bevoegdheid | Sinds | Bron |
 |---|---|---|---|---|
-| Ashley Dreves | bestuurder (eerste bestuurder bij oprichting) | alleen/zelfstandig bevoegd | 2025-12-23 | B-KVK-DRV, B-AKTE-OPR sub c |
+| Ashley Dreves | bestuurder (eerste bestuurder bij oprichting) | alleen/zelfstandig bevoegd | 2025-12-23 | [B-KVK-DRV](../bronnen/nas-index/REGISTER.md#b-kvk-drv), [B-AKTE-OPR](../bronnen/nas-index/REGISTER.md#b-akte-opr) sub c |
 
 UBO-registratie: Ashley Dreves, aard van belang *aandeelhouder*, omvang >75% en ≤100%,
 ingangsdatum 23-12-2025, geen verzoek tot afscherming. Bron: B-UBO-DRV.
@@ -60,25 +60,26 @@ ingangsdatum 23-12-2025, geen verzoek tot afscherming. Bron: B-UBO-DRV.
 ## D. Feiten / absolute waarheden
 | # | Feit | Bron | Vastgesteld op | Geldig t/m |
 |---|---|---|---|---|
-| F1 | Dreves Holding B.V. is opgericht op 23-12-2025 ten overstaan van notaris mr. R.S. Oude Hengel te 's-Gravenhage | B-AKTE-OPR | 2026-09-23 | — |
-| F2 | Ashley Dreves is enig aandeelhouder én alleen/zelfstandig bevoegd bestuurder | B-KVK-DRV, B-UBO-DRV | 2026-09-23 | — |
-| F3 | Het geplaatste en gestorte kapitaal bedraagt € 100,00, verdeeld in 100 aandelen van € 1,00 nominaal, genummerd 1 t/m 100 | B-AKTE-OPR, B-REG-DRV blad B.1 | 2026-09-23 | — |
-| F4 | Het eerste boekjaar is verlengd en loopt t/m 31-12-2026 | B-AKTE-OPR slotverklaring | 2026-09-23 | — |
-| F5 | De vennootschap neemt de oprichtingskosten voor eigen rekening | B-AKTE-OPR slotverklaring sub d | 2026-09-23 | — |
-| F6 | KVK-inschrijfvergoeding € 82,25 (factuur 250883436, btw-vrijgesteld), vervaldatum 21-01-2026 | B-FACT-KVK | 2026-09-23 | — |
-| F7 | De certificaten uit de eerste tranche (9 stuks, 02-01-2025) staan op naam van A. Dreves **privé** | B-AKTE-CERT, B-NOTA-DRV | 2026-09-23 | — |
-| F7a | Dreves Holding B.V. heeft in december 2025 een **tweede tranche certificaten** in Verra Aan- en Verkoop B.V. verkregen voor circa € 12.000 | N-VERRA (opgave Jelle 2026-09-23) | 2026-09-23 | — |
-| F8 | Dreves Holding B.V. i.o. is op 23-12-2025 een geldlening van € 12.094,50 aangegaan met Verra Aan- en Verkoop B.V., 5% rente, looptijd 5 jaar | B-GL-2025 | 2026-09-23 | — |
-| F9 | Aan de certificaten is **geen** vergaderrecht verbonden | B-AKTE-CERT art. 3 sub j | 2026-09-23 | — |
-| F41 | Lening 2025: de rente wordt jaarlijks aan het einde van het jaar berekend en overgemaakt aan de geldgever | B-GL-2025 art. 2.2 | 2026-09-23 | — |
-| F42 | Lening 2025: geen aflossingsplicht, behoudens steeds 25% van het jaarlijks toekomende dividend; tussentijds boetevrij aflossen is toegestaan | B-GL-2025 art. 3.1–3.3 | 2026-09-23 | — |
-| F43 | Dreves Holding B.V. heeft een zakelijke bankrekening bij ING | opgave Jelle | 2026-09-23 | — |
-| F44 | De administratie van Dreves Holding B.V. wordt gevoerd in de webapp van deze repo (`app/`, spoor 2), vanaf het eerste boekjaar | opgave Jelle | 2026-09-23 | — |
+| F1 | Dreves Holding B.V. is opgericht op 23-12-2025 ten overstaan van notaris mr. R.S. Oude Hengel te 's-Gravenhage | [B-AKTE-OPR](../bronnen/nas-index/REGISTER.md#b-akte-opr) p. 1 (verschijning), p. 27 (slotverklaring) | 2026-09-23 | — |
+| F2 | Ashley Dreves is enig aandeelhouder én alleen/zelfstandig bevoegd bestuurder | [B-KVK-DRV](../bronnen/nas-index/REGISTER.md#b-kvk-drv) p. 1, [B-UBO-DRV](../bronnen/nas-index/REGISTER.md#b-ubo-drv) p. 2 | 2026-09-23 | — |
+| F3 | Het geplaatste en gestorte kapitaal bedraagt € 100,00, verdeeld in 100 aandelen van € 1,00 nominaal, genummerd 1 t/m 100 | [B-AKTE-OPR](../bronnen/nas-index/REGISTER.md#b-akte-opr) slotverklaring sub a (p. 27); [B-REG-DRV](../bronnen/nas-index/REGISTER.md#b-reg-drv) blad B.1 (p. 9) en D.1 (p. 13) | 2026-09-23 | — |
+| F4 | Het eerste boekjaar is verlengd en loopt t/m 31-12-2026 | [B-AKTE-OPR](../bronnen/nas-index/REGISTER.md#b-akte-opr) slotverklaring sub c (p. 27) | 2026-09-23 | — |
+| F5 | De vennootschap neemt de oprichtingskosten voor eigen rekening | [B-AKTE-OPR](../bronnen/nas-index/REGISTER.md#b-akte-opr) slotverklaring sub d (p. 27) | 2026-09-23 | — |
+| F6 | KVK-inschrijfvergoeding € 82,25 (factuur 250883436, btw-vrijgesteld), vervaldatum 21-01-2026 | [B-FACT-KVK](../bronnen/nas-index/REGISTER.md#b-fact-kvk) p. 1 | 2026-09-23 | — |
+| F7 | De certificaten uit de eerste tranche (9 stuks, 02-01-2025) staan op naam van A. Dreves **privé** | [B-AKTE-CERT](../bronnen/nas-index/REGISTER.md#b-akte-cert) p. 1 en 3 (Koper 2 = A. Dreves), [B-NOTA-DRV](../bronnen/nas-index/REGISTER.md#b-nota-drv) p. 1 | 2026-09-23 | — |
+| F7a | Dreves Holding B.V. heeft in december 2025 een **tweede tranche certificaten** in Verra Aan- en Verkoop B.V. verkregen voor circa € 12.000 | opgave Jelle, notitie N-VERRA (gesprek 2026-09-23) | 2026-09-23 | — |
+| F8 | Dreves Holding B.V. i.o. is op 23-12-2025 een geldlening van € 12.094,50 aangegaan met Verra Aan- en Verkoop B.V., 5% rente, looptijd 5 jaar | [B-GL-2025](../bronnen/nas-index/REGISTER.md#b-gl-2025) art. 1.1–1.3 en 2.1 (p. 1) | 2026-09-23 | — |
+| F9 | Aan de certificaten is **geen** vergaderrecht verbonden | [B-AKTE-CERT](../bronnen/nas-index/REGISTER.md#b-akte-cert) art. 3 sub j (p. 8) | 2026-09-23 | — |
+| F41 | Lening 2025: de rente wordt jaarlijks aan het einde van het jaar berekend en overgemaakt aan de geldgever | [B-GL-2025](../bronnen/nas-index/REGISTER.md#b-gl-2025) art. 2.2 (p. 1) | 2026-09-23 | — |
+| F42 | Lening 2025: geen aflossingsplicht, behoudens steeds 25% van het jaarlijks toekomende dividend; tussentijds boetevrij aflossen is toegestaan | [B-GL-2025](../bronnen/nas-index/REGISTER.md#b-gl-2025) art. 3.1–3.3 (p. 2) | 2026-09-23 | — |
+| F43 | Dreves Holding B.V. heeft een zakelijke bankrekening bij ING | opgave Jelle (gesprek 2026-09-23) | 2026-09-23 | — |
+| F44 | De administratie van Dreves Holding B.V. wordt gevoerd in de webapp van deze repo (`app/`, spoor 2), vanaf het eerste boekjaar | opgave Jelle (gesprek 2026-09-23) | 2026-09-23 | — |
+| F56 | In het aandeelhoudersregister is blad C.1 (gestort kapitaal) niet ingevuld; blad B.1 (geplaatst kapitaal) en D.1 (aandeelhouder) wel | [B-REG-DRV](../bronnen/nas-index/REGISTER.md#b-reg-drv) p. 9, 11 en 13 | 2026-09-24 | — |
 
 ## E. Aannames
 | # | Aanname | Waarom aangenomen | Gevolg als onjuist | Te verifiëren via |
 |---|---|---|---|---|
-| A1 | De holding is opgericht om de VERRA-participatie te gaan houden | Geldlening B-GL-2025 is aangegaan door de holding i.o. "ter verkrijging van die certificaten"; SBI 64210 | Als de holding geen certificaten gaat houden, mist de lening haar grondslag en is de rente mogelijk niet aftrekbaar | Participatieovereenkomst holding, correspondentie STAK |
+| A1 | De holding is opgericht om de VERRA-participatie te gaan houden | Geldlening [B-GL-2025](../bronnen/nas-index/REGISTER.md#b-gl-2025) is aangegaan door de holding i.o. "ter verkrijging van die certificaten"; SBI 64210 | Als de holding geen certificaten gaat houden, mist de lening haar grondslag en is de rente mogelijk niet aftrekbaar | Participatieovereenkomst holding, correspondentie STAK |
 | A2 | De tranche van de holding is een **nieuwe verkrijging**, niet een overdracht van de privépositie | Beide tranches worden op N-VERRA naast elkaar genoemd (4,5% privé + 5,5% holding); art. 5.1 verbiedt vervreemding door de Participant | Bij een overdracht privé→holding is sprake van een vervreemding in box 2 én mogelijk strijd met art. 5.1 | Leveringsakte december 2025 — zie V-F20 |
 | A3 | Er is nog geen bankrekening/administratie gevoerd in de holding over 2025 | Oprichting op 23-12-2025, 8 dagen voor jaareinde | Er zijn transacties die geboekt moeten worden | Bankafschriften, grootboek |
 | A4 | De holding heeft nog geen omzet of personeel behalve de bestuurder | KvK: 1 werkzame persoon, SBI holdingactiviteiten | Loonheffingen-verplichting gemist | Loonadministratie, aangiften LH |

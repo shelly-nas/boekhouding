@@ -17,10 +17,10 @@ waar de onduidelijkheid ontstaat.
 
 | Bron | Gehanteerde noemer | Volgt uit |
 |---|---|---|
-| B-WRD-2024 (spreadsheet) | **200** | cel D25: `=D23/200` |
-| B-WRD-2025 (pdf, per 30-11-2025) | **300** | € 220.000 / 733 ≈ 300; € 290.000 / 967 ≈ 300 |
-| B-AKTE-CERT art. 1 sub f | **100** gecertificeerde aandelen (nrs. 101–200) | notariële vaststelling |
-| B-PRES slide 12 | **200** totaal aandelen, 100 certificaten | aanbiedingspresentatie |
+| [B-WRD-2024](../bronnen/nas-index/REGISTER.md#b-wrd-2024) (spreadsheet) | **200** | cel D25: `=D23/200` |
+| [B-WRD-2025](../bronnen/nas-index/REGISTER.md#b-wrd-2025) (pdf, per 30-11-2025) | **300** | € 220.000 / 733 ≈ 300; € 290.000 / 967 ≈ 300 |
+| [B-AKTE-CERT](../bronnen/nas-index/REGISTER.md#b-akte-cert) art. 1 sub f | **100** gecertificeerde aandelen (nrs. 101–200) | notariële vaststelling |
+| [B-PRES](../bronnen/nas-index/REGISTER.md#b-pres) slide 12 | **200** totaal aandelen, 100 certificaten | aanbiedingspresentatie |
 
 Het geplaatste kapitaal bedraagt 300 aandelen (nrs. 1–300); daarvan zijn er
 100 gecertificeerd (nrs. 101–200). Bron: B-AKTE-CERT art. 1 sub e en f.
@@ -37,7 +37,7 @@ gecertificeerde kapitaal van 100 aandelen.**
 ## 3. Wat dit betekent voor de waarde per certificaat
 Uitgaande van de gekozen ondernemingswaarden uit B-WRD-2025:
 
-| Ondernemingswaarde | ÷ 300 (B-WRD-2025) | ÷ 200 (B-WRD-2024) | ÷ 100 (akte) |
+| Ondernemingswaarde | ÷ 300 ([B-WRD-2025](../bronnen/nas-index/REGISTER.md#b-wrd-2025)) | ÷ 200 ([B-WRD-2024](../bronnen/nas-index/REGISTER.md#b-wrd-2024)) | ÷ 100 (akte) |
 |---|---|---|---|
 | € 220.000 (×3) | € 733 | € 1.100 | € 2.200 |
 | € 290.000 (×4) | € 967 | € 1.450 | € 2.900 |

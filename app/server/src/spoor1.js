@@ -2,6 +2,7 @@ import { pool } from './db.js';
 import { Invoerfout } from './resources.js';
 import {
   aflossingenVoor,
+  DIVIDENDTARIEF,
   dividendToets,
   leaverPrijs,
   leaverRegel,
@@ -40,8 +41,9 @@ async function laad() {
 
 // Rekenbasis: de noemer die als standaard is gemarkeerd (anders alle), en het
 // aantal aandelen waarmee de positie meetelt (anders het aantal certificaten).
-function noemersVoor(d, p) {
+function noemersVoor(d, p, { alle = false } = {}) {
   const eigen = d.noemers.filter((n) => n.vennootschap_id === p.vennootschap_id);
+  if (alle) return eigen;
   const standaard = eigen.filter((n) => n.standaard);
   return standaard.length ? standaard : eigen;
 }
@@ -147,7 +149,7 @@ export async function overzicht(peildatum = vandaag()) {
   return { peildatum, posities, gebeurtenissen: d.gebeurtenissen };
 }
 
-export async function leaver({ positie_id, vertrekdatum = vandaag(), categorie = 'good', extra_korting, ...plan }) {
+export async function leaver({ positie_id, vertrekdatum = vandaag(), categorie = 'good', extra_korting, alle_noemers, ...plan }) {
   const d = await laad();
   const p = d.posities.find((x) => x.id === Number(positie_id)) ?? d.posities[0];
   if (!p) throw new Invoerfout('Geen positie in spoor 1');
@@ -168,7 +170,9 @@ export async function leaver({ positie_id, vertrekdatum = vandaag(), categorie =
       ? { totaal: simulatie(lening, aflossingen, planUitQuery(plan, d, p).opties).schuld(vertrekdatum), volgens_plan: true }
       : schuldOp(lening, aflossingen, vertrekdatum);
   const waarderingen = geldendeWaarderingen(d, p, vertrekdatum);
-  const noemers = noemersVoor(d, p);
+  const toonAlle = alle_noemers === 'true';
+  const noemers = noemersVoor(d, p, { alle: toonAlle });
+  const rekenbasis = noemersVoor(d, p).at(-1)?.aantal ?? null;
   const aantal = rekenAantal(p);
   const matrix = regel
     ? waarderingen.map((w) => ({
@@ -195,6 +199,8 @@ export async function leaver({ positie_id, vertrekdatum = vandaag(), categorie =
     extra_korting_pct: korting,
     schuld,
     noemers,
+    rekenbasis,
+    alle_noemers: toonAlle,
     matrix,
   };
 }
@@ -223,19 +229,24 @@ function planUitQuery(query, d, p) {
   // een ontvangen dividend krijgen er geen gepland dividend bij.
   const totaalVoor = (j) =>
     j in perJaar ? perJaar[j] : j <= huidigJaar || ontvangenIn.has(j) ? 0 : totaal;
+  // Box 3 tot het aanmerkelijk belang ontstaat, box 2 vanaf dat jaar (A13).
+  // 'nooit' = alle jaren box 3; standaard box 2 vanaf 2026.
+  const box2Vanaf = query.box2_vanaf === 'nooit' ? null : /^\d{4}$/.test(query.box2_vanaf ?? '') ? Number(query.box2_vanaf) : 2026;
+  const boxVoor = (j) => (box2Vanaf != null && j >= box2Vanaf ? 2 : 3);
   return {
     noemer: noemer?.aantal ?? null,
     aandeel,
     standaard_totaal: totaal,
     per_jaar: perJaar,
+    box2_vanaf: box2Vanaf,
     totaalVoor,
     opties: {
       vanaf: vandaag(),
       extraPerMaand: getal('extra_per_maand'),
       eenmalig: getal('eenmalig'),
       rendementPct: getal('rendement_pct'),
-      belastingPct: getal('belasting_pct', 15),
       beleid: query.beleid === 'netto' ? 'netto' : 'verplicht',
+      tariefVoorJaar: (j) => DIVIDENDTARIEF[`box${boxVoor(j)}`],
       dividendVoorJaar: (j) => (aandeel ? totaalVoor(j) * aandeel : 0),
     },
   };
@@ -294,7 +305,7 @@ export async function simuleer(query) {
     positie: { aantal: p.aantal, aantal_rekenbasis: rekenAantal(p), inleg: p.inleg },
     noemers: noemersVoor(d, p).map((n) => ({ aantal: n.aantal, label: n.label })),
     factoren,
-    plan: { noemer: plan.noemer, aandeel: plan.aandeel, standaard_totaal: plan.standaard_totaal, per_jaar: plan.per_jaar, waarde_basis: factor ?? 'inleg', groei_pct: groeiPct },
+    plan: { noemer: plan.noemer, aandeel: plan.aandeel, standaard_totaal: plan.standaard_totaal, per_jaar: plan.per_jaar, box2_vanaf: plan.box2_vanaf, waarde_basis: factor ?? 'inleg', groei_pct: groeiPct },
     schuld_nu: keuze.reeks[0].schuld,
     keuze: { ...zonderFuncties(keuze), bij_vertrek: opVertrek(keuze) },
     basis: { ...zonderFuncties(basis), bij_vertrek: opVertrek(basis) },

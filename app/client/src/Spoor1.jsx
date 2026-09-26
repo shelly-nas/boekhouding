@@ -325,14 +325,14 @@ function Aandachtspunten() {
 function Vertrek() {
   // Eén vertrekdatum voor het aflosplan en de vertrekberekening; leeg = einde
   // looptijd (vult het aflosplan in zodra dat geladen is).
-  const [invoer, setInvoer] = useState({ vertrekdatum: '', categorie: 'good', extra_korting: false });
+  const [invoer, setInvoer] = useState({ vertrekdatum: '', categorie: 'good', extra_korting: false, alle_noemers: false });
   const [plan, setPlan] = useState(null);
   const [data, setData] = useState(null);
   const [fout, setFout] = useState(null);
 
   useEffect(() => {
     if (!invoer.vertrekdatum || !plan) return;
-    const q = new URLSearchParams({ ...invoer, ...plan, extra_korting: String(invoer.extra_korting) });
+    const q = new URLSearchParams({ ...invoer, ...plan, extra_korting: String(invoer.extra_korting), alle_noemers: String(invoer.alle_noemers) });
     api.get(`/spoor1/leaver?${q}`).then(
       (d) => { setData(d); setFout(null); },
       (e) => setFout(e.message),
@@ -367,6 +367,10 @@ function Vertrek() {
             <input type="checkbox" checked={invoer.extra_korting} onChange={(e) => zet('extra_korting', e.target.checked)} />
             <span>Extra korting art. 6.5 (onbetaald verlof of gemiddeld &lt; 40 uur/week)</span>
           </label>
+          <label className="vink">
+            <input type="checkbox" checked={invoer.alle_noemers} onChange={(e) => zet('alle_noemers', e.target.checked)} />
+            <span>Toon alle noemers (100 / 200 / 300 — V-O01 is niet beslist)</span>
+          </label>
         </div>
       </section>
 
@@ -396,7 +400,13 @@ function Vertrek() {
                 <thead>
                   <tr>
                     <th>Waardering</th>
-                    {data.noemers.map((n) => <th key={n.id} className="getal">÷ {n.aantal}</th>)}
+                    {data.noemers.map((n) => (
+                      <th key={n.id} className="getal">
+                        ÷ {n.aantal}
+                        {n.aantal === data.rekenbasis && <><br /><small>rekenbasis</small></>}
+                        {data.alle_noemers && n.aantal !== data.rekenbasis && <><br /><small>{n.label}</small></>}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
@@ -421,7 +431,15 @@ function Vertrek() {
             </div>
           )}
           <ul className="uitleg">
-            <li>Rekent met de waardering die in het vertrekjaar als prijs geldt (waardering per eind vorig jaar); bij vertrek stelt de STAK de Marktwaarde vast (art. 6.6.2). Of dezelfde factor geldt als bij de koop, is open (V-F44).</li>
+            <li>
+              <strong>Twee open punten bepalen deze bedragen.</strong> De <em>factor</em> (×3 of ×4) is een keuze binnen
+              een bandbreedte die de verkopers zelf noemen — B-PRES dia 8: "je mag tussen de factor 3 en 4 waarderen".
+              Beide rijen zijn daarom reëel. De <em>noemer</em> is geen keuze maar een uitleg van "het aantal uitstaande
+              Aandelen" (art. 3.1): de akte noemt 100 gecertificeerde en 300 geplaatste aandelen, de presentatie 200.
+              Daar hoort één antwoord bij dat nog niet vaststaat (V-O01). De getoonde rekenbasis is een aanname (A11),
+              geen vaststelling — vink hierboven aan om de andere noemers te zien.
+            </li>
+            <li>Rekent met de waardering die in het vertrekjaar als prijs geldt (waardering per eind vorig jaar); bij vertrek stelt de STAK de Marktwaarde vast (art. 6.6.2). Bij de <em>koop</em> is de factor grotendeels herleid: de holdingtranche is tegen ×3 verworven (F56). Welke factor bij <em>verkoop</em> geldt, is open (V-F44).</li>
             <li>De STAK is niet verplicht de certificaten af te nemen (art. 6.4(i)) — de schuld wordt wel opeisbaar.</li>
             <li>Extra korting toegepast op de Marktwaarde vóór het leaverpercentage: een lezing van art. 6.5, niet vastgesteld.</li>
           </ul>
@@ -444,6 +462,11 @@ const maandenTussen = (a, b) => {
   const [jb, mb] = b.split('-').map(Number);
   return (jb - ja) * 12 + (mb - ma);
 };
+const jarenTussen = (van, tot) => {
+  const lijst = [];
+  for (let j = van; j <= tot; j++) lijst.push(j);
+  return lijst;
+};
 
 function Schuif({ label, waarde, min, max, stap, onChange, toon, uitleg }) {
   return (
@@ -462,8 +485,8 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
   const [perJaar, setPerJaar] = useState({}); // jaar -> totaal vennootschap
   const [waardeBasis, setWaardeBasis] = useState(''); // '' = eerste factor uit de stamdata
   const [groei, setGroei] = useState(0);
-  const [belasting, setBelasting] = useState(15);
   const [beleid, setBeleid] = useState('verplicht');
+  const [box2Vanaf, setBox2Vanaf] = useState(''); // '' = server kiest (2026), 'nooit' = alle jaren box 3
   const [rendement, setRendement] = useState(2);
   const setVertrek = onVertrek;
   const [data, setData] = useState(null);
@@ -476,8 +499,8 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
       const plan = {
         extra_per_maand: extra,
         eenmalig,
-        belasting_pct: belasting,
         beleid,
+        box2_vanaf: box2Vanaf,
         dividenden: Object.entries(perJaar).map(([j, v]) => `${j}:${v}`).join(','),
         ...(dividend === null ? {} : { dividend_totaal: dividend }),
       };
@@ -494,7 +517,7 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
       );
     }, 150);
     return () => clearTimeout(timer.current);
-  }, [extra, eenmalig, dividend, perJaar, waardeBasis, groei, belasting, beleid, rendement, vertrek]);
+  }, [extra, eenmalig, dividend, perJaar, waardeBasis, groei, beleid, box2Vanaf, rendement, vertrek]);
 
   if (fout) return <p className="fout">{fout}</p>;
   if (!data) return <section className="kaart"><p className="uitleg">Laden…</p></section>;
@@ -529,8 +552,6 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
           toon={() => datum(data.vertrekdatum)} uitleg="Geldt ook voor de berekening hieronder" />
         <Schuif label="Waardegroei na laatste waardering" waarde={groei} min={-10} max={15} stap={0.5} onChange={setGroei} toon={pct}
           uitleg="Alleen voor jaren zonder waardering of jaarresultaten; die gaan altijd voor" />
-        <Schuif label="Belasting op dividend" waarde={belasting} min={0} max={31} stap={0.5} onChange={setBelasting} toon={pct}
-          uitleg="15% dividendbelasting wordt ingehouden; in box 2 wordt het meer (V-F12)" />
       </div>
       <div className="keuzes">
         <span>
@@ -542,6 +563,16 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
             {data.factoren.map((f) => <option key={f} value={String(f)}>waardering ×{num(f)} (jaarresultaten, stamdata)</option>)}
             <option value="inleg">inleg (zoals het oude ROI-model)</option>
           </select>
+        </label>
+        <label>
+          Belasting op dividend{' '}
+          <select value={String(data.plan.box2_vanaf ?? 'nooit')} onChange={(e) => setBox2Vanaf(e.target.value)}>
+            <option value="nooit">box 3, alle jaren (15% dividendbelasting verrekend)</option>
+            {jarenTussen(Math.min(Number(data.vanaf.slice(0, 4)), data.plan.box2_vanaf ?? 9999), Number(data.einde.slice(0, 4))).map((j) => (
+              <option key={j} value={String(j)}>box 3, box 2 (24,5%) vanaf {j}</option>
+            ))}
+          </select>{' '}
+          <small>V-F47, A13</small>
         </label>
         <fieldset className="radio">
           <label><input type="radio" checked={beleid === 'verplicht'} onChange={() => setBeleid('verplicht')} /> alleen verplichte {pct(data.lening.aflossing_pct)} van het dividend</label>
@@ -601,9 +632,10 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
           schuld verkleint het risico bij een bad-leaverprijs (tab hieronder).
         </li>
         <li>
-          Vóór inkomstenbelasting. In box 3 verlagen de schuld en het spaargeld allebei je grondslag, wat het verschil
-          ongeveer neutraal houdt. In box 2 is de rente mogelijk aftrekbaar, wat aflossen minder aantrekkelijk maakt. Welke
-          box geldt, is open (V-O01, V-F14).
+          Dividend na belasting volgens de gekozen box; de box 3-heffing over het vermogen zit er niet in. In box 3
+          verlagen de schuld en het spaargeld allebei je grondslag, wat het verschil ongeveer neutraal houdt. In box 2 is
+          de rente mogelijk aftrekbaar, wat aflossen minder aantrekkelijk maakt. Of en vanaf wanneer box 2 geldt, is open
+          (V-F47, V-F49).
         </li>
       </ul>
     </section>

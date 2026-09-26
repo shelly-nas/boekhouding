@@ -5,10 +5,10 @@
 ## A. De transactie
 | Gegeven | Waarde | Bron |
 |---|---|---|
-| Te verwerven belang | **40% in de VERRA-groep** | B-OPDR art. 1 |
-| Indicatieve waardering | circa € 2.000.000 | B-OPDR art. 1 |
-| Kopers | 4 holdings (zie B) | B-OPDR |
-| Adviseur kopende zijde | Atlantis Invest (KvK 82433798) | B-OPDR |
+| Te verwerven belang | **40% in de VERRA-groep** | [B-OPDR](../bronnen/nas-index/REGISTER.md#b-opdr) art. 1 |
+| Indicatieve waardering | circa € 2.000.000 | [B-OPDR](../bronnen/nas-index/REGISTER.md#b-opdr) art. 1 |
+| Kopers | 4 holdings (zie B) | [B-OPDR](../bronnen/nas-index/REGISTER.md#b-opdr) |
+| Adviseur kopende zijde | Atlantis Invest (KvK 82433798) | [B-OPDR](../bronnen/nas-index/REGISTER.md#b-opdr) |
 | Doorgroei | 40% → 100% over 2–5 jaar | N-VERRA |
 
 > De doorgroei naar 100% staat **wel** op de Notion-pagina maar **niet** in de
@@ -36,7 +36,7 @@ B-OPDR art. a definieert de VERRA-groep als:
 | # | Vennootschap | Eerder bekend? |
 |---|---|---|
 | 1 | Verra Real Estate Beheer B.V. | ja — werkgever van A. Dreves |
-| 2 | VERRA Expat Home Services Rotterdam B.V. | nieuw ("Verra EHS Rotterdam" uit B-WRD-2024) |
+| 2 | VERRA Expat Home Services Rotterdam B.V. | nieuw ("Verra EHS Rotterdam" uit [B-WRD-2024](../bronnen/nas-index/REGISTER.md#b-wrd-2024)) |
 | 3 | VERRA Expat Home Services Den Haag B.V. | nieuw |
 | 4 | **VERRA aan- en verkoop B.V.** | ja — hierin houdt A. Dreves certificaten |
 | 5 | Verra Real Estate Verhuur (DH) B.V. | nieuw |
@@ -77,23 +77,23 @@ Voorwaarden (B-OPDR art. 2–4):
 ## E. Feiten / absolute waarheden
 | # | Feit | Bron | Vastgesteld op | Geldig t/m |
 |---|---|---|---|---|
-| F23 | De kopersgroep bestaat uit vier persoonlijke holdings; Dreves Holding B.V. is één daarvan | B-OPDR | 2026-09-23 | — |
-| F24 | Het te verwerven belang is 40% in de VERRA-groep van zes vennootschappen | B-OPDR art. a en 1 | 2026-09-23 | — |
-| F25 | De indicatieve waardering van de groep bedraagt circa € 2.000.000 | B-OPDR art. 1 | 2026-09-23 | — |
-| F26 | Adviseur is Atlantis Invest (KvK 82433798), bestuurder Joran Sonneveld | B-OPDR | 2026-09-23 | — |
-| F27 | Het honorarium bedraagt € 36.250 excl. btw, verdeeld over vier fasen | B-OPDR art. 3 | 2026-09-23 | — |
-| F28 | Iedere opdrachtgever is **hoofdelijk verbonden** voor het volledige honorarium, inclusief meerwerk | B-OPDR art. 5 | 2026-09-23 | — |
-| F29 | IP Holding B.V. is penvoerder; facturatie loopt via die vennootschap | B-OPDR art. 4 | 2026-09-23 | — |
-| F30 | De overeenkomst is op 2026-09-23 **nog niet ondertekend** (datumveld leeg, geen handtekeningen) | B-OPDR handtekeningpagina | 2026-09-23 | — |
-| F31 | De aansprakelijkheid van Atlantis Invest is beperkt tot de verzekeringsuitkering (max. € 500.000), of bij geen uitkering tot het betaalde honorarium | B-OPDR art. 10 | 2026-09-23 | — |
-| F32 | Bij een geschil tússen opdrachtgevers valt advisering daarover buiten de opdracht en mag Atlantis Invest de werkzaamheden opschorten | B-OPDR art. 7 | 2026-09-23 | — |
+| F23 | De kopersgroep bestaat uit vier persoonlijke holdings; Dreves Holding B.V. is één daarvan | [B-OPDR](../bronnen/nas-index/REGISTER.md#b-opdr) p. 1 (partijen), p. 8 (handtekeningpagina) | 2026-09-23 | — |
+| F24 | Het te verwerven belang is 40% in de VERRA-groep van zes vennootschappen | [B-OPDR](../bronnen/nas-index/REGISTER.md#b-opdr) p. 1 (titel), p. 2 (overwegingen, art. 1) | 2026-09-23 | — |
+| F25 | De indicatieve waardering van de groep bedraagt circa € 2.000.000 | [B-OPDR](../bronnen/nas-index/REGISTER.md#b-opdr) art. 1 (p. 2) | 2026-09-23 | — |
+| F26 | Adviseur is Atlantis Invest (KvK 82433798), bestuurder Joran Sonneveld | [B-OPDR](../bronnen/nas-index/REGISTER.md#b-opdr) p. 1 (partijen), p. 8 | 2026-09-23 | — |
+| F27 | Het honorarium bedraagt € 36.250 excl. btw, verdeeld over vier fasen | [B-OPDR](../bronnen/nas-index/REGISTER.md#b-opdr) art. 3 (p. 4) | 2026-09-23 | — |
+| F28 | Iedere opdrachtgever is **hoofdelijk verbonden** voor het volledige honorarium, inclusief meerwerk | [B-OPDR](../bronnen/nas-index/REGISTER.md#b-opdr) art. 5 (p. 4) | 2026-09-23 | — |
+| F29 | IP Holding B.V. is penvoerder; facturatie loopt via die vennootschap | [B-OPDR](../bronnen/nas-index/REGISTER.md#b-opdr) art. 4 (p. 4) | 2026-09-23 | — |
+| F30 | De overeenkomst is op 2026-09-23 **nog niet ondertekend** (datumveld leeg, geen handtekeningen) | [B-OPDR](../bronnen/nas-index/REGISTER.md#b-opdr) handtekeningpagina (p. 8) | 2026-09-23 | — |
+| F31 | De aansprakelijkheid van Atlantis Invest is beperkt tot de verzekeringsuitkering (max. € 500.000), of bij geen uitkering tot het betaalde honorarium | [B-OPDR](../bronnen/nas-index/REGISTER.md#b-opdr) art. 10 (p. 6) | 2026-09-23 | — |
+| F32 | Bij een geschil tússen opdrachtgevers valt advisering daarover buiten de opdracht en mag Atlantis Invest de werkzaamheden opschorten | [B-OPDR](../bronnen/nas-index/REGISTER.md#b-opdr) art. 7 (p. 5) | 2026-09-23 | — |
 
 ## F. Aannames
 | # | Aanname | Waarom aangenomen | Gevolg als onjuist | Te verifiëren via |
 |---|---|---|---|---|
 | A9 | De verkopers zijn N.C. Verra en M.M. van der Laan | Zij besturen de Vennootschap en de STAK en traden op als Verkopers bij de certificaatlevering | Andere partijen aan tafel | LOI, aandeelhoudersregisters groep |
-| A12 | De "Iwan" uit B-WRD-2024 is dezelfde persoon als Iwan Post van IP Holding | Zeldzame voornaam, zelfde branche en regio | Geen belangenverstrengeling; de kostenpost staat los | Navraag, zie V-F30 |
-| A13 | De certificaten van A. Dreves in VERRA aan- en verkoop B.V. blijven bestaan naast het nieuwe 40%-belang | B-OPDR rept niet over de bestaande participatie | Verwatering of gedwongen inbreng zonder verrekening | Term sheet fase 2, zie V-O10 |
+| A12 | De "Iwan" uit [B-WRD-2024](../bronnen/nas-index/REGISTER.md#b-wrd-2024) is dezelfde persoon als Iwan Post van IP Holding | Zeldzame voornaam, zelfde branche en regio | Geen belangenverstrengeling; de kostenpost staat los | Navraag, zie V-F30 |
+| A13 | De certificaten van A. Dreves in VERRA aan- en verkoop B.V. blijven bestaan naast het nieuwe 40%-belang | [B-OPDR](../bronnen/nas-index/REGISTER.md#b-opdr) rept niet over de bestaande participatie | Verwatering of gedwongen inbreng zonder verrekening | Term sheet fase 2, zie V-O10 |
 
 ## G. Aandachtspunten
 

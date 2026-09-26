@@ -169,16 +169,24 @@ export function dividendToets(lening, dividenden, aflossingen, totJaar) {
   return { grondslag, pct: pct * 100, rijen };
 }
 
+// Heffing over het privédividend (A13, V-F47). Box 3: de dividendbelasting
+// van 15% is een voorheffing die in de aangifte IB wordt verrekend (art. 9.2
+// lid 1 onderdeel b Wet IB 2001), het dividend zelf is niet belast. Box 2:
+// 24,5% tot de schijfgrens (art. 2.12 Wet IB 2001, tarief 2026; V-F12).
+export const DIVIDENDTARIEF = { box3: 0, box2: 24.5 };
+
 // Simulatie "aflossen of aanhouden" vanaf een datum: wat doet extra aflossen
 // met de schuld, met je eigen geld en met het saldo van die twee? Het eigen geld
 // is de som van alle kasstromen vanaf 'vanaf' (dividend in, aflossing uit),
 // jaarlijks samengesteld met het alternatieve rendement. Alles vóór
-// inkomstenbelasting. De verplichte aflossing uit dividend wordt steeds
+// inkomstenbelasting over het vermogen; van het dividend gaat per jaar het
+// tarief uit 'tariefVoorJaar' af (standaard de ingehouden dividendbelasting). De verplichte aflossing uit dividend wordt steeds
 // nagekomen; extra aflossen stopt zodra de schuld nul is.
 export function simulatie(lening, historie, opties) {
   const {
     vanaf, extraPerMaand = 0, eenmalig = 0, dividendPerJaar = 0, dividendVoorJaar, dividendDag = '05-08',
-    rendementPct = 0, belastingPct = 0, beleid = 'verplicht', dividendbelastingPct = 15,
+    rendementPct = 0, beleid = 'verplicht', dividendbelastingPct = 15,
+    tariefVoorJaar = () => dividendbelastingPct,
   } = opties;
   const einde = plusJaren(lening.startdatum, lening.looptijd_jaren);
   const pct = (lening.aflossing_uit_dividend_pct ?? 0) / 100;
@@ -205,7 +213,7 @@ export function simulatie(lening, historie, opties) {
     let d = `${j}-${dividendDag}`;
     if (d <= vanaf) d = plusDagen(vanaf, 1);
     if (d >= einde || naarDatum(d).getUTCFullYear() !== j) continue;
-    const netto = bruto * (1 - belastingPct / 100);
+    const netto = bruto * (1 - tariefVoorJaar(j) / 100);
     dividenden.push({ datum: d, bruto, netto });
     plan.push({ datum: d, soort: 'dividend', bedrag: netto });
     const verplicht = bruto * grondslag * pct;
