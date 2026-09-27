@@ -1,37 +1,28 @@
 import { useEffect, useRef, useState } from 'react';
 import { api } from './api.js';
-import CrudTabel from './CrudTabel.jsx';
 import Grafiek from './Grafiek.jsx';
-import { datum, eur, eurc, num, pct, vandaag } from './format.js';
+import { datum, eur, num, pct, vandaag } from './format.js';
+import { Bereik, KORT, Kpi, Netto, Stamdata, Tijdlijn, useOnderdeel } from './onderdelen.jsx';
+import { MetBronnen } from './bronnen.jsx';
 
-const ONDERDELEN = ['Overzicht', 'Vertrek', 'Stamdata'];
+// Verra A&V: de deelneming in Verra Aan- en Verkoop Den Haag B.V. Eén set
+// stamdata (waardering, jaarresultaten, noemer) voor alle houders; de
+// leaverregeling geldt alleen voor de privépositie.
 
-export default function Spoor1() {
-  const [onderdeel, setOnderdeel] = useState(() => {
-    const deel = new URLSearchParams(location.search).get('deel');
-    return ONDERDELEN.includes(deel) ? deel : 'Overzicht';
-  });
+const ONDERDELEN = ['Overzicht', 'Vertrek privé', 'Stamdata'];
+const STAMDATA = ['certificaatpositie', 'dividend', 'jaarresultaat', 'waardering', 'noemer', 'leaver_regel', 'entiteit', 'instelling'];
+
+export default function Verra() {
+  const [onderdeel, nav] = useOnderdeel(ONDERDELEN);
   return (
     <>
-      <nav className="subtabs">
-        {ONDERDELEN.map((o) => (
-          <button key={o} className={o === onderdeel ? 'actief' : ''} onClick={() => setOnderdeel(o)}>
-            {o}
-          </button>
-        ))}
-      </nav>
+      {nav}
       {onderdeel === 'Overzicht' && <Overzicht />}
-      {onderdeel === 'Vertrek' && <Vertrek />}
-      {onderdeel === 'Stamdata' && <Stamdata />}
+      {onderdeel === 'Vertrek privé' && <Vertrek />}
+      {onderdeel === 'Stamdata' && <Stamdata tabellen={STAMDATA} />}
     </>
   );
 }
-
-const Netto = ({ n }) => <span className={n < 0 ? 'neg' : 'pos'}>{eur(n)}</span>;
-const Bereik = ({ min, max, kleur = true }) => {
-  const B = kleur ? Netto : ({ n }) => eur(n);
-  return Math.round(min) === Math.round(max) ? <B n={min} /> : <><B n={min} /> tot <B n={max} /></>;
-};
 
 function Overzicht() {
   const [peildatum, setPeildatum] = useState(vandaag());
@@ -40,119 +31,127 @@ function Overzicht() {
 
   useEffect(() => {
     if (!peildatum) return;
-    api.get(`/spoor1/overzicht?peildatum=${peildatum}`).then(setData, (e) => setFout(e.message));
+    api.get(`/verra/overzicht?peildatum=${peildatum}`).then(setData, (e) => setFout(e.message));
   }, [peildatum]);
 
   if (fout) return <p className="fout">{fout}</p>;
   if (!data) return <p className="uitleg">Laden…</p>;
+  const s = data.samen;
 
   return (
+    <MetBronnen>
     <>
       <div className="balk">
         <label>
           Peildatum <input type="date" value={peildatum} onChange={(e) => setPeildatum(e.target.value)} />
         </label>
       </div>
-      {data.posities.map((p) => <Positie key={p.positie.id} p={p} />)}
-      {!data.posities.length && <p className="uitleg">Nog geen certificaatpositie in spoor 1 — voeg er een toe onder Stamdata.</p>}
+      {!s ? (
+        <p className="uitleg">Nog geen certificaatpositie — voeg er een toe onder Stamdata.</p>
+      ) : (
+        <>
+          <h2>
+            {s.vennootschap}{' '}
+            <small>· certificaten via de STAK, zonder vergaderrecht</small>
+          </h2>
+          <div className="kpis">
+            <Kpi titel="Belang samen" waarde={`${num(s.aandelen)} van ${s.noemer} = ${pct(s.pct)}`}
+              sub={data.posities.map((p) => `${KORT[p.positie.houder_code] ?? p.positie.houder} ${pct((p.positie.aantal_rekenbasis / s.noemer) * 100)}`).join(' · ')} />
+            <Kpi titel="Inleg samen" waarde={eur(s.inleg)} sub="volledig geleend" />
+            <Kpi titel="Schuld op peildatum" waarde={eur(s.schuld)} sub="details onder Financiering" />
+            <Kpi titel="Waarde samen" waarde={<Bereik min={Math.min(...s.per_factor.map((f) => f.waarde))} max={Math.max(...s.per_factor.map((f) => f.waarde))} kleur={false} />}
+              sub={s.per_factor.map((f) => `×${num(f.factor)}`).join(' tot ')} />
+            <Kpi titel="Netto samen" waarde={<Bereik min={Math.min(...s.per_factor.map((f) => f.netto))} max={Math.max(...s.per_factor.map((f) => f.netto))} />}
+              sub="waarde − schuld" />
+          </div>
+          <Posities data={data} />
+          <Waarderingsverloop rijen={data.waarderingsverloop} posities={data.posities} />
+        </>
+      )}
       <Tijdlijn items={data.gebeurtenissen} />
       <Aandachtspunten />
     </>
+    </MetBronnen>
   );
 }
 
-function Positie({ p }) {
-  const waarden = p.matrix.flatMap((m) => m.cellen.map((c) => c.waarde));
+function Posities({ data }) {
+  const s = data.samen;
   return (
-    <>
-      <h2>
-        {p.positie.aantal} certificaten {p.positie.vennootschap} <small>· {p.positie.houder}</small>
-        {p.noemers.length === 1 && (
-          <small className="rekenbasis">
-            {' '}· rekenbasis {num(p.positie.aantal_rekenbasis)} van {p.noemers[0].aantal} aandelen ={' '}
-            {pct((p.positie.aantal_rekenbasis / p.noemers[0].aantal) * 100)}
-          </small>
-        )}
-      </h2>
-      <div className="kpis">
-        <Kpi titel="Inleg" waarde={eur(p.positie.inleg)} sub={`verkregen ${datum(p.positie.verkregen_op)}`} />
-        <Kpi
-          titel="Schuld op peildatum"
-          waarde={eur(p.schuld.totaal)}
-          sub={p.schuld.opgelopen_rente ? `waarvan ${eur(p.schuld.opgelopen_rente)} opgelopen rente` : 'geen lening'}
-        />
-        <Kpi
-          titel="Waarde certificaten"
-          waarde={waarden.length ? <Bereik min={Math.min(...waarden)} max={Math.max(...waarden)} kleur={false} /> : '—'}
-          sub={p.noemers.length === 1 ? "afhankelijk van de waardering (×3 of ×4)" : "afhankelijk van noemer en waardering"}
-        />
-        <Kpi
-          titel="Netto positie"
-          waarde={p.netto_bandbreedte ? <Bereik {...p.netto_bandbreedte} /> : '—'}
-          sub="waarde − schuld"
-        />
-        <Kpi
-          titel="Dividend ontvangen (netto)"
-          waarde={eur(p.dividend_totaal.netto)}
-          sub={`bruto ${eur(p.dividend_totaal.bruto)}, tot peildatum`}
-        />
-      </div>
-
-      <section className="kaart">
-        <h3>Waarde en netto positie</h3>
-        <p className="uitleg">
-          Ondernemingswaarde ÷ {p.noemers.length === 1 ? p.noemers[0].aantal : 'noemer'} ×{' '}
-          {num(p.positie.aantal_rekenbasis)} aandelen, min de schuld op de peildatum. Rekenbasis volgens de verkopers en
-          het rectificatievoornemen (aanname A11); de akte zegt nog 9 certificaten op 100 (V-F40).
-        </p>
-        <div className="scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Waardering</th>
-                {p.noemers.map((n) => <th key={n.id} className="getal">÷ {n.aantal}<br /><small>{n.label}</small></th>)}
-              </tr>
-            </thead>
-            <tbody>
-              {p.matrix.map((m) => (
-                <tr key={m.waardering.id}>
+    <MetBronnen>
+    <section className="kaart">
+      <h3>Posities</h3>
+      <p className="uitleg">
+        Waarde = ondernemingswaarde ÷ {s.noemer} × aantal aandelen, volgens de waardering die op de peildatum als prijs
+        geldt. Het belang wordt gemeten aan het geplaatste kapitaal van {s.noemer} aandelen (A14).
+      </p>
+      <div className="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Houder</th>
+              <th className="getal">Aandelen</th>
+              <th>Verkregen</th>
+              <th className="getal">Inleg</th>
+              {s.per_factor.map((f) => <th key={f.factor} className="getal">Waarde ×{num(f.factor)}</th>)}
+              <th className="getal">Schuld</th>
+              <th className="getal">Netto</th>
+              <th className="getal">Dividend netto</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.posities.map((p) => {
+              const cellen = p.matrix.map((m) => ({ w: m.waardering, c: m.cellen.at(-1) }));
+              return (
+                <tr key={p.positie.id}>
                   <td>
-                    {m.waardering.ondernemingswaarde == null ? 'Instapprijs' : eur(m.waardering.ondernemingswaarde)}{' '}
-                    <small>{m.waardering.label}</small>
-                    <br /><small>{m.waardering.toelichting}</small>
+                    {p.positie.houder}
+                    {p.positie.houder_code === 'prive' && <><br /><small>leaverregeling van toepassing</small></>}
                   </td>
-                  {m.cellen.map((c) => (
-                    <td key={c.noemer} className="getal">
-                      {eur(c.waarde)} <small>({eur(c.per_certificaat)}/st)</small>
-                      <br />netto <Netto n={c.netto} />
-                    </td>
+                  <td className="getal">{num(p.positie.aantal_rekenbasis)}<br /><small>{pct((p.positie.aantal_rekenbasis / s.noemer) * 100)}</small></td>
+                  <td>{datum(p.positie.verkregen_op)}</td>
+                  <td className="getal">{eur(p.positie.inleg)}<br /><small>{eur(p.positie.inleg / p.positie.aantal_rekenbasis)}/aandeel</small></td>
+                  {cellen.map(({ w, c }) => (
+                    <td key={w.id} className="getal">{eur(c?.waarde)}{w.soort === 'inleg' && <><br /><small>instapprijs</small></>}</td>
                   ))}
+                  <td className="getal">{eur(p.schuld.totaal)}</td>
+                  <td className="getal">{p.netto_bandbreedte ? <Bereik {...p.netto_bandbreedte} /> : '—'}</td>
+                  <td className="getal">{eur(p.dividend_totaal.netto)}</td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <Waarderingsverloop rijen={p.waarderingsverloop} />
-      {p.lening && <Schuldverloop p={p} />}
-      {p.dividend_toets && <DividendToets t={p.dividend_toets} />}
-    </>
+              );
+            })}
+            <tr className="totaal">
+              <td><strong>Samen</strong></td>
+              <td className="getal"><strong>{num(s.aandelen)}</strong><br /><small>{pct(s.pct)}</small></td>
+              <td />
+              <td className="getal"><strong>{eur(s.inleg)}</strong></td>
+              {s.per_factor.map((f) => <td key={f.factor} className="getal"><strong>{eur(f.waarde)}</strong></td>)}
+              <td className="getal"><strong>{eur(s.schuld)}</strong></td>
+              <td className="getal"><strong><Bereik min={Math.min(...s.per_factor.map((f) => f.netto))} max={Math.max(...s.per_factor.map((f) => f.netto))} /></strong></td>
+              <td className="getal"><strong>{eur(s.dividend_netto)}</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    </MetBronnen>
   );
 }
 
-function Waarderingsverloop({ rijen }) {
+function Waarderingsverloop({ rijen, posities }) {
   if (!rijen?.length) return null;
-  const factoren = rijen[0].per_factor.map((x) => x.factor);
+  const naam = Object.fromEntries(posities.map((p) => [p.positie.id, KORT[p.positie.houder_code] ?? p.positie.houder]));
   const soortTekst = { vastgesteld: 'vastgesteld', berekend: 'berekend', doorgetrokken: 'doorgetrokken', inleg: 'instapprijs' };
   return (
+    <MetBronnen>
     <section className="kaart">
       <h3>Waardering per jaar</h3>
       <p className="uitleg">
         Methode van de verkopers (B-PRES dia 7, B-WRD-2025): resultaat vóór belastingen van de drie voorgaande boekjaren,
         gewogen 1-2-3 (meest recent het zwaarst), × factor. De waardering per eind van een jaar is de prijs in het jaar
-        erna (dia 5). Een vastgestelde waardering gaat voor; ontbreekt een jaarresultaat, dan loopt de waarde door.
-        Jaarresultaten en prognoses voeg je toe onder Stamdata.
+        erna (dia 5). Een vastgestelde waardering gaat voor; ontbreekt een jaarresultaat, dan loopt de waarde door. In het
+        jaar van verkrijging telt de instapprijs. Eén waardering voor alle houders; jaarresultaten en prognoses voeg je
+        toe onder Stamdata.
       </p>
       <div className="scroll">
         <table>
@@ -160,7 +159,7 @@ function Waarderingsverloop({ rijen }) {
             <tr>
               <th>Geldt in</th>
               <th>Resultaten (gewicht 1 · 2 · 3)</th>
-              {factoren.map((f) => <th key={f} className="getal">×{num(f)}: ondernemingswaarde → positie</th>)}
+              {rijen[0].per_factor.map((x) => <th key={x.factor} className="getal">×{num(x.factor)}: ondernemingswaarde · per aandeel · per houder</th>)}
             </tr>
           </thead>
           <tbody>
@@ -177,8 +176,15 @@ function Waarderingsverloop({ rijen }) {
                 </td>
                 {r.per_factor.map((x) => (
                   <td key={x.factor} className="getal">
-                    {x.ondernemingswaarde == null ? '—' : eur(x.ondernemingswaarde)} → <strong>{eur(x.waarde)}</strong>
-                    <br /><small>{soortTekst[x.soort]}{x.soort === 'vastgesteld' || x.soort === 'doorgetrokken' ? `: ${x.bron}` : ''}</small>
+                    {x.ondernemingswaarde == null ? '—' : <>{eur(x.ondernemingswaarde)} · {eur(x.per_aandeel)}</>}
+                    {x.soort !== 'inleg' && <><br /><small>{soortTekst[x.soort]}{x.soort === 'vastgesteld' || x.soort === 'doorgetrokken' ? `: ${x.bron}` : ''}</small></>}
+                    <br />
+                    {x.posities.map((p) => (
+                      <small key={p.positie_id} className="resultaat">
+                        {naam[p.positie_id]} {p.waarde == null ? '—' : <strong>{eur(p.waarde)}</strong>}
+                        {p.soort === 'inleg' && ' (instapprijs)'}
+                      </small>
+                    ))}
                   </td>
                 ))}
               </tr>
@@ -187,138 +193,25 @@ function Waarderingsverloop({ rijen }) {
         </table>
       </div>
     </section>
-  );
-}
-
-function Kpi({ titel, waarde, sub }) {
-  return (
-    <div className="kpi">
-      <div className="kpi-titel">{titel}</div>
-      <div className="kpi-waarde">{waarde}</div>
-      {sub && <div className="kpi-sub">{sub}</div>}
-    </div>
-  );
-}
-
-function Schuldverloop({ p }) {
-  const l = p.lening;
-  return (
-    <section className="kaart">
-      <h3>Schuldverloop — {l.omschrijving}</h3>
-      <p className="uitleg">
-        {eur(l.hoofdsom)} van {l.geldgever} · {pct(l.rente_pct)} rente,{' '}
-        {l.rente_bijschrijven ? 'bijgeschreven (rente over rente)' : 'betaald'}{' '}
-        {l.rente_periode === 'kalenderjaar' ? 'op 31-12 van elk jaar' : 'op de jaardag van de lening'} · looptijd
-        tot {datum(l.einddatum)} · vrijwillig aflossen mag altijd. Opeisbaar bij einde participatie.
-      </p>
-      <div className="scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Periode</th>
-              <th className="getal">Begin</th>
-              <th className="getal">Rente</th>
-              <th className="getal">Afgelost</th>
-              <th className="getal">Eind</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {p.verloop.map((r) => (
-              <tr key={r.jaar} className={r.prognose ? 'prognose' : ''}>
-                <td>{datum(r.start)} – {datum(r.eind)}</td>
-                <td className="getal">{eur(r.beginsaldo)}</td>
-                <td className="getal">{eur(r.rente)}{r.rente_betaald ? ' (betaald)' : ''}</td>
-                <td className="getal">{eur(r.afgelost)}</td>
-                <td className="getal"><strong>{eur(r.eindsaldo)}</strong></td>
-                <td><small>{r.prognose ? 'prognose' : ''}</small></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <p className="uitleg">Prognose rekent alleen met al ingevoerde dividenden en aflossingen.</p>
-    </section>
-  );
-}
-
-function DividendToets({ t }) {
-  return (
-    <section className="kaart">
-      <h3>Aflossingsverplichting uit dividend</h3>
-      <p className="uitleg">
-        B-GL-2024 art. 3.2: {pct(t.pct)} van het jaarlijks toekomende dividend gaat als aflossing naar de geldgever,
-        hier gerekend over het <strong>{t.grondslag}</strong> dividend. Geen dividend is geen verplichting (art. 3.1).
-        Niet nakomen maakt de lening na ingebrekestelling direct opeisbaar (art. 4.1(c)).
-      </p>
-      <div className="scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Jaar</th>
-              <th className="getal">Dividend bruto</th>
-              <th className="getal">Netto</th>
-              <th className="getal">Verplicht</th>
-              <th className="getal">Afgelost</th>
-              <th className="getal">Verschil</th>
-              <th className="getal">Cumulatief</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {t.rijen.map((r) => (
-              <tr key={r.jaar}>
-                <td>{r.jaar}</td>
-                <td className="getal">{eur(r.dividend_bruto)}</td>
-                <td className="getal">{eur(r.dividend_netto)}</td>
-                <td className="getal">{eurc(r.verplicht)}</td>
-                <td className="getal">{eurc(r.afgelost)}</td>
-                <td className="getal"><Netto n={r.verschil} /></td>
-                <td className="getal"><Netto n={r.cum_verschil} /></td>
-                <td className={r.status === 'tekort' ? 'neg' : ''}>{r.status}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <p className="uitleg">
-        Het contract noemt geen betaaltermijn. Per jaar tellen alle aflossingen in hetzelfde kalenderjaar mee;
-        "Cumulatief" laat zien of je over de hele looptijd voorloopt of achterloopt.
-      </p>
-    </section>
-  );
-}
-
-function Tijdlijn({ items }) {
-  const nu = vandaag();
-  return (
-    <section className="kaart">
-      <h3>Tijdlijn</h3>
-      <ul className="tijdlijn">
-        {items.map((g) => (
-          <li key={g.id} className={g.datum < nu ? 'verleden' : ''}>
-            <strong>{datum(g.datum)}</strong> {g.omschrijving} <small>{g.bron}</small>
-          </li>
-        ))}
-      </ul>
-    </section>
+    </MetBronnen>
   );
 }
 
 function Aandachtspunten() {
   return (
+    <MetBronnen>
     <section className="kaart">
       <h3>Open punten die de cijfers raken</h3>
       <ul>
-        <li><strong>V-F40</strong> Rectificatie nog niet notarieel vastgelegd: de rekenbasis (13,5 van 300) is een aanname; de akte zegt 9 op 100 (box 2).</li>
-        <li><strong>V-F44</strong> Factor ×3 of ×4 voor de Marktwaarde.</li>
-        <li><strong>V-F08</strong> Bijlage 3 (Marktwaarde per 31-12-2024) ontbreekt: basis onder de inleg van € 1.900/st.</li>
-        <li><strong>V-F09</strong> Zakelijkheid 5% rente op onbezekerde lening; lucratief belang.</li>
-        <li><strong>V-F14</strong> Verwerking lening in aangifte IB 2024 en 2025.</li>
-        <li><strong>V-F28</strong> Valt de privépositie binnen de opdracht?</li>
+        <li><strong>V-F40 / V-F54</strong> De rectificatie (13,5 aandelen privé) ligt als concept; nog niet gepasseerd. De akte van 2024 zegt nog 9 certificaten.</li>
+        <li><strong>V-F44</strong> Factor ×3 of ×4 voor de Marktwaarde bij verkoop.</li>
+        <li><strong>V-F47 / V-F48</strong> Tellen privé (4,5%) en holding (5,5%) samen tot een aanmerkelijk belang (10%), en tellen certificaten daarvoor als aandelen? Bepaalt box 2 of box 3 privé.</li>
+        <li><strong>V-F19</strong> Deelnemingsvrijstelling bij de holding (art. 13 Wet VpB 1969).</li>
+        <li><strong>V-F08</strong> Bijlage 3 (Marktwaarde per 31-12-2024) ontbreekt: basis onder de inleg van € 1.900/certificaat.</li>
       </ul>
       <p className="uitleg">Zie openstaande-vragen/REGISTER.md.</p>
     </section>
+    </MetBronnen>
   );
 }
 
@@ -333,7 +226,7 @@ function Vertrek() {
   useEffect(() => {
     if (!invoer.vertrekdatum || !plan) return;
     const q = new URLSearchParams({ ...invoer, ...plan, extra_korting: String(invoer.extra_korting) });
-    api.get(`/spoor1/leaver?${q}`).then(
+    api.get(`/verra/leaver?${q}`).then(
       (d) => { setData(d); setFout(null); },
       (e) => setFout(e.message),
     );
@@ -342,6 +235,7 @@ function Vertrek() {
   const zet = (k, v) => setInvoer((i) => ({ ...i, [k]: v }));
 
   return (
+    <MetBronnen>
     <>
       <Aflossen vertrek={invoer.vertrekdatum} onVertrek={(d) => zet('vertrekdatum', d)} onPlan={setPlan} />
       <section className="kaart">
@@ -430,7 +324,7 @@ function Vertrek() {
               <strong>De factor bepaalt deze bedragen.</strong> De <em>factor</em> (×3 of ×4) is een keuze binnen
               een bandbreedte die de verkopers zelf noemen — B-PRES dia 8: "je mag tussen de factor 3 en 4 waarderen".
               Beide rijen zijn daarom reëel. De <em>noemer</em> is 300 aandelen, zoals de verkopers rekenen (B-MAIL-2025-12,
-              A11); de rectificatie die dat notarieel vastlegt, is er nog niet (V-F40).
+              A11); de rectificatie die dat notarieel vastlegt, ligt als concept en is nog niet gepasseerd (V-F40, V-F54).
             </li>
             <li>Rekent met de waardering die in het vertrekjaar als prijs geldt (waardering per eind vorig jaar); bij vertrek stelt de STAK de Marktwaarde vast (art. 6.6.2). Bij de <em>koop</em> is de factor grotendeels herleid: de holdingtranche is tegen ×3 verworven (F56). Welke factor bij <em>verkoop</em> geldt, is open (V-F44).</li>
             <li>De STAK is niet verplicht de certificaten af te nemen (art. 6.4(i)) — de schuld wordt wel opeisbaar.</li>
@@ -439,6 +333,7 @@ function Vertrek() {
         </section>
       )}
     </>
+    </MetBronnen>
   );
 }
 
@@ -498,7 +393,7 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
         ...(dividend === null ? {} : { dividend_totaal: dividend }),
       };
       const q = new URLSearchParams({ ...plan, rendement_pct: rendement, waarde: waardeBasis, groei_pct: groei, vertrekdatum: vertrek });
-      api.get(`/spoor1/simulatie?${q}`).then(
+      api.get(`/verra/simulatie?${q}`).then(
         (d) => {
           setData(d);
           setFout(null);
@@ -526,6 +421,7 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
   const verschilReeks = k.reeks.map((p, i) => ({ datum: p.datum, waarde: p.netto - bs.reeks[i].netto }));
 
   return (
+    <MetBronnen>
     <section className="kaart">
       <h3>Aflossen of aanhouden</h3>
       <p className="uitleg">
@@ -637,12 +533,14 @@ function Aflossen({ vertrek, onVertrek, onPlan }) {
         </li>
       </ul>
     </section>
+    </MetBronnen>
   );
 }
 
 function Jaaroverzicht({ jaren, inleg, waardeLabel, perJaar, standaard, huidigJaar, onDividend }) {
   const laatste = jaren.rijen.at(-1);
   return (
+    <MetBronnen>
     <div className="jaaroverzicht">
       <h4>Jaaroverzicht</h4>
       <p className="uitleg">
@@ -715,16 +613,6 @@ function Jaaroverzicht({ jaren, inleg, waardeLabel, perJaar, standaard, huidigJa
         is dus een rendement op een geleend bedrag, niet op eigen geld.
       </p>
     </div>
+    </MetBronnen>
   );
-}
-
-const STAMDATA = ['certificaatpositie', 'lening', 'dividend', 'aflossing', 'jaarresultaat', 'waardering', 'noemer', 'leaver_regel', 'entiteit', 'gebeurtenis', 'instelling'];
-
-function Stamdata() {
-  const [meta, setMeta] = useState(null);
-  useEffect(() => {
-    api.get('/meta').then(setMeta);
-  }, []);
-  if (!meta) return <p className="uitleg">Laden…</p>;
-  return STAMDATA.map((n) => <CrudTabel key={n} naam={n} meta={meta} spoor={1} />);
 }

@@ -1,11 +1,27 @@
 # Webapp boekhouding
 
-Eén app voor de drie sporen:
-- **Spoor 1**, privé A. Dreves: positie, schuldverloop, aflossingstoets en vertrekberekening.
-- **Spoor 2**, Dreves Holding B.V.: dubbel boekhouden (fase A).
-- **Spoor 3**: nog een lege tab.
+Eén app, ingedeeld naar functie (sinds migratie 010). De eigen partijen — privé
+A. Dreves en Dreves Holding B.V. — zijn partijen in de database, geen sporen.
+- **Verra A&V**: de certificaatposities van privé en holding in Verra Aan- en
+  Verkoop, de gedeelde waardering, en voor de privépositie het vertrekplan met
+  de leaverregeling.
+- **Financiering**: alle leningen van privé en holding. Voor een lening die in de
+  administratie van de holding wordt geboekt, is het journaal leidend.
+- **Overdracht** privé → holding: verkoop van de privécertificaten tegen
+  marktwaarde (×3 tot ×4), per jaar van overdracht: resultaat en box 2-heffing,
+  schuld die opeisbaar kan worden, belasting op het dividend daarna, voorwaarden.
+- **Overname** 40% VERRA-groep: volgt.
+- **Administratie**: Dreves Holding B.V. volledig (journaal, grootboek,
+  leningen, controles, concept-jaarrekening en VpB-berekening met en zonder
+  deelnemingsvrijstelling); privé: het vermogen uit dit dossier (certificaten,
+  lening 2024, aandelen holding) en per jaar de box, de stand op 1 januari,
+  dividend, dividendbelasting en rente.
 
-Een tab is direct te openen met `?spoor=2`.
+Wetsverwijzingen in de schermen ("art. … Wet IB 2001", "art. 2:… BW", …) worden
+automatisch links naar wetten.overheid.nl (`client/src/bronnen.jsx`).
+
+Direct openen: `?module=verra|financiering|overdracht|overname|administratie`,
+eventueel met `&deel=<subtab>`; bij Administratie `&partij=prive|holding`.
 
 ## Lokaal
 ```bash
@@ -40,7 +56,7 @@ vervangt alleen de images, de data blijft staan.
 - Geen directe identifiers (BSN, IBAN, adressen, geboortedata) invoeren; zie
   `../CLAUDE.md`.
 
-## Boekhouding (spoor 2)
+## Administratie Dreves Holding B.V.
 Het journaal is de administratie van de holding (art. 2:10 BW, art. 52 AWR):
 - **In balans:** de server weigert een boeking waarvan debet en credit niet
   gelijk zijn, of waarvan de datum buiten een open boekjaar valt.
@@ -63,7 +79,7 @@ Het journaal is de administratie van de holding (art. 2:10 BW, art. 52 AWR):
 - Nog niet gebouwd (fase B/C): fiscale correcties en VpB, RGS-koppeling en
   exports (aangifte, XAF, micro-jaarrekening), ING-import (CAMT.053), btw.
 
-## Rekenregels (spoor 1)
+## Rekenregels (Verra A&V en Financiering)
 - **Rente** wordt per kalenderjaar of per contractjaar berekend (instelling per
   lening), naar rato van het aantal dagen in dat jaar. Bij bijschrijven telt de
   rente aan het eind van de periode op bij de schuld, en loopt er daarna rente

@@ -5,16 +5,17 @@
 
 const bron = { naam: 'bron', label: 'Bron', type: 'text' };
 const notitie = { naam: 'notitie', label: 'Notitie', type: 'text', lang: true };
-const spoor = { naam: 'spoor', label: 'Spoor', type: 'spoor', verplicht: true };
+const partij = { naam: 'partij_id', label: 'Partij', type: 'ref', ref: 'entiteit' };
 
 export const RESOURCES = {
   entiteit: {
-    titel: 'Entiteiten',
-    uitleg: 'Vennootschappen, stichtingen en personen die in dit spoor een rol spelen.',
+    titel: 'Partijen',
+    uitleg: 'Vennootschappen, stichtingen en personen. Eén keer vastgelegd, voor alle onderdelen. "Code" markeert de eigen partijen (prive, holding).',
     labelVeld: 'naam',
     velden: [
-      spoor,
       { naam: 'naam', label: 'Naam', type: 'text', verplicht: true },
+      { naam: 'code', label: 'Code', type: 'text' },
+      { naam: 'regime', label: 'Fiscaal regime', type: 'text' },
       { naam: 'kvk', label: 'KvK', type: 'text' },
       { naam: 'soort', label: 'Soort', type: 'text' },
       { naam: 'rol', label: 'Rol', type: 'text', lang: true },
@@ -25,12 +26,11 @@ export const RESOURCES = {
   certificaatpositie: {
     titel: 'Certificaatposities',
     uitleg: 'Wie houdt hoeveel certificaten, tegen welke inleg. "Aantal aandelen (rekenbasis)" is het belang waarmee de app rekent (leeg = aantal certificaten).',
-    labelVeld: 'houder',
+    labelVeld: 'label',
     velden: [
-      spoor,
-      { naam: 'houder', label: 'Houder', type: 'text', verplicht: true },
+      { naam: 'houder_id', label: 'Houder', type: 'ref', ref: 'entiteit', verplicht: true },
       { naam: 'vennootschap_id', label: 'Vennootschap', type: 'ref', ref: 'entiteit' },
-      { naam: 'aantal', label: 'Aantal certificaten (akte)', type: 'integer', verplicht: true },
+      { naam: 'aantal', label: 'Aantal certificaten (akte)', type: 'integer' },
       { naam: 'aantal_rekenbasis', label: 'Aantal aandelen (rekenbasis)', type: 'number' },
       { naam: 'nummers', label: 'Nummers', type: 'text' },
       { naam: 'inleg', label: 'Inleg (€)', type: 'number', verplicht: true },
@@ -45,10 +45,9 @@ export const RESOURCES = {
     uitleg: 'Schulden, met rente en aflossingsregeling.',
     labelVeld: 'omschrijving',
     velden: [
-      spoor,
       { naam: 'omschrijving', label: 'Omschrijving', type: 'text', verplicht: true },
       { naam: 'geldgever_id', label: 'Geldgever', type: 'ref', ref: 'entiteit' },
-      { naam: 'schuldenaar', label: 'Schuldenaar', type: 'text', verplicht: true },
+      { naam: 'schuldenaar_id', label: 'Schuldenaar', type: 'ref', ref: 'entiteit', verplicht: true },
       { naam: 'positie_id', label: 'Financiert positie', type: 'ref', ref: 'certificaatpositie' },
       { naam: 'hoofdsom', label: 'Hoofdsom (€)', type: 'number', verplicht: true },
       { naam: 'rente_pct', label: 'Rente %', type: 'number', verplicht: true },
@@ -58,7 +57,6 @@ export const RESOURCES = {
       { naam: 'looptijd_jaren', label: 'Looptijd (jaren)', type: 'integer', verplicht: true },
       { naam: 'aflossing_uit_dividend_pct', label: 'Verplichte aflossing uit dividend %', type: 'number' },
       { naam: 'aflossing_grondslag', label: 'Over dividend', type: 'enum', opties: ['bruto', 'netto'], verplicht: true },
-      { naam: 'richting', label: 'Richting', type: 'enum', opties: ['ontvangen', 'verstrekt'], verplicht: true },
       { naam: 'rekening_id', label: 'Grootboekrekening', type: 'ref', ref: 'grootboekrekening' },
       bron,
       notitie,
@@ -170,7 +168,7 @@ export const RESOURCES = {
     uitleg: 'Afsluiten gaat via het overzicht; een afgesloten boekjaar is niet meer te wijzigen.',
     labelVeld: 'label',
     velden: [
-      spoor,
+      { ...partij, label: 'Administratie van', verplicht: true },
       { naam: 'start', label: 'Start', type: 'date', verplicht: true },
       { naam: 'eind', label: 'Eind', type: 'date', verplicht: true },
       { naam: 'status', label: 'Status', type: 'text', berekend: true },
@@ -182,7 +180,7 @@ export const RESOURCES = {
     uitleg: 'Schriftelijke vastlegging (art. 2:247 BW bij rechtshandelingen met de aandeelhouder). De getekende versie voeg je als bijlage toe onder Leningen.',
     labelVeld: 'titel',
     velden: [
-      spoor,
+      partij,
       { naam: 'soort', label: 'Soort', type: 'enum', opties: ['lening', 'rekening-courant', 'besluit', 'overig'], verplicht: true },
       { naam: 'titel', label: 'Titel', type: 'text', verplicht: true },
       { naam: 'datum', label: 'Datum', type: 'date' },
@@ -197,7 +195,7 @@ export const RESOURCES = {
     titel: 'Tijdlijn',
     uitleg: 'Data en termijnen.',
     velden: [
-      spoor,
+      partij,
       { naam: 'datum', label: 'Datum', type: 'date', verplicht: true },
       { naam: 'omschrijving', label: 'Omschrijving', type: 'text', verplicht: true, lang: true },
       bron,
@@ -222,11 +220,9 @@ export function normaliseer(veld, waarde) {
       return n;
     }
     case 'integer':
-    case 'ref':
-    case 'spoor': {
+    case 'ref': {
       const n = Number(waarde);
       if (!Number.isInteger(n)) throw new Invoerfout(`${veld.label}: geen geheel getal`);
-      if (veld.type === 'spoor' && ![1, 2, 3].includes(n)) throw new Invoerfout('Spoor moet 1, 2 of 3 zijn');
       return n;
     }
     case 'bool':

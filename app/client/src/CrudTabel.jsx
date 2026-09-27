@@ -4,7 +4,9 @@ import { datum, num } from './format.js';
 
 // Generieke tabel voor één resource uit /api/meta: tonen, toevoegen,
 // bewerken en verwijderen. Velden en types komen van de server.
-export default function CrudTabel({ naam, meta, spoor, onWijziging }) {
+// 'partij' (prive|holding) toont alleen wat bij die eigen partij hoort; gedeelde
+// stamdata negeert het filter.
+export default function CrudTabel({ naam, meta, partij, onWijziging }) {
   const def = meta[naam];
   const sleutel = def.sleutel ?? 'id';
   const [rijen, setRijen] = useState([]);
@@ -14,7 +16,7 @@ export default function CrudTabel({ naam, meta, spoor, onWijziging }) {
   const [fout, setFout] = useState(null);
 
   const laad = async () => {
-    const q = spoor && naam !== 'instelling' ? `?spoor=${spoor}` : '';
+    const q = partij ? `?partij=${partij}` : '';
     setRijen(await api.get(`/data/${naam}${q}`));
     const refNamen = [...new Set(def.velden.filter((v) => v.type === 'ref').map((v) => v.ref))];
     const geladen = await Promise.all(refNamen.map((r) => api.get(`/data/${r}`)));
@@ -23,7 +25,7 @@ export default function CrudTabel({ naam, meta, spoor, onWijziging }) {
 
   useEffect(() => {
     laad().catch((e) => setFout(e.message));
-  }, [naam, spoor]);
+  }, [naam, partij]);
 
   const refLabel = (ref, id) => {
     const rij = refs[ref]?.find((r) => r.id === id);
@@ -46,7 +48,7 @@ export default function CrudTabel({ naam, meta, spoor, onWijziging }) {
       setConcept({ ...rij });
     } else {
       setBewerk('nieuw');
-      setConcept(spoor ? { spoor } : {});
+      setConcept({});
     }
   };
 
@@ -84,12 +86,6 @@ export default function CrudTabel({ naam, meta, spoor, onWijziging }) {
       case 'number':
       case 'integer':
         return <input type="number" step="any" value={w ?? ''} onChange={(e) => zet(e.target.value)} />;
-      case 'spoor':
-        return (
-          <select value={w ?? ''} onChange={(e) => zet(e.target.value)}>
-            {[1, 2, 3].map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
-        );
       case 'enum':
         return (
           <select value={w ?? ''} onChange={(e) => zet(e.target.value)}>
@@ -113,8 +109,7 @@ export default function CrudTabel({ naam, meta, spoor, onWijziging }) {
     }
   };
 
-  // In de tabel het spoor weglaten: dat is al gekozen via de tab.
-  const kolommen = def.velden.filter((v) => !(spoor && v.type === 'spoor'));
+  const kolommen = def.velden;
 
   const formulier = (
     <div className="formulier">

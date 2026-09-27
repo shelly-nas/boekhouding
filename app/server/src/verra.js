@@ -1,7 +1,10 @@
+// Verra A&V: de certificaatposities in Verra Aan- en Verkoop Den Haag B.V.,
+// van alle houders, met de gedeelde waardering. De leaverregeling en het
+// vertrekplan gelden alleen voor de privépositie.
 import { pool } from './db.js';
 import { Invoerfout } from './resources.js';
+import { aflossingenPerLening } from './financiering.js';
 import {
-  aflossingenVoor,
   DIVIDENDTARIEF,
   dividendToets,
   leaverPrijs,
@@ -15,47 +18,56 @@ import {
   volleJaren,
 } from './rekenen.js';
 
-const SPOOR = 1;
 const vandaag = () => new Date().toISOString().slice(0, 10);
 
-async function laad() {
+export async function laad() {
   const q = (sql, p = []) => pool.query(sql, p).then((r) => r.rows);
   const [posities, leningen, dividenden, aflossingen, waarderingen, noemers, regels, instellingen, gebeurtenissen, entiteiten, jaarresultaten] =
     await Promise.all([
-      q('SELECT * FROM certificaatpositie WHERE spoor = $1 ORDER BY id', [SPOOR]),
-      q('SELECT * FROM lening WHERE spoor = $1 ORDER BY id', [SPOOR]),
+      q('SELECT * FROM certificaatpositie ORDER BY verkregen_op, id'),
+      q('SELECT * FROM lening WHERE positie_id IS NOT NULL ORDER BY id'),
       q('SELECT * FROM dividend ORDER BY datum'),
       q('SELECT * FROM aflossing ORDER BY datum'),
       q('SELECT * FROM waardering ORDER BY peildatum, id'),
       q('SELECT * FROM noemer ORDER BY aantal'),
       q('SELECT * FROM leaver_regel ORDER BY id'),
       q('SELECT * FROM instelling'),
-      q('SELECT * FROM gebeurtenis WHERE spoor = $1 ORDER BY datum', [SPOOR]),
-      q('SELECT id, naam FROM entiteit'),
+      q('SELECT * FROM gebeurtenis WHERE partij_id IS NOT NULL ORDER BY datum'),
+      q('SELECT id, naam, code FROM entiteit'),
       q('SELECT * FROM jaarresultaat ORDER BY boekjaar'),
     ]);
   const naam = Object.fromEntries(entiteiten.map((e) => [e.id, e.naam]));
+  const code = Object.fromEntries(entiteiten.filter((e) => e.code).map((e) => [e.id, e.code]));
   const instelling = Object.fromEntries(instellingen.map((i) => [i.sleutel, i.waarde]));
-  return { posities, leningen, dividenden, aflossingen, waarderingen, noemers, regels, instelling, gebeurtenissen, naam, jaarresultaten };
+  const afl = await aflossingenPerLening(leningen);
+  return { posities, leningen, dividenden, aflossingen, afl, waarderingen, noemers, regels, instelling, gebeurtenissen, naam, code, jaarresultaten };
+}
+
+// De privépositie: alleen daarop zijn de leaverregeling en het vertrekplan van
+// toepassing.
+export function privepositie(d) {
+  const p = d.posities.find((x) => d.code[x.houder_id] === 'prive');
+  if (!p) throw new Invoerfout('Geen privépositie');
+  return p;
 }
 
 // Rekenbasis: de noemer die als standaard is gemarkeerd (anders alle), en het
 // aantal aandelen waarmee de positie meetelt (anders het aantal certificaten).
-function noemersVoor(d, p) {
+export function noemersVoor(d, p) {
   const eigen = d.noemers.filter((n) => n.vennootschap_id === p.vennootschap_id);
   const standaard = eigen.filter((n) => n.standaard);
   return standaard.length ? standaard : eigen;
 }
-const rekenAantal = (p) => Number(p.aantal_rekenbasis ?? p.aantal);
+export const rekenAantal = (p) => Number(p.aantal_rekenbasis ?? p.aantal);
 
 // Factoren (×3, ×4) die in de stamdata voorkomen.
-function factorenVoor(d, p) {
+export function factorenVoor(d, p) {
   const f = d.waarderingen.filter((w) => w.vennootschap_id === p.vennootschap_id && w.factor != null).map((w) => Number(w.factor));
   return [...new Set(f.length ? f : [3, 4])].sort((a, b) => a - b);
 }
 
 // Waardering per jaar voor één factor (null = inleg), volgens B-PRES dia 7.
-function waarderingVoor(d, p, factor, { groeiPct = 0, noemer } = {}) {
+export function waarderingVoor(d, p, factor, { groeiPct = 0, noemer } = {}) {
   const n = noemer ?? noemersVoor(d, p).at(-1)?.aantal;
   const weging = [1, 2, 3].map((i) => Number(d.instelling[`waardering_weging_${i}`] ?? [3, 2, 1][i - 1]));
   return waarderingPerJaar({
@@ -84,10 +96,10 @@ function geldendeWaarderingen(d, p, datum) {
   });
 }
 
-function leningVoor(d, positie) {
+export function leningVoor(d, positie) {
   const lening = d.leningen.find((l) => l.positie_id === positie.id);
   if (!lening) return { lening: null, aflossingen: [] };
-  return { lening, aflossingen: aflossingenVoor(lening, d.aflossingen) };
+  return { lening, aflossingen: d.afl.get(lening.id)?.aflossingen ?? [] };
 }
 
 export async function overzicht(peildatum = vandaag()) {
@@ -112,7 +124,7 @@ export async function overzicht(peildatum = vandaag()) {
       netto: ontvangen.reduce((s, x) => s + x.netto, 0),
     };
     return {
-      positie: { ...p, vennootschap: d.naam[p.vennootschap_id], aantal_rekenbasis: aantal },
+      positie: { ...p, houder: d.naam[p.houder_id], houder_code: d.code[p.houder_id], vennootschap: d.naam[p.vennootschap_id], aantal_rekenbasis: aantal },
       lening: lening && {
         ...lening,
         geldgever: d.naam[lening.geldgever_id],
@@ -145,13 +157,78 @@ export async function overzicht(peildatum = vandaag()) {
       })(),
     };
   });
-  return { peildatum, posities, gebeurtenissen: d.gebeurtenissen };
+  return {
+    peildatum,
+    posities,
+    samen: samen(d, posities),
+    waarderingsverloop: verloopVennootschap(d, posities),
+    gebeurtenissen: d.gebeurtenissen.map((g) => ({ ...g, partij: d.naam[g.partij_id] })),
+  };
 }
 
-export async function leaver({ positie_id, vertrekdatum = vandaag(), categorie = 'good', extra_korting, ...plan }) {
+// Alle posities bij elkaar: het belang in de vennootschap en de waarde per
+// factor, tegen de rekenbasis (standaard noemer).
+function samen(d, posities) {
+  if (!posities.length) return null;
+  const noemer = posities[0].noemers.at(-1)?.aantal ?? null;
+  const aandelen = posities.reduce((s, p) => s + p.positie.aantal_rekenbasis, 0);
+  const schuld = posities.reduce((s, p) => s + p.schuld.totaal, 0);
+  const factoren = posities[0].matrix.map((m) => m.waardering);
+  return {
+    vennootschap: posities[0].positie.vennootschap,
+    noemer,
+    aandelen,
+    pct: noemer ? (aandelen / noemer) * 100 : null,
+    inleg: posities.reduce((s, p) => s + p.positie.inleg, 0),
+    schuld,
+    dividend_netto: posities.reduce((s, p) => s + p.dividend_totaal.netto, 0),
+    per_factor: factoren.map((w, i) => {
+      const waarde = posities.reduce((s, p) => s + (p.matrix[i]?.cellen.at(-1)?.waarde ?? 0), 0);
+      return { factor: w.factor, waarde, netto: waarde - schuld };
+    }),
+  };
+}
+
+// Waardering per jaar voor de vennootschap, met de waarde per positie. Vóór de
+// verkrijging heeft een positie geen waarde; in het jaar van verkrijging geldt
+// de inleg (instapprijs).
+function verloopVennootschap(d, posities) {
+  if (!posities.length) return [];
+  const ps = posities.map((x) => x.positie);
+  const van = Math.min(...ps.map((p) => Number(p.verkregen_op.slice(0, 4))));
+  const eindjaren = posities.map((x) => (x.lening ? Number(x.lening.einddatum.slice(0, 4)) : Number(x.positie.verkregen_op.slice(0, 4)) + 4));
+  const tot = Math.max(...eindjaren);
+  const vennootschap = ps[0].vennootschap_id;
+  const res = new Map(d.jaarresultaten.filter((r) => r.vennootschap_id === vennootschap).map((r) => [Number(r.boekjaar), r]));
+  const factoren = factorenVoor(d, ps[0]);
+  const noemer = noemersVoor(d, ps[0]).at(-1)?.aantal;
+  const reeksen = ps.map((p) => ({ p, per: factoren.map((f) => waarderingVoor(d, p, f)) }));
+  const rijen = [];
+  for (let j = van; j <= tot; j++) {
+    rijen.push({
+      jaar: j,
+      resultaten: [j - 3, j - 2, j - 1].map((x) => (res.has(x) ? { jaar: x, resultaat: res.get(x).resultaat, status: res.get(x).status } : { jaar: x, resultaat: null })),
+      per_factor: factoren.map((f, i) => {
+        const perPositie = reeksen.map(({ p, per }) =>
+          j < Number(p.verkregen_op.slice(0, 4)) ? { positie_id: p.id, waarde: null, soort: 'voor verkrijging' } : { positie_id: p.id, ...per[i](j) });
+        const metWaarde = perPositie.find((x) => x.ondernemingswaarde != null);
+        return {
+          factor: f,
+          ondernemingswaarde: metWaarde?.ondernemingswaarde ?? null,
+          per_aandeel: metWaarde && noemer ? metWaarde.ondernemingswaarde / noemer : null,
+          soort: metWaarde?.soort ?? 'inleg',
+          bron: metWaarde?.bron ?? null,
+          posities: perPositie,
+        };
+      }),
+    });
+  }
+  return rijen;
+}
+
+export async function leaver({ vertrekdatum = vandaag(), categorie = 'good', extra_korting, ...plan }) {
   const d = await laad();
-  const p = d.posities.find((x) => x.id === Number(positie_id)) ?? d.posities[0];
-  if (!p) throw new Invoerfout('Geen positie in spoor 1');
+  const p = privepositie(d);
   if (vertrekdatum < p.verkregen_op) throw new Invoerfout('Vertrekdatum ligt vóór de verkrijging');
   const jaar = volleJaren(p.verkregen_op, vertrekdatum) + 1;
   const regel = leaverRegel(
@@ -205,7 +282,7 @@ export async function leaver({ positie_id, vertrekdatum = vandaag(), categorie =
 // Het aflosplan uit de query (schuiven en jaartabel in de tab Vertrek). Wordt
 // gedeeld door de simulatie en de vertrekberekening, zodat beide op hetzelfde
 // plan rekenen.
-function planUitQuery(query, d, p) {
+export function planUitQuery(query, d, p) {
   const getal = (k, std = 0) => (query[k] === undefined || query[k] === '' ? std : Math.max(0, Number(query[k]) || 0));
   const noemers = noemersVoor(d, p);
   const noemer = noemers.find((n) => n.aantal === Number(query.noemer)) ?? noemers.at(-1);
@@ -252,9 +329,9 @@ function planUitQuery(query, d, p) {
 // Aflossen of aanhouden: jouw keuze tegenover alleen de verplichte aflossing.
 export async function simuleer(query) {
   const d = await laad();
-  const p = d.posities[0];
-  const { lening, aflossingen } = p ? leningVoor(d, p) : {};
-  if (!lening) throw new Invoerfout('Geen lening in spoor 1');
+  const p = privepositie(d);
+  const { lening, aflossingen } = leningVoor(d, p);
+  if (!lening) throw new Invoerfout('Geen lening op de privépositie');
   const plan = planUitQuery(query, d, p);
   const vanaf = plan.opties.vanaf;
   const keuze = simulatie(lening, aflossingen, plan.opties);

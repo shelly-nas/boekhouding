@@ -1,31 +1,47 @@
 import { useState } from 'react';
-import Spoor1 from './Spoor1.jsx';
-import Spoor2 from './Spoor2.jsx';
+import Verra from './Verra.jsx';
+import Financiering from './Financiering.jsx';
+import Administratie from './Administratie.jsx';
+import Overdracht from './Overdracht.jsx';
 
-const SPOREN = [
-  { nr: 1, naam: 'Privé A. Dreves', regime: 'box 1, 2 of 3' },
-  { nr: 2, naam: 'Dreves Holding B.V.', regime: 'VpB' },
-  { nr: 3, naam: 'Overname 40% VERRA', regime: 'VpB' },
+// Ingedeeld naar functie, niet naar partij: de deelneming in Verra A&V en de
+// financiering raken privé en holding allebei; de administratie is per partij.
+const MODULES = [
+  { id: 'verra', naam: 'Verra A&V', sub: 'deelneming · waardering' },
+  { id: 'financiering', naam: 'Financiering', sub: 'leningen privé en holding' },
+  { id: 'overdracht', naam: 'Overdracht', sub: 'privé → holding' },
+  { id: 'overname', naam: 'Overname', sub: '40% VERRA-groep' },
+  { id: 'administratie', naam: 'Administratie', sub: 'holding · privé' },
 ];
 
+function Leeg({ titel, children }) {
+  return (
+    <section className="leeg">
+      <h2>{titel}</h2>
+      {children}
+    </section>
+  );
+}
+
 export default function App() {
-  // ?spoor=2 in de URL gaat voor; anders de laatst gekozen tab.
-  const [spoor, setSpoor] = useState(() => {
-    const uitUrl = Number(new URLSearchParams(location.search).get('spoor'));
-    if ([1, 2, 3].includes(uitUrl)) return uitUrl;
+  // ?module=... in de URL gaat voor; anders de laatst gekozen module.
+  const [module, setModule] = useState(() => {
+    const uitUrl = new URLSearchParams(location.search).get('module');
+    if (MODULES.some((m) => m.id === uitUrl)) return uitUrl;
     try {
-      return Number(localStorage.getItem('spoor')) || 1;
+      const bewaard = localStorage.getItem('module');
+      return MODULES.some((m) => m.id === bewaard) ? bewaard : 'verra';
     } catch {
-      return 1;
+      return 'verra';
     }
   });
-  const kies = (nr) => {
-    setSpoor(nr);
-    history.replaceState(null, '', `?spoor=${nr}`);
+  const kies = (id) => {
+    setModule(id);
+    history.replaceState(null, '', `?module=${id}`);
     try {
-      localStorage.setItem('spoor', nr);
+      localStorage.setItem('module', id);
     } catch {
-      // alleen een gemak; zonder opslag start de app op spoor 1
+      // alleen een gemak; zonder opslag start de app op Verra A&V
     }
   };
   return (
@@ -33,24 +49,23 @@ export default function App() {
       <header className="kop">
         <h1>Boekhouding</h1>
         <nav className="tabs">
-          {SPOREN.map((s) => (
-            <button key={s.nr} className={s.nr === spoor ? 'actief' : ''} onClick={() => kies(s.nr)}>
-              <span className="tab-nr">{s.nr}</span> {s.naam}
-              <small>{s.regime}</small>
+          {MODULES.map((m) => (
+            <button key={m.id} className={m.id === module ? 'actief' : ''} onClick={() => kies(m.id)}>
+              {m.naam}
+              <small>{m.sub}</small>
             </button>
           ))}
         </nav>
       </header>
       <main>
-        {spoor === 1 ? (
-          <Spoor1 />
-        ) : spoor === 2 ? (
-          <Spoor2 />
-        ) : (
-          <section className="leeg">
-            <h2>Spoor {spoor} — nog niet ingericht</h2>
-            <p>De stamdata-tabellen zijn al voorbereid op dit spoor; de schermen volgen.</p>
-          </section>
+        {module === 'verra' && <Verra />}
+        {module === 'financiering' && <Financiering />}
+        {module === 'administratie' && <Administratie />}
+        {module === 'overdracht' && <Overdracht />}
+        {module === 'overname' && (
+          <Leeg titel="Overname 40% VERRA-groep — nog niet ingericht">
+            <p>De verwerving via de holding volgt later.</p>
+          </Leeg>
         )}
       </main>
     </>

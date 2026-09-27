@@ -1,8 +1,12 @@
 import express from 'express';
 import { pool, migreer, wachtOpDatabase } from './db.js';
 import { RESOURCES, normaliseer, Invoerfout } from './resources.js';
-import { overzicht, leaver, simuleer } from './spoor1.js';
-import * as s2 from './spoor2.js';
+import { overzicht, leaver, simuleer } from './verra.js';
+import * as fin from './financiering.js';
+import { overdracht } from './overdracht.js';
+import { vermogen } from './prive.js';
+import { jaarrekening, vpb } from './jaarrekening.js';
+import * as s2 from './administratie.js';
 
 const app = express();
 app.use(express.json({ limit: '1mb' }));
@@ -14,20 +18,27 @@ app.get('/api/health', async (_req, res) => {
 
 app.get('/api/meta', (_req, res) => res.json(RESOURCES));
 
-// Filter op spoor voor tabellen zonder eigen spoorkolom: via de ouder.
-const SPOOR_VIA = {
-  dividend: 'positie_id IN (SELECT id FROM certificaatpositie WHERE spoor = $1)',
-  aflossing: 'lening_id IN (SELECT id FROM lening WHERE spoor = $1)',
-  waardering: 'vennootschap_id IN (SELECT id FROM entiteit WHERE spoor = $1)',
-  noemer: 'vennootschap_id IN (SELECT id FROM entiteit WHERE spoor = $1)',
-  jaarresultaat: 'vennootschap_id IN (SELECT id FROM entiteit WHERE spoor = $1)',
-  leaver_regel: 'positie_id IN (SELECT id FROM certificaatpositie WHERE spoor = $1)',
+// Filter op een eigen partij (?partij=prive|holding). Gedeelde stamdata van de
+// vennootschap (waarderingen, noemers, jaarresultaten) en de partijen zelf
+// worden nooit gefilterd.
+const PARTIJ = '(SELECT id FROM entiteit WHERE code = $1)';
+const PARTIJ_FILTER = {
+  certificaatpositie: `houder_id = ${PARTIJ}`,
+  lening: `${PARTIJ} IN (geldgever_id, schuldenaar_id)`,
+  dividend: `positie_id IN (SELECT id FROM certificaatpositie WHERE houder_id = ${PARTIJ})`,
+  leaver_regel: `positie_id IN (SELECT id FROM certificaatpositie WHERE houder_id = ${PARTIJ})`,
+  aflossing: `lening_id IN (SELECT id FROM lening WHERE ${PARTIJ} IN (geldgever_id, schuldenaar_id))`,
+  boekjaar: `partij_id = ${PARTIJ}`,
+  gebeurtenis: `partij_id = ${PARTIJ}`,
+  overeenkomst: `partij_id = ${PARTIJ}`,
 };
 
 // Leesbaar label voor keuzelijsten.
 const LABEL = {
   grootboekrekening: "nummer || ' ' || naam",
   boekjaar: "to_char(start, 'DD-MM-YYYY') || ' t/m ' || to_char(eind, 'DD-MM-YYYY')",
+  certificaatpositie:
+    "(SELECT naam FROM entiteit e WHERE e.id = houder_id) || ' – ' || trim_scale(coalesce(aantal_rekenbasis, aantal)) || ' aandelen'",
 };
 const VOLGORDE = { grootboekrekening: 'nummer', jaarresultaat: 'boekjaar', waardering: 'peildatum, id' };
 
@@ -55,13 +66,11 @@ app.get('/api/data/:resource', async (req, res) => {
   if (!r) return;
   const tabel = req.params.resource;
   const sleutel = r.sleutel ?? 'id';
-  const spoor = req.query.spoor ? Number(req.query.spoor) : null;
-  let where = '';
-  if (spoor && r.velden.some((v) => v.naam === 'spoor')) where = 'WHERE spoor = $1';
-  else if (spoor && SPOOR_VIA[tabel]) where = `WHERE ${SPOOR_VIA[tabel]}`;
+  const partij = req.query.partij && PARTIJ_FILTER[tabel] ? String(req.query.partij) : null;
+  const where = partij ? `WHERE ${PARTIJ_FILTER[tabel]}` : '';
   const { rows } = await pool.query(
     `SELECT *${LABEL[tabel] ? `, ${LABEL[tabel]} AS label` : ''} FROM ${tabel} ${where} ORDER BY ${VOLGORDE[tabel] ?? sleutel}`,
-    where ? [spoor] : [],
+    partij ? [partij] : [],
   );
   res.json(rows);
 });
@@ -106,44 +115,50 @@ app.delete('/api/data/:resource/:id', async (req, res) => {
   res.status(204).end();
 });
 
-app.get('/api/spoor1/overzicht', async (req, res) => {
+app.get('/api/verra/overzicht', async (req, res) => {
   res.json(await overzicht(req.query.peildatum));
 });
 
-app.get('/api/spoor1/simulatie', async (req, res) => {
+app.get('/api/verra/simulatie', async (req, res) => {
   res.json(await simuleer(req.query));
 });
 
-app.get('/api/spoor1/leaver', async (req, res) => {
+app.get('/api/verra/leaver', async (req, res) => {
   res.json(await leaver(req.query));
 });
 
-// Spoor 2: boekhouding Dreves Holding B.V.
-app.get('/api/spoor2/journaal', async (req, res) => res.json(await s2.journaal(req.query)));
-app.get('/api/spoor2/journaal/:id', async (req, res) => {
+app.get('/api/prive/vermogen', async (req, res) => res.json(await vermogen(req.query)));
+app.get('/api/overdracht', async (req, res) => res.json(await overdracht(req.query)));
+app.get('/api/financiering/leningen', async (req, res) => res.json(await fin.leningen(req.query)));
+
+// Administratie Dreves Holding B.V.
+app.get('/api/administratie/journaal', async (req, res) => res.json(await s2.journaal(req.query)));
+app.get('/api/administratie/journaal/:id', async (req, res) => {
   const p = await s2.post(Number(req.params.id));
   p ? res.json(p) : res.status(404).json({ fout: 'niet gevonden' });
 });
-app.post('/api/spoor2/journaal', async (req, res) => res.status(201).json(await s2.maakPost(req.body)));
-app.put('/api/spoor2/journaal/:id', async (req, res) => res.json(await s2.wijzigPost(Number(req.params.id), req.body)));
-app.delete('/api/spoor2/journaal/:id', async (req, res) => {
+app.post('/api/administratie/journaal', async (req, res) => res.status(201).json(await s2.maakPost(req.body)));
+app.put('/api/administratie/journaal/:id', async (req, res) => res.json(await s2.wijzigPost(Number(req.params.id), req.body)));
+app.delete('/api/administratie/journaal/:id', async (req, res) => {
   await s2.verwijderPost(Number(req.params.id));
   res.status(204).end();
 });
-app.post('/api/spoor2/journaal/:id/tegenboeking', async (req, res) =>
+app.post('/api/administratie/journaal/:id/tegenboeking', async (req, res) =>
   res.status(201).json(await s2.tegenboeking(Number(req.params.id), req.body?.datum)),
 );
-app.post('/api/spoor2/boekjaar/:id/afsluiten', async (req, res) => res.json(await s2.sluitBoekjaar(Number(req.params.id))));
-app.get('/api/spoor2/rapport', async (req, res) => res.json(await s2.rapport(req.query)));
-app.get('/api/spoor2/grootboek/:id', async (req, res) => {
+app.post('/api/administratie/boekjaar/:id/afsluiten', async (req, res) => res.json(await s2.sluitBoekjaar(Number(req.params.id))));
+app.get('/api/administratie/rapport', async (req, res) => res.json(await s2.rapport(req.query)));
+app.get('/api/administratie/grootboek/:id', async (req, res) => {
   const k = await s2.grootboekkaart(Number(req.params.id), req.query);
   k ? res.json(k) : res.status(404).json({ fout: 'niet gevonden' });
 });
-app.get('/api/spoor2/leningen', async (req, res) => res.json(await s2.leningen(req.query)));
-app.post('/api/spoor2/leningen/:id/rente', async (req, res) =>
+app.get('/api/administratie/leningen', async (req, res) => res.json(await s2.leningen(req.query)));
+app.post('/api/administratie/leningen/:id/rente', async (req, res) =>
   res.status(201).json(await s2.boekRente(Number(req.params.id), req.body?.eind)),
 );
-app.get('/api/spoor2/controles', async (_req, res) => res.json(await s2.controles()));
+app.get('/api/administratie/jaarrekening', async (req, res) => res.json(await jaarrekening(req.query)));
+app.get('/api/administratie/vpb', async (req, res) => res.json(await vpb(req.query)));
+app.get('/api/administratie/controles', async (_req, res) => res.json(await s2.controles()));
 
 // Bijlagen: het bestand zelf als request body, metadata in de query.
 app.post('/api/bijlagen', express.raw({ type: () => true, limit: '25mb' }), async (req, res) => {

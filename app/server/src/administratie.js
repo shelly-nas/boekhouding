@@ -5,7 +5,8 @@ import { pool } from './db.js';
 import { Invoerfout } from './resources.js';
 import { plusJaren, schuldOp, schuldverloop } from './rekenen.js';
 
-const SPOOR = 2;
+// De administratie van Dreves Holding B.V.
+const HOLDING = "(SELECT id FROM entiteit WHERE code = 'holding')";
 const BIJLAGEN = process.env.BIJLAGEN_DIR ?? path.resolve('data/bijlagen');
 const vandaag = () => new Date().toISOString().slice(0, 10);
 const cent = (n) => Math.round(Number(n) * 100);
@@ -36,7 +37,7 @@ async function log(client, tabel, recordId, actie, oud, nieuw) {
 async function boekjaarVoor(client, boekjaarId, datum) {
   const [bj] = boekjaarId
     ? await q('SELECT * FROM boekjaar WHERE id = $1', [boekjaarId], client)
-    : await q('SELECT * FROM boekjaar WHERE spoor = $1 AND $2 BETWEEN start AND eind', [SPOOR, datum], client);
+    : await q(`SELECT * FROM boekjaar WHERE partij_id = ${HOLDING} AND $1 BETWEEN start AND eind`, [datum], client);
   if (!bj) throw new Invoerfout(`Geen boekjaar voor ${datum}`);
   if (bj.status !== 'open') throw new Invoerfout('Dit boekjaar is afgesloten; boek de correctie in een open boekjaar');
   if (datum < bj.start || datum > bj.eind) throw new Invoerfout(`Datum valt buiten het boekjaar (${bj.start} t/m ${bj.eind})`);
@@ -262,7 +263,7 @@ async function saldi({ van, tot, alleenDefinitief }) {
 export async function rapport({ boekjaar_id, peildatum, alleen_definitief }) {
   const [bj] = boekjaar_id
     ? await q('SELECT * FROM boekjaar WHERE id = $1', [boekjaar_id])
-    : await q('SELECT * FROM boekjaar WHERE spoor = $1 ORDER BY start DESC LIMIT 1', [SPOOR]);
+    : await q(`SELECT * FROM boekjaar WHERE partij_id = ${HOLDING} ORDER BY start DESC LIMIT 1`);
   if (!bj) throw new Invoerfout('Geen boekjaar');
   const tot = peildatum && peildatum < bj.eind ? peildatum : bj.eind;
   const alleenDefinitief = alleen_definitief === 'true';
@@ -345,7 +346,10 @@ export async function grootboekkaart(rekeningId, { boekjaar_id }) {
 // het saldo hoort te zijn.
 // ---------------------------------------------------------------------------
 
-async function leningDetail(l, peildatum) {
+// De boekingen op de leningrekening en de aflossingen die daaruit volgen. Ook
+// gebruikt door Financiering, zodat een geboekte lening daar hetzelfde saldo
+// toont als in de administratie.
+export async function leningMutaties(l) {
   const regels = l.rekening_id
     ? await q(
         `SELECT r.debet, r.credit, p.datum, p.referentie FROM journaalregel r
@@ -358,6 +362,12 @@ async function leningDetail(l, peildatum) {
   const aflossingen = regels
     .filter((r) => r !== opening && !(r.referentie ?? '').startsWith('rente:') && (ontvangen ? r.debet : r.credit) > 0)
     .map((r) => ({ datum: r.datum, bedrag: ontvangen ? r.debet : r.credit }));
+  return { regels, aflossingen };
+}
+
+async function leningDetail(l, peildatum) {
+  const { regels, aflossingen } = await leningMutaties(l);
+  const ontvangen = l.richting === 'ontvangen';
   const tot = regels.filter((r) => r.datum <= peildatum);
   const grootboek = euro(tot.reduce((s, r) => s + (ontvangen ? cent(r.credit) - cent(r.debet) : cent(r.debet) - cent(r.credit)), 0));
   const schuld = schuldOp(l, aflossingen, peildatum);
@@ -380,20 +390,27 @@ async function leningDetail(l, peildatum) {
   };
 }
 
+// Leningen waarbij de holding partij is. 'richting' vanuit de holding gezien:
+// ontvangen = schuld van de holding, verstrekt = vordering van de holding.
+export const LENINGEN = `
+  SELECT l.*, e.naam AS geldgever, s.naam AS schuldenaar,
+         CASE WHEN l.schuldenaar_id = ${HOLDING} THEN 'ontvangen' ELSE 'verstrekt' END AS richting,
+         g.nummer AS rekening_nummer, g.naam AS rekening_naam
+  FROM lening l
+  LEFT JOIN entiteit e ON e.id = l.geldgever_id
+  LEFT JOIN entiteit s ON s.id = l.schuldenaar_id
+  LEFT JOIN grootboekrekening g ON g.id = l.rekening_id
+  WHERE ${HOLDING} IN (l.geldgever_id, l.schuldenaar_id)`;
+
 export async function leningen({ peildatum = vandaag() }) {
-  const lijst = await q(
-    `SELECT l.*, e.naam AS geldgever, g.nummer AS rekening_nummer, g.naam AS rekening_naam
-     FROM lening l LEFT JOIN entiteit e ON e.id = l.geldgever_id LEFT JOIN grootboekrekening g ON g.id = l.rekening_id
-     WHERE l.spoor = $1 ORDER BY l.id`,
-    [SPOOR],
-  );
+  const lijst = await q(`${LENINGEN} ORDER BY l.id`);
   return Promise.all(lijst.map((l) => leningDetail(l, peildatum)));
 }
 
 // Maakt de renteboeking voor één renteperiode (als concept), gedateerd op het
 // einde van de periode. De referentie voorkomt een dubbele boeking.
 export async function boekRente(leningId, eind) {
-  const [l] = await q('SELECT * FROM lening WHERE id = $1 AND spoor = $2', [leningId, SPOOR]);
+  const [l] = await q(`${LENINGEN} AND l.id = $1`, [leningId]);
   if (!l) throw new Invoerfout('Lening niet gevonden');
   if (!l.rekening_id) throw new Invoerfout('Koppel eerst een grootboekrekening aan de lening');
   const detail = await leningDetail(l, vandaag());
@@ -491,12 +508,12 @@ export async function controles() {
   }
 
   // Punten uit de vastlegging (openstaande-vragen/REGISTER.md) die de boeken raken.
-  melding('info', 'Leveringsakte certificaten tranche 2 ontbreekt', 'Aantal, prijs en datum staan niet vast; de openingsboeking is voorlopig.', 'V-F20, V-F05');
+  melding('info', 'Betaling koopsom aan de STAK niet aangetoond', 'De geldgever betaalde de koopsom namens de holding aan de STAK (23-12-2025); een betaalbewijs ontbreekt nog.', 'V-F05');
   melding('info', 'Btw-positie holding', 'Nu geen ondernemer; managementvergoeding over ca. 2 jaar. Voorbelasting mogelijk aftrekbaar als voorbereidingshandeling.', 'V-F01, V-F39');
   melding('info', 'Gebruikelijk loon', 'Nagaan of de holding werkzaamheden verricht waarvoor loon in aanmerking moet worden genomen.', 'art. 12a Wet LB 1964, V-F04');
   melding('info', 'Uitnodiging aangifte VpB', 'Zonder uitnodiging geldt een eigen meldplicht.', 'art. 6 lid 3 AWR, V-F02');
 
-  const termijnen = await q('SELECT * FROM gebeurtenis WHERE spoor = $1 AND datum >= $2 ORDER BY datum LIMIT 8', [SPOOR, nu]);
+  const termijnen = await q(`SELECT * FROM gebeurtenis WHERE partij_id = ${HOLDING} AND datum >= $1 ORDER BY datum LIMIT 8`, [nu]);
   const volgorde = { fout: 0, waarschuwing: 1, info: 2 };
   return { meldingen: uit.sort((a, b) => volgorde[a.niveau] - volgorde[b.niveau]), termijnen };
 }

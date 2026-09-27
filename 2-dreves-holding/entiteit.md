@@ -45,6 +45,7 @@ ingangsdatum 23-12-2025, geen verzoek tot afscherming. Bron: B-UBO-DRV.
   openbaarmakingstermijn ten hoogste twaalf maanden na afloop van het boekjaar.
 - **Fiscale eenheid VpB:** nee. De holding heeft een certificaatbelang van 5,5% (F58, A14), geen dochter waarmee een fiscale eenheid mogelijk is (art. 15 Wet VpB 1969 vereist ten minste 95%).
 - **Fiscale eenheid OB:** nee, geen aanwijzing van.
+- **Tarief VpB 2026:** 19% over de eerste € 200.000 belastbare winst, 25,8% daarboven; ongewijzigd ten opzichte van 2025 (art. 22 Wet VpB 1969; tarieven bevestigd op belastingdienst.nl, *Veranderingen vennootschapsbelasting 2026*, geraadpleegd 2026-09-27).
 - **Verrekenbare verliezen:** geen (eerste boekjaar loopt nog).
 - **Deelnemingsvrijstelling (art. 13 Wet VpB 1969):** te beoordelen. Dreves Holding
   houdt sinds **31-12-2025** 16,5 aandelen via certificaten (F58). Twee toetsen:
@@ -89,6 +90,7 @@ ingangsdatum 23-12-2025, geen verzoek tot afscherming. Bron: B-UBO-DRV.
 | A2 | De tranche van de holding is een **nieuwe verkrijging**, niet een overdracht van de privépositie | Beide tranches worden op N-VERRA naast elkaar genoemd (4,5% privé + 5,5% holding); art. 5.1 verbiedt vervreemding door de Participant | Bij een overdracht privé→holding is sprake van een vervreemding in box 2 én mogelijk strijd met art. 5.1 | Leveringsakte december 2025 — zie V-F20 |
 | A3 | Er is nog geen bankrekening/administratie gevoerd in de holding over 2025 | Oprichting op 23-12-2025, 8 dagen voor jaareinde | Er zijn transacties die geboekt moeten worden | Bankafschriften, grootboek |
 | A4 | De holding heeft nog geen omzet of personeel behalve de bestuurder | KvK: 1 werkzame persoon, SBI holdingactiviteiten | Loonheffingen-verplichting gemist | Loonadministratie, aangiften LH |
+| A5 | **Dreves Holding B.V. is een participatieonderneming** en kan daarom het micro-regime niet toepassen; voor de jaarrekening geldt het regime voor kleine rechtspersonen (art. 2:396 BW) | Art. 2:398 lid 6 BW sluit art. 2:395a (micro) uit voor een participatieonderneming als bedoeld in art. 2 punt 15 Richtlijn 2013/34/EU: een onderneming die uitsluitend deelnemingen verkrijgt, beheert en exploiteert "zonder zich rechtstreeks of onrechtstreeks in te laten met de bedrijfsvoering". De holding houdt alleen certificaten zonder vergaderrecht (F9, F58) en verricht nog geen werkzaamheden (A4) | Is de holding géén participatieonderneming, dan kan zij bij de grenzen van art. 2:395a (activa ≤ € 450.000, netto-omzet ≤ € 900.000, < 10 werknemers; Stb. 2024, 52) het micro-regime toepassen, met minder toelichting. Zodra de managementvergoeding start (V-F39), is de uitsluiting opnieuw te beoordelen | V-F60 |
 
 ## F. Openstaande vragen
 | # | Vraag | Type | Sinds |

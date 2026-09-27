@@ -2,12 +2,41 @@ import { useEffect, useMemo, useState } from 'react';
 import { api } from './api.js';
 import CrudTabel from './CrudTabel.jsx';
 import { conceptOvereenkomst } from './overeenkomst.js';
+import Prive from './Prive.jsx';
+import { Jaarrekening, Vpb } from './Jaarrekening.jsx';
 import { datum, eurc, pct, vandaag } from './format.js';
+import { MetBronnen } from './bronnen.jsx';
 
-const ONDERDELEN = ['Overzicht', 'Journaal', 'Grootboek', 'Leningen', 'Stamdata'];
+const ONDERDELEN = ['Overzicht', 'Journaal', 'Grootboek', 'Leningen', 'Jaarrekening', 'VpB', 'Stamdata'];
 
-export default function Spoor2() {
-  const [onderdeel, setOnderdeel] = useState('Overzicht');
+// Administratie per eigen partij. Dreves Holding B.V. voert een volledige
+// boekhouding (art. 2:10 BW, art. 52 AWR); privé gaat het om het vermogen en
+// de fiscale posities die daarbij horen.
+export default function Administratie() {
+  const [partij, setPartij] = useState(() => (new URLSearchParams(location.search).get('partij') === 'prive' ? 'prive' : 'holding'));
+  const kies = (p) => {
+    setPartij(p);
+    const q = new URLSearchParams(location.search);
+    q.set('partij', p);
+    q.delete('deel');
+    history.replaceState(null, '', `?${q}`);
+  };
+  return (
+    <>
+      <nav className="partijkeuze">
+        <button className={partij === 'holding' ? 'actief' : ''} onClick={() => kies('holding')}>Dreves Holding B.V. <small>VpB · volledige boekhouding</small></button>
+        <button className={partij === 'prive' ? 'actief' : ''} onClick={() => kies('prive')}>Privé A. Dreves <small>IB · vermogen</small></button>
+      </nav>
+      {partij === 'holding' ? <Holding /> : <Prive />}
+    </>
+  );
+}
+
+function Holding() {
+  const [onderdeel, setOnderdeel] = useState(() => {
+    const deel = new URLSearchParams(location.search).get('deel');
+    return ONDERDELEN.includes(deel) ? deel : 'Overzicht';
+  });
   const [boekjaren, setBoekjaren] = useState([]);
   const [boekjaarId, setBoekjaarId] = useState(null);
   const [rekeningen, setRekeningen] = useState([]);
@@ -15,7 +44,7 @@ export default function Spoor2() {
   const ververs = () => setVersie((v) => v + 1);
 
   useEffect(() => {
-    api.get('/data/boekjaar?spoor=2').then((bj) => {
+    api.get('/data/boekjaar?partij=holding').then((bj) => {
       setBoekjaren(bj);
       setBoekjaarId((id) => id ?? bj.find((b) => b.start <= vandaag() && vandaag() <= b.eind)?.id ?? bj.at(-1)?.id);
     });
@@ -50,6 +79,8 @@ export default function Spoor2() {
           {onderdeel === 'Journaal' && <Journaal boekjaar={boekjaar} rekeningen={rekeningen} ververs={ververs} />}
           {onderdeel === 'Grootboek' && <Grootboek boekjaar={boekjaar} rekeningen={rekeningen} />}
           {onderdeel === 'Leningen' && <Leningen ververs={ververs} />}
+          {onderdeel === 'Jaarrekening' && <Jaarrekening boekjaar={boekjaar} />}
+          {onderdeel === 'VpB' && <Vpb boekjaar={boekjaar} />}
           {onderdeel === 'Stamdata' && <Stamdata ververs={ververs} />}
         </>
       )}
@@ -68,14 +99,14 @@ function Overzicht({ boekjaar, versie, ververs }) {
 
   useEffect(() => {
     const q = new URLSearchParams({ boekjaar_id: boekjaar.id, peildatum, alleen_definitief: definitief });
-    api.get(`/spoor2/rapport?${q}`).then(setRapport, (e) => setFout(e.message));
-    api.get('/spoor2/controles').then(setControles, (e) => setFout(e.message));
+    api.get(`/administratie/rapport?${q}`).then(setRapport, (e) => setFout(e.message));
+    api.get('/administratie/controles').then(setControles, (e) => setFout(e.message));
   }, [boekjaar.id, peildatum, definitief, versie]);
 
   const afsluiten = async () => {
     if (!confirm(`Boekjaar ${boekjaar.label} afsluiten? Daarna kan er niets meer in worden geboekt of gewijzigd.`)) return;
     try {
-      await api.post(`/spoor2/boekjaar/${boekjaar.id}/afsluiten`);
+      await api.post(`/administratie/boekjaar/${boekjaar.id}/afsluiten`);
       ververs();
     } catch (e) {
       setFout(e.message);
@@ -83,6 +114,7 @@ function Overzicht({ boekjaar, versie, ververs }) {
   };
 
   return (
+    <MetBronnen>
     <>
       <div className="balk">
         <label>Peildatum <input type="date" value={peildatum} onChange={(e) => setPeildatum(e.target.value)} /></label>
@@ -152,6 +184,7 @@ function Overzicht({ boekjaar, versie, ververs }) {
         </div>
       )}
     </>
+    </MetBronnen>
   );
 }
 
@@ -179,7 +212,7 @@ function Journaal({ boekjaar, rekeningen, ververs }) {
   const [open, setOpen] = useState(null); // post-id, of 'nieuw'
   const [fout, setFout] = useState(null);
 
-  const laad = () => api.get(`/spoor2/journaal?boekjaar_id=${boekjaar.id}`).then(setPosts, (e) => setFout(e.message));
+  const laad = () => api.get(`/administratie/journaal?boekjaar_id=${boekjaar.id}`).then(setPosts, (e) => setFout(e.message));
   useEffect(() => { laad(); }, [boekjaar.id]);
 
   const klaar = (nieuwId) => {
@@ -236,7 +269,7 @@ function PostEditor({ id, boekjaar, rekeningen, onKlaar }) {
   const [fout, setFout] = useState(null);
 
   const laad = () =>
-    api.get(`/spoor2/journaal/${id}`).then(
+    api.get(`/administratie/journaal/${id}`).then(
       (p) => setPost({ ...p, regels: p.regels.map((r) => ({ ...r, debet: r.debet || '', credit: r.credit || '' })) }),
       (e) => setFout(e.message),
     );
@@ -256,7 +289,7 @@ function PostEditor({ id, boekjaar, rekeningen, onKlaar }) {
     setFout(null);
     try {
       const body = { ...post, status, boekjaar_id: boekjaar.id };
-      const uit = nieuw ? await api.post('/spoor2/journaal', body) : await api.put(`/spoor2/journaal/${id}`, body);
+      const uit = nieuw ? await api.post('/administratie/journaal', body) : await api.put(`/administratie/journaal/${id}`, body);
       onKlaar(nieuw ? uit.id : null);
     } catch (e) {
       setFout(e.message);
@@ -265,7 +298,7 @@ function PostEditor({ id, boekjaar, rekeningen, onKlaar }) {
   const verwijder = async () => {
     if (!confirm('Deze conceptboeking verwijderen?')) return;
     try {
-      await api.del(`/spoor2/journaal/${id}`);
+      await api.del(`/administratie/journaal/${id}`);
       onKlaar(null);
     } catch (e) {
       setFout(e.message);
@@ -275,7 +308,7 @@ function PostEditor({ id, boekjaar, rekeningen, onKlaar }) {
     const d = prompt('Datum van de tegenboeking (JJJJ-MM-DD)', vandaag());
     if (!d) return;
     try {
-      const uit = await api.post(`/spoor2/journaal/${id}/tegenboeking`, { datum: d });
+      const uit = await api.post(`/administratie/journaal/${id}/tegenboeking`, { datum: d });
       onKlaar(uit.id);
     } catch (e) {
       setFout(e.message);
@@ -420,7 +453,7 @@ function Grootboek({ boekjaar, rekeningen }) {
 
   useEffect(() => {
     if (!rekeningId) return setKaart(null);
-    api.get(`/spoor2/grootboek/${rekeningId}?boekjaar_id=${boekjaar.id}`).then(setKaart);
+    api.get(`/administratie/grootboek/${rekeningId}?boekjaar_id=${boekjaar.id}`).then(setKaart);
   }, [rekeningId, boekjaar.id]);
 
   return (
@@ -464,12 +497,12 @@ function Grootboek({ boekjaar, rekeningen }) {
 function Leningen({ ververs }) {
   const [lijst, setLijst] = useState(null);
   const [fout, setFout] = useState(null);
-  const laad = () => api.get(`/spoor2/leningen?peildatum=${vandaag()}`).then(setLijst, (e) => setFout(e.message));
+  const laad = () => api.get(`/administratie/leningen?peildatum=${vandaag()}`).then(setLijst, (e) => setFout(e.message));
   useEffect(() => { laad(); }, []);
 
   const boekRente = async (l, eind) => {
     try {
-      await api.post(`/spoor2/leningen/${l.id}/rente`, { eind });
+      await api.post(`/administratie/leningen/${l.id}/rente`, { eind });
       laad();
       ververs();
     } catch (e) {
@@ -479,6 +512,7 @@ function Leningen({ ververs }) {
 
   if (!lijst) return fout ? <p className="fout">{fout}</p> : <p className="uitleg">Laden…</p>;
   return (
+    <MetBronnen>
     <>
       {fout && <p className="fout">{fout}</p>}
       {lijst.map((l) => (
@@ -534,20 +568,21 @@ function Leningen({ ververs }) {
           {!l.overeenkomsten.length && <p className="fout">Geen overeenkomst vastgelegd. Voeg er een toe onder Stamdata → Overeenkomsten.</p>}
         </section>
       ))}
-      {!lijst.length && <p className="uitleg">Nog geen leningen in spoor 2. Voeg ze toe onder Stamdata.</p>}
+      {!lijst.length && <p className="uitleg">Nog geen leningen van de holding. Voeg ze toe onder Financiering → Stamdata.</p>}
     </>
+    </MetBronnen>
   );
 }
 
 // ---------------------------------------------------------------------------
 
-const STAMDATA = ['lening', 'overeenkomst', 'grootboekrekening', 'boekjaar', 'entiteit', 'gebeurtenis'];
+const STAMDATA = ['grootboekrekening', 'boekjaar', 'overeenkomst', 'gebeurtenis'];
 
 function Stamdata({ ververs }) {
   const [meta, setMeta] = useState(null);
   useEffect(() => { api.get('/meta').then(setMeta); }, []);
   if (!meta) return <p className="uitleg">Laden…</p>;
   return STAMDATA.map((n) => (
-    <CrudTabel key={n} naam={n} meta={meta} spoor={n === 'grootboekrekening' ? null : 2} onWijziging={ververs} />
+    <CrudTabel key={n} naam={n} meta={meta} partij={n === 'grootboekrekening' ? null : 'holding'} onWijziging={ververs} />
   ));
 }
