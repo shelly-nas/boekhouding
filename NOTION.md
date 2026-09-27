@@ -31,7 +31,7 @@ Elk spoor heeft een eigen subpagina; de hoofdpagina is de ingang en bevat wat
 sporen overstijgt.
 
 ```
-VERRA  (hoofdpagina)
+Ondernemen  (hoofdpagina, onder "VERRA")
 ├─ Overzicht en leeswijzer — de drie sporen, persoonsgegevens
 ├─ Wat als eerste aandacht vraagt
 │    Deadlines, op te vragen stukken, waar geld op tafel ligt

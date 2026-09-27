@@ -245,7 +245,7 @@ Herindexering 2026-09-24: elk document opnieuw gelezen, per pagina (scans via be
 
 - **Pad:** `Dreves Holding B.V./Register Dreves Hld BV - scan gtk pgn .pdf`
 - **Omvang:** 16 · **tekstlaag:** nee (scan) · **hash:** `7d1b0432c0947df7`
-- **Feiten:** F3, F56
+- **Feiten:** F3, F67
 
 | Vindplaats | Inhoud |
 |---|---|
@@ -288,6 +288,47 @@ Herindexering 2026-09-24: elk document opnieuw gelezen, per pagina (scans via be
 | p. 9 | art. 8.2–8.7 (o.a. 8.7 afstand vernietiging wegens dwaling); art. 9.1–9.2 recht en rechtsmacht (Amsterdam) |
 | p. 10 | ondertekening 30-12-2024, Rotterdam en Gran Canaria |
 | p. 11 | bijlage 3: alleen de aantekening "ontvangen per mail 30-12-2024" |
+
+### B-AKTE-2025
+
+- **Pad:** `VERRA/Certificaten/251224 AFSCHRIFT akte van levering certificaten VAV BV.pdf`
+- **Omvang:** zie document · **tekstlaag:** ja · **hash:** `b9e1f83e63e233f1`
+- **Status:** gepasseerd 31-12-2025 (afschrift); niet-afschrift- en conceptversies op de NAS tellen niet als bron
+- **Feiten:** F58, F59, F60, F61, F65
+
+| Vindplaats | Inhoud |
+|---|---|
+| p. 2–4 | partijen: Freek Holding B.V. (Koper 1), Dreves Holding B.V. (Koper 2), Uddevalla Holding B.V. (Koper 3) |
+| p. 4–6 | definities: Certificaten 2 A en 2 B (incl. de onverdeelde helft van het certificaat van nr. 275) |
+| p. 6 | koopprijzen (Koper 2: € 6.597,00 + € 5.497,50 = € 12.094,50) |
+| p. 8 | garanties sub e en f: geplaatst kapitaal 300, gecertificeerd kapitaal |
+
+### B-RECT
+
+- **Pad:** `VERRA/Certificaten/251224 Akte van rectificatie levering certificaten Verra Aan- en Verkoop Den Haag B.V.pdf`
+- **Omvang:** zie document · **tekstlaag:** ja · **hash:** `186bfd57d6849848`
+- **Status:** **concept** — aanhef "Op @, verscheen voor mij": datum en comparant niet ingevuld (V-F54)
+- **Feiten:** F62, F63, F64, F65, F66
+
+| Vindplaats | Inhoud |
+|---|---|
+| p. 2–3 | overwegingen: uitgangspunt en bedoeling (10% Koper 1, 4,5% Koper 2) |
+| p. 5 | nieuwe definities: A. Dreves privé Aandelen 2 A en 2 B; mede-eigendom certificaat nr. 275 |
+| p. 7 | citaat en vervanging over de verkoper van de Certificaten 2 A |
+
+### B-STAK-OPR
+
+- **Pad:** `VERRA/Certificaten/231218 Afschrift akte van oprichting Stichting Administratiekantoor Verra Makelaars.pdf`
+- **Omvang:** zie document · **tekstlaag:** zie register · **hash:** `121a0921297bc927`
+- **Feiten:** — (oprichtingsakte en statuten STAK, 18-12-2023; bron voor V-F11 en V-F56)
+
+### B-STAK-ADM
+
+- **Pad:** `VERRA/Certificaten/231218 Afschrift akte houdende administratie voorwaarden.pdf`
+- **Omvang:** zie document · **tekstlaag:** zie register · **hash:** `dce418f3a3179cc0`
+- **Feiten:** — (administratievoorwaarden STAK, 18-12-2023; open: V-F56)
+
+> De vier bovenstaande documenten zijn op 2026-09-26 in een andere sessie ingelezen; de vindplaatsen komen uit de feitentabellen. Omvang en tekstlaag zijn niet opnieuw vastgesteld (NAS was bij het bijwerken van deze index niet gemount).
 
 ### B-GL-2024
 
