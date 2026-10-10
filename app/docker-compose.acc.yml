@@ -1,0 +1,109 @@
+# Acceptatiestack: boekhouding-acc.shelly-nas.nl.
+#
+# Gedeployd door .github/workflows/acc.yml bij elke pull request naar main,
+# naast productie maar er los van: eigen map (/volume1/docker/boekhouding-acc),
+# eigen containers, eigen Traefik-routers en een eigen database. De laatst
+# gedeployde PR staat erop.
+#
+# De images zijn dezelfde die productie zou krijgen, getagd acc-<commit>. De
+# database wordt bij elke deploy opnieuw opgebouwd: de workflow leegt
+# ./data/postgres, waarna het image init.sql en de aanvullingen (02-...)
+# uitvoert en de server de migraties van de PR toepast. Er komt nooit een kopie
+# van de productiedatabase op acc; wat je hier invoert, is bij de volgende
+# deploy weg.
+#
+# Houd dit bestand gelijk aan docker-compose.prd.yml. Verschillen: namen, host,
+# vaste paden onder ./data (de workflow reset ./data/postgres) en de bijlagen
+# in een named volume (zie onder).
+services:
+  db:
+    image: ${REGISTRY}/boekhouding-db:${IMAGE_TAG:?IMAGE_TAG is verplicht}
+    container_name: boekhouding-acc-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-boekhouder}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is verplicht}
+      POSTGRES_DB: ${DB_NAME:-boekhouding}
+      TZ: ${TZ:-Europe/Amsterdam}
+    volumes:
+      # Vast pad: deploy-acceptance.yml maakt precies deze map leeg en zet hem
+      # op uid/gid 70 (postgres in alpine).
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-boekhouder} -d ${DB_NAME:-boekhouding}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  server:
+    image: ${REGISTRY}/boekhouding-server:${IMAGE_TAG:?IMAGE_TAG is verplicht}
+    container_name: boekhouding-acc-server
+    restart: always
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-boekhouder}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME:-boekhouding}
+      SERVER_PORT: 3000
+      TZ: ${TZ:-Europe/Amsterdam}
+      NODE_ENV: production
+    volumes:
+      # Named volume in plaats van de bind mount van productie: de workflow
+      # maakt alleen ./data/postgres aan, en een bind mount die Docker zelf
+      # aanmaakt is van root, waardoor de server (uid 1000) er niet in kan
+      # schrijven. Een nieuw named volume neemt de eigenaar uit het image over.
+      # De teardown na het sluiten van de PR ruimt het op.
+      - bijlagen:/data/bijlagen
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+    networks:
+      - shelly-network
+      - default
+    labels:
+      - "traefik.enable=true"
+      # Twee netwerken: zeg Traefik welk hij kan bereiken, anders kiest hij
+      # soms het default-netwerk van de stack en volgt een 504.
+      - "traefik.docker.network=shelly-network"
+      - "traefik.http.routers.boekhouding-acc-api.rule=Host(`boekhouding-acc.shelly-nas.nl`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.boekhouding-acc-api.entrypoints=web"
+      - "traefik.http.services.boekhouding-acc-api.loadbalancer.server.port=3000"
+
+  client:
+    image: ${REGISTRY}/boekhouding-client:${IMAGE_TAG:?IMAGE_TAG is verplicht}
+    container_name: boekhouding-acc-client
+    restart: always
+    environment:
+      TZ: ${TZ:-Europe/Amsterdam}
+    depends_on:
+      - server
+    networks:
+      - shelly-network
+      - default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=shelly-network"
+      - "traefik.http.routers.boekhouding-acc.rule=Host(`boekhouding-acc.shelly-nas.nl`)"
+      - "traefik.http.routers.boekhouding-acc.entrypoints=web"
+      - "traefik.http.services.boekhouding-acc.loadbalancer.server.port=80"
+
+volumes:
+  bijlagen:
+
+networks:
+  shelly-network:
+    external: true

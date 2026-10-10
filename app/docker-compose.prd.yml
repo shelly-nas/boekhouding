@@ -73,6 +73,7 @@ services:
       - default
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=shelly-network"
       - "traefik.http.routers.boekhouding-api.rule=Host(`${APP_HOST:?APP_HOST is verplicht}`) && PathPrefix(`/api`)"
       - "traefik.http.routers.boekhouding-api.entrypoints=web"
       - "traefik.http.services.boekhouding-api.loadbalancer.server.port=3000"
@@ -90,6 +91,7 @@ services:
       - default
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=shelly-network"
       - "traefik.http.routers.boekhouding.rule=Host(`${APP_HOST}`)"
       - "traefik.http.routers.boekhouding.entrypoints=web"
       - "traefik.http.services.boekhouding.loadbalancer.server.port=80"

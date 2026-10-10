@@ -1,6 +1,15 @@
 # Webapp boekhouding
 
-Eén app, ingedeeld naar functie (sinds migratie 010). De eigen partijen — privé
+Eén app, ingedeeld naar functie (sinds migratie 010). Het startscherm
+**Overzicht** toont de structuur: VERRA (eigenaren, STAK, de zes vennootschappen)
+met daaronder A. Dreves en Dreves Holding, en de verbanden daartussen. Een blok
+aanklikken toont alle afhankelijkheden; eroverheen bewegen licht ze op. Daarboven
+de kerncijfers en een korte balans. Verbanden komen uit de tabel `relatie` en
+vanzelf uit de certificaatposities en leningen (migratie 014).
+Onder het schema staan de **geldstromen vanuit A. Dreves** (`/api/geldstromen`):
+dividend van Verra A&V privé en via de holding, rente, aflossing, VpB, box 2 en
+de uitkering van de holding aan privé, per jaar en als stroomschema. De
+"waarde voor A. Dreves" telt geld in de holding mee na latente box 2 (A15). De eigen partijen — privé
 A. Dreves en Dreves Holding B.V. — zijn partijen in de database, geen sporen.
 - **Verra A&V**: de certificaatposities van privé en holding in Verra Aan- en
   Verkoop, de gedeelde waardering, en voor de privépositie het vertrekplan met
@@ -41,6 +50,39 @@ Drie images: `boekhouding-db`, `-server` en `-client`, met dezelfde
 `IMAGE_TAG`. `docker-compose.prd.yml` samen met een `.env` (zie `.env.example`). De database
 staat in een bind mount op `${DATA_DIR}/postgres`: een nieuwe `IMAGE_TAG`
 vervangt alleen de images, de data blijft staan.
+
+## CI en acceptatie (acc)
+Beide workflows staan in `.github/workflows/` in de root van de repo en
+reageren alleen op wijzigingen onder `app/`. Een PR die alleen de vastlegging
+(markdown) raakt, draait ze niet.
+
+- **`ci.yml`**, bij elke push en PR: clientbuild; `init.sql` en de aanvullingen
+  op een verse Postgres 17; de aanvullingen nog een keer (het aantal rijen moet
+  gelijk blijven); een controle op dubbele migratienummers; alle migraties twee
+  keer via `migreer()`; `npm test` in `server/`.
+- **`acc.yml`**, bij elke PR naar `main`: bouwt de drie images als
+  `acc-<commit>` en zet ze op **boekhouding-acc.shelly-nas.nl**
+  (`/volume1/docker/boekhouding-acc`, `docker-compose.acc.yml`). De database
+  wordt elke deploy opnieuw opgebouwd uit het db-image. Er komt nooit een
+  kopie van productie op. Bij het sluiten of mergen van de PR ruimt
+  `teardown-acceptance.yml` acc op, tenzij er intussen een andere PR op staat.
+  Eén acc: de laatst gepushte PR wint. Met *Run workflow* zet je een branch er
+  met de hand op.
+
+Bekijk de wijziging op acc en merge daarna. Dat is de goedkeuring.
+
+Vereist in de GitHub-repo: de variables `REGISTRY_URL`, `REGISTRY_USERNAME`,
+`DB_USER`, `DB_NAME` (optioneel `TZ`) en de secrets `REGISTRY_PASSWORD` en
+`DB_PASSWORD`. Plus een self-hosted runner `shelly` op de NAS.
+
+## Vormgeving
+Volgt de shelly-nas designrichtlijnen (Web App Template):
+`client/src/tokens.css` is de bron van waarheid voor kleur, spacing en radius.
+`styles.css` leest alleen rollen (`--primary`, `--surface`, `--text-muted`),
+nooit hexwaarden. Lettertype Figtree, self-hosted via `@fontsource/figtree`.
+Dark mode volgt het systeem; de knop onderin de sidebar legt een eigen keuze
+vast (`localStorage` `thema`). De grafiekreeksen (`--reeks-1..3`) zijn een apart
+gevalideerd palet, want een reeks betekent geen actie of status.
 
 ## Schema en data
 - `database/init.sql` bevat het schema en de stamdata van spoor 1 (stand
