@@ -9,6 +9,7 @@ const WET = {
   'Wet VpB 1969': 'BWBR0002672',
   AWR: 'BWBR0002320',
   'Wet LB 1964': 'BWBR0002471',
+  'Wet DB 1965': 'BWBR0002515',
 };
 const BW2 = 'BWBR0003045';
 
@@ -24,7 +25,7 @@ const jci = (bwbr, artikel) => `https://wetten.overheid.nl/jci1.3:c:${bwbr}&arti
 
 // "art. 4.19 en 4.21 Wet IB 2001", "art. 13 lid 2 Wet VpB 1969", "art. 2:247 BW".
 const PATROON =
-  /art\. (2:\d+[a-z]?)((?: lid \d+)?) BW|art\. (\d+(?:\.\d+)?[a-z]?)((?: lid \d+)?(?: onderdeel [a-z])?(?: (?:en|,) \d+(?:\.\d+)?[a-z]?)*) (Wet IB 2001|Wet VpB 1969|AWR|Wet LB 1964)/g;
+  /art\. (2:\d+[a-z]?)((?: lid \d+)?) BW|art\. (\d+(?:\.\d+)?[a-z]?)((?: lid \d+)?(?: onderdeel [a-z])?(?: (?:en|,) \d+(?:\.\d+)?[a-z]?)*) (Wet IB 2001|Wet VpB 1969|AWR|Wet LB 1964|Wet DB 1965)/g;
 
 function linkTekst(tekst) {
   if (typeof tekst !== 'string' || !tekst.includes('art.')) return tekst;

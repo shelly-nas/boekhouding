@@ -6,6 +6,8 @@ import * as fin from './financiering.js';
 import { overdracht } from './overdracht.js';
 import { vermogen } from './prive.js';
 import { jaarrekening, vpb } from './jaarrekening.js';
+import * as ov from './overzicht.js';
+import { geldstromen } from './geldstromen.js';
 import * as s2 from './administratie.js';
 
 const app = express();
@@ -127,6 +129,12 @@ app.get('/api/verra/leaver', async (req, res) => {
   res.json(await leaver(req.query));
 });
 
+app.get('/api/geldstromen', async (req, res) => res.json(await geldstromen(req.query)));
+app.get('/api/overzicht', async (_req, res) => res.json(await ov.overzicht()));
+app.get('/api/overzicht/partij/:id', async (req, res) => {
+  const p = await ov.partij(Number(req.params.id));
+  p ? res.json(p) : res.status(404).json({ fout: 'niet gevonden' });
+});
 app.get('/api/prive/vermogen', async (req, res) => res.json(await vermogen(req.query)));
 app.get('/api/overdracht', async (req, res) => res.json(await overdracht(req.query)));
 app.get('/api/financiering/leningen', async (req, res) => res.json(await fin.leningen(req.query)));
