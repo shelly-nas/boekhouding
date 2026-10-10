@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Boekhouding Dreves</title>
+    <script>
+      // Thema vóór de eerste paint zetten, anders flitst dark mode licht op.
+      // Een eigen keuze (Thema.jsx) gaat voor de systeeminstelling.
+      (function () {
+        var keuze = null;
+        try { keuze = localStorage.getItem('thema'); } catch (e) {}
+        var donker = keuze ? keuze === 'donker' : matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.className = donker ? 'theme-dark' : 'theme-light';
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
