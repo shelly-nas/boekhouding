@@ -1,0 +1,93 @@
+name: Build & Deploy to Production
+
+# Elke push naar main gaat naar productie, boekhouding.shelly-nas.nl. Een pull
+# request bekijk je eerst op boekhouding-acc.shelly-nas.nl (acc.yml); mergen is
+# de release.
+#
+# De images krijgen de commit en latest als tag. Productie pint de commit, dus
+# wat draait is altijd een bekende commit, en terugrollen is een eerdere commit
+# deployen ("Run workflow" op die commit of branch).
+#
+# De database en de bijlagen staan in de externe volumes boekhouding-db-data en
+# boekhouding-bijlagen. De eerste deploy maakt ze aan; daarna worden ze alleen
+# hergebruikt. Geen deploy, opschoning of `docker compose down -v` haalt ze weg.
+#
+# De app staat in app/; de rest van de repo is de vastlegging (markdown). Een
+# merge die alleen die vastlegging wijzigt, deployt niets.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'app/**'
+      - '.github/workflows/deploy.yml'
+  # Opnieuw deployen of terugrollen: draai op main, een tag of de branch van
+  # een eerdere commit.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  # Laat deploy-production.yml de gemergde PR van de commit op acc opzoeken,
+  # zodat acc ook na een squash- of rebase-merge wordt opgeruimd.
+  pull-requests: read
+
+# Deploys lopen één voor één en op volgorde; een nieuwere push wacht in plaats
+# van een deploy halverwege af te breken.
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  build-server:
+    name: Build and Push Server
+    uses: shelly-nas/shared-workflows/.github/workflows/build-push-image.yml@main
+    with:
+      registry: ${{ vars.REGISTRY_URL }}
+      image_tag: ${{ vars.REGISTRY_URL }}/boekhouding-server:${{ github.sha }},${{ vars.REGISTRY_URL }}/boekhouding-server:latest
+      context: ./app/server
+    secrets:
+      registry_password: ${{ secrets.REGISTRY_PASSWORD }}
+
+  build-client:
+    name: Build and Push Client
+    uses: shelly-nas/shared-workflows/.github/workflows/build-push-image.yml@main
+    with:
+      registry: ${{ vars.REGISTRY_URL }}
+      image_tag: ${{ vars.REGISTRY_URL }}/boekhouding-client:${{ github.sha }},${{ vars.REGISTRY_URL }}/boekhouding-client:latest
+      context: ./app/client
+    secrets:
+      registry_password: ${{ secrets.REGISTRY_PASSWORD }}
+
+  build-db:
+    name: Build and Push Database
+    uses: shelly-nas/shared-workflows/.github/workflows/build-push-image.yml@main
+    with:
+      registry: ${{ vars.REGISTRY_URL }}
+      image_tag: ${{ vars.REGISTRY_URL }}/boekhouding-db:${{ github.sha }},${{ vars.REGISTRY_URL }}/boekhouding-db:latest
+      context: ./app/database
+    secrets:
+      registry_password: ${{ secrets.REGISTRY_PASSWORD }}
+
+  deploy:
+    name: Deploy to Production
+    needs: [build-server, build-client, build-db]
+    uses: shelly-nas/shared-workflows/.github/workflows/deploy-production.yml@main
+    with:
+      registry: ${{ vars.REGISTRY_URL }}
+      deploy_directory: /volume1/docker/boekhouding
+      compose_file: app/docker-compose.prod.yml
+      image_tag: ${{ github.sha }}
+      # Moet gelijk zijn aan de externe volumes in docker-compose.prod.yml.
+      persistent_volumes: boekhouding-db-data boekhouding-bijlagen
+      # Vangnet: acc opruimen zodra de commit erop in productie staat (acc.yml
+      # doet dat al bij het sluiten van de PR).
+      acc_directory: /volume1/docker/boekhouding-acc
+    secrets:
+      registry_username: ${{ vars.REGISTRY_USERNAME }}
+      registry_password: ${{ secrets.REGISTRY_PASSWORD }}
+      env_file_content: |
+        DB_NAME=${{ vars.DB_NAME }}
+        DB_USER=${{ vars.DB_USER }}
+        DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+        TZ=${{ vars.TZ || 'Europe/Amsterdam' }}

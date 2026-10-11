@@ -1,0 +1,60 @@
+# Lokale stack: bouwt de images uit de bron en draait op http://localhost:8080.
+#
+#   docker compose up --build
+#
+# Het schema en de stamdata komen uit database/init.sql, alleen bij een leeg
+# volume. Opnieuw beginnen met de stamdata: `docker compose down -v`.
+#
+# De data staat in de named volumes 'pgdata' (database) en 'bijlagen'
+# (documenten bij boekingen) en blijft bewaard bij
+# `docker compose down` en bij elke rebuild. Alleen `docker compose down -v`
+# wist het.
+name: boekhouding
+
+services:
+  db:
+    build: ./database
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: boekhouder
+      POSTGRES_PASSWORD: lokaal
+      POSTGRES_DB: boekhouding
+      TZ: Europe/Amsterdam
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U boekhouder -d boekhouding"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  server:
+    build: ./server
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: boekhouder
+      DB_PASSWORD: lokaal
+      DB_NAME: boekhouding
+      SERVER_PORT: 3000
+      TZ: Europe/Amsterdam
+    volumes:
+      - bijlagen:/data/bijlagen
+    depends_on:
+      db:
+        condition: service_healthy
+
+  client:
+    build: ./client
+    restart: unless-stopped
+    depends_on:
+      - server
+    ports:
+      - "127.0.0.1:8080:80"
+
+volumes:
+  pgdata:
+  bijlagen:

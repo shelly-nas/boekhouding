@@ -1,10 +1,18 @@
 # Notion — vastlegging VERRA
 
 ## Doelpagina
-- URL: `https://app.notion.com/p/VERRA-3e4716f3606d800fb083ce56a342449e`
-- Page id: `3e4716f3606d800fb083ce56a342449e`
+- URL: `https://app.notion.com/p/Ondernemen-3e4716f3606d800fb083ce56a342449e`
+- Page id: `3e4716f3606d800fb083ce56a342449e` (ongewijzigd)
+- **Titel: "Ondernemen"** (was "VERRA")
 - Status connector: **geautoriseerd** sinds 2026-09-23
-- Locatie in Notion: `Huisje Boompje Beestje / MLK 73 / VERRA`
+- Locatie in Notion: `Huisje Boompje Beestje / VERRA / Ondernemen`
+  (verplaatst op 2026-09-25; was `Huisje Boompje Beestje / MLK 73 / VERRA`)
+
+De nieuwe bovenliggende pagina **VERRA** (`2d7716f3606d808c8120cb774048e8fd`) is
+géén dossierpagina maar een werkmap met gespreksnotities per adviseur, in
+uitklapblokken: *Akker*, *Oude Hengel* (notaris) en *Financieel Adviseur*.
+Die notities bevatten vragen en antwoorden die het dossier raken — zie
+`bronnen/nas-index/REGISTER.md` onder N-ADVIES.
 
 ## Toegang
 De connector loopt via de claude.ai connector-instellingen, niet via een lokale
@@ -23,7 +31,7 @@ Elk spoor heeft een eigen subpagina; de hoofdpagina is de ingang en bevat wat
 sporen overstijgt.
 
 ```
-VERRA  (hoofdpagina)
+Ondernemen  (hoofdpagina, onder "VERRA")
 ├─ Overzicht en leeswijzer — de drie sporen, persoonsgegevens
 ├─ Wat als eerste aandacht vraagt
 │    Deadlines, op te vragen stukken, waar geld op tafel ligt

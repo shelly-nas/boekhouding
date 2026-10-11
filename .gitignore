@@ -21,3 +21,8 @@
 # Python
 __pycache__/
 *.pyc
+
+# Webapp
+node_modules/
+dist/
+app/data/

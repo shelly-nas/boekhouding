@@ -26,6 +26,7 @@ groep behoort. Die verbanden staan in [RELATIES.md](RELATIES.md).
 | [NOTION.md](NOTION.md) | Notion-pagina VERRA: structuur en schrijfregels |
 | [SYNC.md](SYNC.md) | Wat is wanneer naar Notion overgezet |
 | [templates/](templates/) | Formats voor entiteit en bron |
+| [app/](app/) | Webapp: stamdata en berekeningen per spoor (Docker) |
 | [tools/](tools/) | `scan-nas.py` (wat is er veranderd) en `maskeer.py` (persoonsgegevens) |
 
 ## Bijwerken na een documentwijziging

@@ -1,0 +1,132 @@
+name: CI
+
+# Draait bij elke wijziging aan de app: elke push en elke pull request, zodat
+# een probleem boven komt vóór main en niet pas bij de deploy.
+#
+# Volgt shared-workflows/ci-node-postgres.yml, maar als eigen workflow: die
+# verwacht TypeScript (tsc) en een server-build, en deze app is JavaScript en
+# staat in app/.
+on:
+  push:
+    paths:
+      - 'app/**'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    paths:
+      - 'app/**'
+      - '.github/workflows/ci.yml'
+  workflow_dispatch:
+
+# Een nieuwere push naar dezelfde branch vervangt de lopende run.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  client:
+    name: Client build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: app/client/package-lock.json
+      - run: npm ci
+        working-directory: app/client
+      - run: npm run build
+        working-directory: app/client
+
+  server-tests:
+    name: Schema and server tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        # Zelfde major als database/Dockerfile. Via Google's mirror van Docker
+        # Hub: de runners van GitHub lopen tegen de anonieme pull-limiet aan.
+        image: mirror.gcr.io/library/postgres:17-alpine
+        env:
+          POSTGRES_USER: boekhouder
+          POSTGRES_PASSWORD: ci-password
+          POSTGRES_DB: boekhouding
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U boekhouder -d boekhouding"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USER: boekhouder
+      DB_PASSWORD: ci-password
+      DB_NAME: boekhouding
+      DATABASE_URL: postgresql://boekhouder:ci-password@localhost:5432/boekhouding
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: app/server/package-lock.json
+      - run: npm ci
+        working-directory: app/server
+
+      # Nummers moeten uniek zijn. Twee branches die elk 016_ toevoegen mergen
+      # zonder conflict in git en botsen dan in productie: de een staat als
+      # toegepast geregistreerd, de ander draait stilletjes nooit.
+      - name: Check for duplicate migration numbers
+        run: |
+          shopt -s nullglob
+          files=(app/server/migrations/[0-9][0-9][0-9]_*.sql)
+          duplicates=$(printf '%s\n' "${files[@]}" \
+            | xargs -n1 basename | cut -d_ -f1 | sort | uniq -d)
+          if [ -n "$duplicates" ]; then
+            echo "Dubbele migratienummer(s): $duplicates"
+            exit 1
+          fi
+          echo "Migratienummering is uniek (${#files[@]} migraties)."
+
+      # Het schema dat een installatie echt krijgt: init.sql en daarna de
+      # aanvullingen (02-, 03-, ...), in de volgorde van het postgres-entrypoint
+      # (zie database/Dockerfile).
+      - name: Apply the schema to a fresh database
+        working-directory: app/database
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f init.sql
+          for f in 0*-*.sql; do
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
+          done
+
+      # De aanvullingen draaien op productie met de hand en zeggen dat
+      # nogmaals uitvoeren niets dubbel boekt. Hier wordt dat gecontroleerd.
+      - name: Re-run the aanvullingen (must be a no-op)
+        working-directory: app/database
+        run: |
+          before=$(psql "$DATABASE_URL" -tAc "SELECT count(*) FROM dividend")
+          for f in 0*-*.sql; do
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
+          done
+          after=$(psql "$DATABASE_URL" -tAc "SELECT count(*) FROM dividend")
+          if [ "$before" != "$after" ]; then
+            echo "Aanvulling is niet idempotent: $before rijen in dividend ervoor, $after erna."
+            exit 1
+          fi
+
+      # Twee keer: de tweede run moet niets meer te doen vinden.
+      - name: Apply pending migrations twice
+        working-directory: app/server
+        run: |
+          for run in 1 2; do
+            node -e "
+              import('./src/db.js')
+                .then(async (db) => { await db.migreer(); await db.pool.end(); })
+                .catch((e) => { console.error(e); process.exit(1); });
+            "
+          done
+
+      - name: Server tests
+        working-directory: app/server
+        run: npm test
