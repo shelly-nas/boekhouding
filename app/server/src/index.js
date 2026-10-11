@@ -15,7 +15,8 @@ app.use(express.json({ limit: '1mb' }));
 
 app.get('/api/health', async (_req, res) => {
   await pool.query('SELECT 1');
-  res.json({ ok: true });
+  // APP_VERSION is de gedeployde commit (IMAGE_TAG), zie docker-compose.prod.yml.
+  res.json({ ok: true, version: process.env.APP_VERSION || 'lokaal' });
 });
 
 app.get('/api/meta', (_req, res) => res.json(RESOURCES));
