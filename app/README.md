@@ -46,13 +46,24 @@ Zonder Docker: `npm install && npm start` in `server/` (tegen een Postgres op
 `server/`.
 
 ## Productie
-Drie images: `boekhouding-db`, `-server` en `-client`, met dezelfde
-`IMAGE_TAG`. `docker-compose.prd.yml` samen met een `.env` (zie `.env.example`). De database
-staat in een bind mount op `${DATA_DIR}/postgres`: een nieuwe `IMAGE_TAG`
-vervangt alleen de images, de data blijft staan.
+**boekhouding.shelly-nas.nl.** Elke merge naar `main` die `app/` raakt, gaat
+direct naar productie (`.github/workflows/deploy.yml`). Drie images,
+`boekhouding-db`, `-server` en `-client`, getagd met de commit (en `latest`);
+`docker-compose.prod.yml` pint de commit als `IMAGE_TAG`, en
+`GET /api/health` meldt hem als `version`.
+
+De database en de bijlagen staan in de externe Docker-volumes
+`boekhouding-db-data` en `boekhouding-bijlagen`. De eerste deploy maakt ze aan
+(en de database krijgt dan `init.sql` en de aanvullingen); elke volgende deploy
+hergebruikt ze. Geen deploy, opschoning of `docker compose down -v` verwijdert
+ze; weggooien is altijd een bewuste `docker volume rm`.
+
+Opnieuw deployen of terugrollen: *Actions → Build & Deploy to Production → Run
+workflow*, op `main` of op een eerdere commit. Migraties worden bij een
+rollback niet teruggedraaid.
 
 ## CI en acceptatie (acc)
-Beide workflows staan in `.github/workflows/` in de root van de repo en
+De workflows staan in `.github/workflows/` in de root van de repo en
 reageren alleen op wijzigingen onder `app/`. Een PR die alleen de vastlegging
 (markdown) raakt, draait ze niet.
 
@@ -69,7 +80,8 @@ reageren alleen op wijzigingen onder `app/`. Een PR die alleen de vastlegging
   Eén acc: de laatst gepushte PR wint. Met *Run workflow* zet je een branch er
   met de hand op.
 
-Bekijk de wijziging op acc en merge daarna. Dat is de goedkeuring.
+Bekijk de wijziging op acc en merge daarna. Dat is de goedkeuring, en de merge
+is de release (zie *Productie*).
 
 Vereist in de GitHub-repo: de variables `REGISTRY_URL`, `REGISTRY_USERNAME`,
 `DB_USER`, `DB_NAME` (optioneel `TZ`) en de secrets `REGISTRY_PASSWORD` en

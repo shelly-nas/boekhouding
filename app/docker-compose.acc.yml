@@ -12,7 +12,7 @@
 # van de productiedatabase op acc; wat je hier invoert, is bij de volgende
 # deploy weg.
 #
-# Houd dit bestand gelijk aan docker-compose.prd.yml. Verschillen: namen, host,
+# Houd dit bestand gelijk aan docker-compose.prod.yml. Verschillen: namen, host,
 # vaste paden onder ./data (de workflow reset ./data/postgres) en de bijlagen
 # in een named volume (zie onder).
 services:
@@ -48,6 +48,8 @@ services:
       DB_NAME: ${DB_NAME:-boekhouding}
       SERVER_PORT: 3000
       TZ: ${TZ:-Europe/Amsterdam}
+      # De commit die draait (acc-<commit>); GET /api/health meldt hem.
+      APP_VERSION: ${IMAGE_TAG}
       NODE_ENV: production
     volumes:
       # Named volume in plaats van de bind mount van productie: de workflow

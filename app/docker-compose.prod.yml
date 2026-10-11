@@ -1,24 +1,22 @@
-# Productiestack.
+# Productiestack: boekhouding.shelly-nas.nl.
 #
-# IMAGE_TAG is de uitgebrachte versie (1.2.3), niet 'latest': een rollback is
-# dan één regel wijzigen, en een herstart trekt niet stilletjes een nieuwere
-# build binnen.
+# Gedeployd door .github/workflows/deploy.yml bij elke push naar main. Die
+# kopieert alleen dit bestand (als docker-compose.yaml) en een .env naar
+# /volume1/docker/boekhouding. IMAGE_TAG is de commit op main, niet 'latest':
+# een herstart trekt dan niet stilletjes een nieuwere build binnen, en een
+# rollback is het deployen van een eerdere commit.
 #
-# Data blijft bestaan over versies heen: de database en de bijlagen staan in
-# bind mounts op de host (${DATA_DIR}/postgres en ${DATA_DIR}/bijlagen). Een
-# nieuwe versie vervangt alleen de images; ook `docker compose down -v` laat
-# een bind mount met rust. Beide paden moeten op de host bestaan: postgres
-# eigendom van uid/gid 70 (postgres in alpine), bijlagen van uid/gid 1000.
+# De database en de bijlagen staan in externe volumes met een vaste naam
+# (onderaan). Het schema en de stamdata komen uit database/init.sql bij de
+# eerste start van het lege volume. Daarna gaat een schemawijziging in
+# server/migrations/; de server past die bij het starten toe.
 #
-# Het schema en de stamdata worden door database/init.sql aangemaakt bij de
-# eerste start van een leeg volume. Staat er eenmaal data in, dan gaat een
-# schemawijziging niet meer daar maar in server/migrations/; de server past die
-# bij het starten toe.
+# Houd dit bestand gelijk aan docker-compose.acc.yml, op namen, host en opslag na.
 services:
   db:
     # Eigen image: het schema zit erin gebakken, omdat de deploy alleen dit
     # compose-bestand naar de host kopieert.
-    image: ${REGISTRY}/boekhouding-db:${IMAGE_TAG:?IMAGE_TAG is verplicht - zet een versie, niet latest}
+    image: ${REGISTRY}/boekhouding-db:${IMAGE_TAG:?IMAGE_TAG is verplicht - zet een commit, niet latest}
     container_name: boekhouding-db
     restart: always
     environment:
@@ -27,7 +25,9 @@ services:
       POSTGRES_DB: ${DB_NAME:-boekhouding}
       TZ: ${TZ:-Europe/Amsterdam}
     volumes:
-      - ${DATA_DIR:-./data}/postgres:/var/lib/postgresql/data
+      # Extern volume: blijft staan bij elke deploy, ook bij
+      # `docker compose down -v`. Zie `volumes:` onderaan.
+      - db_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-boekhouder} -d ${DB_NAME:-boekhouding}"]
       interval: 10s
@@ -36,7 +36,7 @@ services:
       start_period: 10s
 
   server:
-    image: ${REGISTRY}/boekhouding-server:${IMAGE_TAG:?IMAGE_TAG is verplicht - zet een versie, niet latest}
+    image: ${REGISTRY}/boekhouding-server:${IMAGE_TAG:?IMAGE_TAG is verplicht - zet een commit, niet latest}
     container_name: boekhouding-server
     restart: always
     environment:
@@ -47,12 +47,14 @@ services:
       DB_NAME: ${DB_NAME:-boekhouding}
       SERVER_PORT: 3000
       TZ: ${TZ:-Europe/Amsterdam}
+      # De commit die draait; GET /api/health meldt hem als versie.
+      APP_VERSION: ${IMAGE_TAG}
       NODE_ENV: production
     volumes:
-      # Bijlagen bij boekingen (bewaarplicht 7 jaar, art. 52 AWR). Bind mount,
-      # net als de database: overleeft elke nieuwe versie. Eigenaar op de host:
-      # uid/gid 1000 (de node-user in het image).
-      - ${DATA_DIR:-./data}/bijlagen:/data/bijlagen
+      # Bijlagen bij boekingen (bewaarplicht 7 jaar, art. 52 AWR). Extern
+      # volume, net als de database. Een nieuw, leeg volume neemt de eigenaar
+      # uit het image over (node, uid 1000).
+      - bijlagen:/data/bijlagen
     depends_on:
       db:
         condition: service_healthy
@@ -74,12 +76,12 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=shelly-network"
-      - "traefik.http.routers.boekhouding-api.rule=Host(`${APP_HOST:?APP_HOST is verplicht}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.boekhouding-api.rule=Host(`boekhouding.shelly-nas.nl`) && PathPrefix(`/api`)"
       - "traefik.http.routers.boekhouding-api.entrypoints=web"
       - "traefik.http.services.boekhouding-api.loadbalancer.server.port=3000"
 
   client:
-    image: ${REGISTRY}/boekhouding-client:${IMAGE_TAG:?IMAGE_TAG is verplicht - zet een versie, niet latest}
+    image: ${REGISTRY}/boekhouding-client:${IMAGE_TAG:?IMAGE_TAG is verplicht - zet een commit, niet latest}
     container_name: boekhouding-client
     restart: always
     environment:
@@ -92,10 +94,23 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=shelly-network"
-      - "traefik.http.routers.boekhouding.rule=Host(`${APP_HOST}`)"
+      - "traefik.http.routers.boekhouding.rule=Host(`boekhouding.shelly-nas.nl`)"
       - "traefik.http.routers.boekhouding.entrypoints=web"
       - "traefik.http.services.boekhouding.loadbalancer.server.port=80"
 
 networks:
   shelly-network:
     external: true
+
+volumes:
+  # Extern, met een vaste naam: compose maakt ze niet aan en verwijdert ze
+  # nooit, ook niet met `docker compose down -v`, en de opschoonstappen van de
+  # shared-workflows laten ze staan. deploy.yml geeft dezelfde namen mee als
+  # `persistent_volumes`; de eerste deploy maakt ze aan. Weggooien kan alleen
+  # bewust: `docker volume rm boekhouding-db-data`.
+  db_data:
+    external: true
+    name: boekhouding-db-data
+  bijlagen:
+    external: true
+    name: boekhouding-bijlagen
